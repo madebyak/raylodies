@@ -1,0 +1,88 @@
+"use client";
+
+import { motion } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, Play } from "lucide-react";
+import { Project } from "@/lib/data";
+
+interface WorkCardProps {
+  project: Project;
+  index: number;
+  featured?: boolean;
+}
+
+export default function WorkCard({ project, index, featured = false }: WorkCardProps) {
+  const isVideo = project.category === "ai-videos";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{
+        duration: 0.6,
+        delay: index * 0.1,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+    >
+      <Link href={`/work/${project.slug}`} className="group block">
+        <article className="space-y-4">
+          {/* Image Container */}
+          <div
+            className={`relative overflow-hidden bg-white/5 ${
+              featured ? "aspect-[21/9]" : "aspect-video"
+            }`}
+          >
+            <Image
+              src={project.thumbnail}
+              alt={project.title}
+              fill
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              sizes={featured ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
+            />
+
+            {/* Hover Overlay */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
+
+            {/* Category Tag */}
+            <span className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white/80 text-xs font-light px-3 py-1 tracking-wide capitalize">
+              {project.category.replace("-", " ")}
+            </span>
+
+            {/* Video Indicator */}
+            {isVideo && (
+              <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm p-2 rounded-full">
+                <Play size={14} className="text-white fill-white" />
+              </div>
+            )}
+
+            {/* View Indicator */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <span className="text-white text-sm font-light tracking-wider border border-white/30 px-4 py-2 backdrop-blur-sm bg-black/30">
+                View Project
+              </span>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-white text-lg font-light group-hover:text-white/80 transition-colors duration-300">
+                {project.title}
+              </h3>
+              <p className="text-white/40 text-sm font-light mt-1">
+                {project.year}
+              </p>
+            </div>
+            <ArrowRight
+              size={18}
+              className="text-white/30 group-hover:text-white group-hover:translate-x-1 transition-all duration-300 mt-1"
+            />
+          </div>
+        </article>
+      </Link>
+    </motion.div>
+  );
+}
+
