@@ -33,8 +33,8 @@ export default function Footer() {
               Raylodies
             </Link>
             <p className="text-white/40 text-sm font-light leading-relaxed max-w-xs">
-              AI Creative Director specializing in AI-generated images and videos.
-              Pushing the boundaries of digital creativity.
+              Not just art. A mindset of believing that something beautiful can
+              grow out of nothing.
             </p>
           </div>
 

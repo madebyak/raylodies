@@ -20,7 +20,7 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-white/40 text-sm font-light tracking-widest uppercase mb-6"
           >
-            AI Creative Director
+            AI Creative Director & Artist
           </motion.p>
 
           {/* Main Headline */}
@@ -28,11 +28,12 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light text-white leading-[1.1] tracking-tight mb-8"
+            className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light text-white/60 leading-[1.1] tracking-tight mb-8"
           >
-            Crafting visual experiences at the intersection of{" "}
-            <span className="text-white/60">artificial intelligence</span> and{" "}
-            <span className="text-white/60">creative direction</span>.
+            I craft bold visual stories at the crossroads of{" "}
+            <span className="text-white">AI</span> and{" "}
+            <span className="text-white">art</span> — transforming ideas into
+            digital experiences for both personal and creative use.
           </motion.h1>
 
           {/* Description */}
@@ -42,9 +43,10 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="text-white/50 text-lg md:text-xl font-light leading-relaxed max-w-2xl mb-10"
           >
-            Specializing in AI-generated imagery and video, pushing the boundaries
-            of what&apos;s possible in digital creativity. Available for select
-            projects and collaborations.
+            If you&apos;re here for self-expression, visual identity, or
+            storytelling, my work is designed to spark emotion, curiosity, and
+            connection. Through AI-generated art, I create immersive visuals that
+            move people and expand what&apos;s possible in visual communication.
           </motion.p>
 
           {/* CTA Buttons */}

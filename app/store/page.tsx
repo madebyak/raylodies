@@ -17,9 +17,11 @@ export default function StorePage() {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white mb-6">
             Store
           </h1>
-          <p className="text-white/50 text-lg md:text-xl font-light max-w-2xl">
-            Premium AI presets and prompts to elevate your creative projects.
-            Carefully crafted for exceptional results.
+          <p className="text-white/50 text-lg md:text-xl font-light max-w-3xl">
+            Explore a curated collection of premium Digital Prints, Source
+            material, Assets, and Blueprints; crafted for artists, designers,
+            brands, and collectors. These resources are here to elevate what you
+            create, how you create it, and the spaces you inhabit.
           </p>
         </motion.div>
 
