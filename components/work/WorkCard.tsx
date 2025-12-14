@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Play } from "lucide-react";
-import { Project } from "@/lib/data";
+import { Project } from "@/types/database";
 
 interface WorkCardProps {
   project: Project;
@@ -13,7 +13,9 @@ interface WorkCardProps {
 }
 
 export default function WorkCard({ project, index, featured = false }: WorkCardProps) {
-  const isVideo = project.category === "ai-videos";
+  // Determine if it's a video based on category or media type
+  // For now, simple check on category slug
+  const isVideo = project.categories?.slug === "ai-videos";
 
   return (
     <motion.div
@@ -34,21 +36,29 @@ export default function WorkCard({ project, index, featured = false }: WorkCardP
               featured ? "aspect-[21/9]" : "aspect-video"
             }`}
           >
-            <Image
-              src={project.thumbnail}
-              alt={project.title}
-              fill
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              sizes={featured ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
-            />
+            {project.thumbnail ? (
+              <Image
+                src={project.thumbnail}
+                alt={project.title}
+                fill
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                sizes={featured ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-white/5 flex items-center justify-center text-white/20">
+                No Thumbnail
+              </div>
+            )}
 
             {/* Hover Overlay */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
 
             {/* Category Tag */}
-            <span className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white/80 text-xs font-light px-3 py-1 tracking-wide capitalize">
-              {project.category.replace("-", " ")}
-            </span>
+            {project.categories && (
+              <span className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white/80 text-xs font-light px-3 py-1 tracking-wide capitalize">
+                {project.categories.name}
+              </span>
+            )}
 
             {/* Video Indicator */}
             {isVideo && (
@@ -85,4 +95,3 @@ export default function WorkCard({ project, index, featured = false }: WorkCardP
     </motion.div>
   );
 }
-

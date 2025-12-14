@@ -11,3 +11,4 @@ export default function Providers({ children }: ProvidersProps) {
   return <SmoothScroll>{children}</SmoothScroll>;
 }
 
+

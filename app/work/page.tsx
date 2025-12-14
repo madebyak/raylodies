@@ -1,19 +1,19 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { getProjects } from "@/actions/projects";
 import WorkGrid from "@/components/work/WorkGrid";
 
-export default function WorkPage() {
+export default async function WorkPage() {
+  // Fetch real projects from Supabase
+  const projects = await getProjects();
+
+  // Transform data to match the UI component structure if needed
+  // Or update the UI component to use the new Project type
+  // For now, let's update WorkGrid to accept projects as a prop
+
   return (
     <section className="px-6 md:px-10 pt-32 pb-20 md:pt-40 md:pb-32">
       <div className="max-w-[1800px] mx-auto">
         {/* Page Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-12 md:mb-16"
-        >
+        <div className="mb-12 md:mb-16 animate-fade-up">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white mb-6">
             Work
           </h1>
@@ -21,18 +21,13 @@ export default function WorkPage() {
             A collection of AI-generated images and videos, exploring the
             boundaries of digital creativity and artificial intelligence.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Work Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <WorkGrid />
-        </motion.div>
+        {/* Work Grid - Passing real data */}
+        <div className="animate-fade-up delay-200">
+          <WorkGrid initialProjects={projects} />
+        </div>
       </div>
     </section>
   );
 }
-

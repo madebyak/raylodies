@@ -6,19 +6,26 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { User } from "@supabase/supabase-js";
 
-const navLinks = [
+const baseNavLinks = [
   { href: "/work", label: "Work" },
   { href: "/store", label: "Store" },
   { href: "/about", label: "About" },
   { href: "/start-a-project", label: "Start a Project" },
 ];
 
-export default function Header() {
+export default function Header({ user }: { user?: User | null }) {
   const [currentTime, setCurrentTime] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  const userLink = user
+    ? { href: "/account", label: "Account" }
+    : { href: "/login", label: "Sign In" };
+
+  const navLinks = [...baseNavLinks, userLink];
 
   // Update time every second
   useEffect(() => {
@@ -148,4 +155,3 @@ export default function Header() {
     </header>
   );
 }
-

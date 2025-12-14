@@ -1,8 +1,8 @@
 import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-// Combine class names utility (simplified version without tailwind-merge for now)
-export function cn(...inputs: ClassValue[]): string {
-  return clsx(inputs);
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
 // Format price with currency
@@ -41,4 +41,3 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
 export function getStaggerDelay(index: number, baseDelay: number = 0.1): number {
   return index * baseDelay;
 }
-

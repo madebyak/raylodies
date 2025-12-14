@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { projects, Project } from "@/lib/data";
+import { Project } from "@/types/database";
 import CategoryFilter from "./CategoryFilter";
 import WorkCard from "./WorkCard";
 
@@ -12,13 +12,13 @@ const categories = [
   { value: "ai-videos", label: "AI Videos" },
 ];
 
-export default function WorkGrid() {
+export default function WorkGrid({ initialProjects }: { initialProjects: Project[] }) {
   const [activeCategory, setActiveCategory] = useState("all");
 
   const filteredProjects =
     activeCategory === "all"
-      ? projects
-      : projects.filter((p: Project) => p.category === activeCategory);
+      ? initialProjects
+      : initialProjects.filter((p) => p.categories?.slug === activeCategory || p.categories?.name.toLowerCase().includes(activeCategory.replace('ai-', '')));
 
   return (
     <div className="space-y-10">
@@ -39,7 +39,7 @@ export default function WorkGrid() {
           transition={{ duration: 0.3 }}
           className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"
         >
-          {filteredProjects.map((project: Project, index: number) => (
+          {filteredProjects.map((project: any, index: number) => (
             <WorkCard
               key={project.id}
               project={project}
@@ -61,4 +61,3 @@ export default function WorkGrid() {
     </div>
   );
 }
-

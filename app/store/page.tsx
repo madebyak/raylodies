@@ -1,40 +1,29 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { getProducts } from "@/actions/products";
 import ProductGrid from "@/components/store/ProductGrid";
 
-export default function StorePage() {
+export default async function StorePage() {
+  const products = await getProducts();
+
   return (
     <section className="px-6 md:px-10 pt-32 pb-20 md:pt-40 md:pb-32">
       <div className="max-w-[1800px] mx-auto">
         {/* Page Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-12 md:mb-16"
-        >
+        <div className="mb-12 md:mb-16 animate-fade-up">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white mb-6">
             Store
           </h1>
           <p className="text-white/50 text-lg md:text-xl font-light max-w-3xl">
             Explore a curated collection of premium Digital Prints, Source
             material, Assets, and Blueprints; crafted for artists, designers,
-            brands, and collectors. These resources are here to elevate what you
-            create, how you create it, and the spaces you inhabit.
+            brands, and collectors.
           </p>
-        </motion.div>
+        </div>
 
         {/* Product Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <ProductGrid />
-        </motion.div>
+        <div className="animate-fade-up delay-200">
+          <ProductGrid initialProducts={products} />
+        </div>
       </div>
     </section>
   );
 }
-

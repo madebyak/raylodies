@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { Product } from "@/lib/data";
+import { Product } from "@/types/database";
 import { formatPrice } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -27,21 +27,29 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         <article className="space-y-4">
           {/* Image Container */}
           <div className="relative aspect-[4/3] overflow-hidden bg-white/5">
-            <Image
-              src={product.thumbnail}
-              alt={product.title}
-              fill
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
+            {product.thumbnail ? (
+              <Image
+                src={product.thumbnail}
+                alt={product.title}
+                fill
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-white/20">
+                No Thumbnail
+              </div>
+            )}
 
             {/* Hover Overlay */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
 
             {/* Category Tag */}
-            <span className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white/80 text-xs font-light px-3 py-1 tracking-wide">
-              {product.category}
-            </span>
+            {product.categories && (
+              <span className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white/80 text-xs font-light px-3 py-1 tracking-wide">
+                {product.categories.name}
+              </span>
+            )}
 
             {/* View Indicator */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -65,4 +73,3 @@ export default function ProductCard({ product, index }: ProductCardProps) {
     </motion.div>
   );
 }
-

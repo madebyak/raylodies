@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import Providers from "@/components/providers";
+import { createClient } from "@/lib/supabase/server";
+import { Toaster } from "sonner";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -26,21 +27,26 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <html lang="en">
       <body className={`${roboto.variable} antialiased`}>
         <Providers>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
+          <ConditionalLayout user={user}>
+            {children}
+          </ConditionalLayout>
         </Providers>
+        <Toaster theme="dark" position="bottom-right" richColors />
       </body>
     </html>
   );
 }
-
