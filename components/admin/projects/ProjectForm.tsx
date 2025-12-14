@@ -75,11 +75,12 @@ export default function ProjectForm({
   }
 
   async function handleMediaUpload(url: string, type: 'image' | 'video') {
+    if (!initialData?.id) return;
     try {
-        const newItem = await addProjectMedia(initialData?.id!, url, type);
+        const newItem = await addProjectMedia(initialData.id, url, type);
         setMediaItems(prev => [...prev, newItem]);
         toast.success("Media added");
-    } catch (e) {
+    } catch {
         toast.error("Failed to add media to DB");
     }
   }
@@ -89,7 +90,7 @@ export default function ProjectForm({
     try {
         await removeProjectMedia(id);
         toast.success("Media removed");
-    } catch (e) {
+    } catch {
         toast.error("Failed to remove media");
     }
   }
@@ -145,46 +146,70 @@ export default function ProjectForm({
       <form action={handleSubmit} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#050505] border border-white/5 rounded-xl p-6 space-y-6">
+            <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
               <h3 className="text-lg font-light text-white mb-4">Basic Information</h3>
               <Input name="title" label="Project Title" defaultValue={initialData?.title} required />
               <Input name="slug" label="Slug (URL)" defaultValue={initialData?.slug} className="font-mono text-white/60" />
               <Textarea name="description" label="Description" defaultValue={initialData?.description || ''} rows={6} />
             </div>
 
-            {!isNew && (
-              <div className="bg-[#050505] border border-white/5 rounded-xl p-6 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-light text-white">Media Gallery</h3>
-                  <span className="text-xs text-white/40">Drag to reorder</span>
-                </div>
-                
-                <MediaUploader projectId={initialData?.id!} onUploadComplete={handleMediaUpload} />
-                
-                <DndContext 
-                  sensors={sensors} 
-                  collisionDetection={closestCenter} 
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext items={mediaItems.map(i => i.id)} strategy={rectSortingStrategy}>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {mediaItems.map((item) => (
-                        <SortableMediaItem 
-                          key={item.id} 
-                          id={item.id} 
-                          item={item} 
-                          onRemove={handleRemoveMedia} 
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
+            <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-light text-white">Media Gallery</h3>
+                {!isNew && <span className="text-xs text-white/40">Drag to reorder • First image = thumbnail</span>}
               </div>
-            )}
+              
+              {isNew ? (
+                <div className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center opacity-50 cursor-not-allowed">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                      <Save className="w-6 h-6 text-white/20" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-white/40 font-medium">
+                        Save project first to upload media
+                      </p>
+                      <p className="text-xs text-white/30">
+                        Fill in the basic information and save to enable uploads
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : initialData?.id ? (
+                <>
+                  <MediaUploader projectId={initialData.id} onUploadComplete={handleMediaUpload} />
+                  
+                  <DndContext 
+                    sensors={sensors} 
+                    collisionDetection={closestCenter} 
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext items={mediaItems.map(i => i.id)} strategy={rectSortingStrategy}>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {mediaItems.map((item) => (
+                          <SortableMediaItem 
+                            key={item.id} 
+                            id={item.id} 
+                            item={item} 
+                            onRemove={handleRemoveMedia} 
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                  
+                  {mediaItems.length === 0 && (
+                    <p className="text-sm text-white/30 text-center py-4">
+                      No media yet. Upload images or videos to showcase your project.
+                    </p>
+                  )}
+                </>
+              ) : null}
+            </div>
           </div>
 
           <div className="space-y-6">
-            <div className="bg-[#050505] border border-white/5 rounded-xl p-6 space-y-6">
+            <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
               <h3 className="text-lg font-light text-white mb-4">Settings</h3>
               <Select
                 name="category_id"
@@ -193,14 +218,20 @@ export default function ProjectForm({
                 options={[{ value: '', label: 'Select Category' }, ...categories.map(c => ({ value: c.id, label: c.name }))]}
               />
               <Input name="year" label="Year" defaultValue={initialData?.year || new Date().getFullYear().toString()} />
-              <div className="space-y-4 pt-4 border-t border-white/5">
-                <label className="flex items-center justify-between cursor-pointer group">
-                  <span className="text-sm text-white/60 group-hover:text-white transition-colors">Published</span>
-                  <input type="checkbox" name="is_published" defaultChecked={initialData?.is_published} className="accent-white w-4 h-4" />
+              <div className="space-y-3 pt-4 border-t border-white/10">
+                <label className="flex items-center justify-between cursor-pointer group p-3 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/[0.02] transition-all">
+                  <div className="flex flex-col">
+                    <span className="text-sm text-white/80 group-hover:text-white transition-colors">Published</span>
+                    <span className="text-xs text-white/40">Visible on public pages</span>
+                  </div>
+                  <input type="checkbox" name="is_published" defaultChecked={initialData?.is_published} className="accent-white w-5 h-5 rounded" />
                 </label>
-                <label className="flex items-center justify-between cursor-pointer group">
-                  <span className="text-sm text-white/60 group-hover:text-white transition-colors">Featured</span>
-                  <input type="checkbox" name="is_featured" defaultChecked={initialData?.is_featured} className="accent-white w-4 h-4" />
+                <label className="flex items-center justify-between cursor-pointer group p-3 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/[0.02] transition-all">
+                  <div className="flex flex-col">
+                    <span className="text-sm text-white/80 group-hover:text-white transition-colors">Featured</span>
+                    <span className="text-xs text-white/40">Show on homepage</span>
+                  </div>
+                  <input type="checkbox" name="is_featured" defaultChecked={initialData?.is_featured} className="accent-white w-5 h-5 rounded" />
                 </label>
               </div>
             </div>

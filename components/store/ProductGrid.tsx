@@ -13,7 +13,7 @@ export default function ProductGrid({ initialProducts }: { initialProducts: Prod
           </p>
         </div>
       ) : (
-        initialProducts.map((product: any, index: number) => (
+        initialProducts.map((product, index) => (
           <ProductCard key={product.id} product={product} index={index} />
         ))
       )}

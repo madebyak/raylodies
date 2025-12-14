@@ -1,25 +1,25 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { ProjectMedia } from '@/types/database'
+import { ProductImage } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
-export async function addProjectMedia(projectId: string, url: string, type: 'image' | 'video') {
+export async function addProductImage(productId: string, url: string) {
   const supabase = await createClient()
 
-  console.log(`Adding project media: projectId=${projectId}, type=${type}, url=${url}`)
+  console.log(`Adding product image: productId=${productId}, url=${url}`)
 
   // Get current max order
   const { data: maxOrder, error: maxOrderError } = await supabase
-    .from('project_media')
+    .from('product_images')
     .select('display_order')
-    .eq('project_id', projectId)
+    .eq('product_id', productId)
     .order('display_order', { ascending: false })
     .limit(1)
     .single()
 
   if (maxOrderError && maxOrderError.code !== 'PGRST116') {
-    // PGRST116 = no rows returned, which is fine for first media
+    // PGRST116 = no rows returned, which is fine for first image
     console.error('Error getting max order:', maxOrderError)
   }
 
@@ -27,98 +27,96 @@ export async function addProjectMedia(projectId: string, url: string, type: 'ima
   console.log(`Next display order: ${nextOrder}`)
 
   const { data, error } = await supabase
-    .from('project_media')
+    .from('product_images')
     .insert({
-      project_id: projectId,
+      product_id: productId,
       url,
-      type,
       display_order: nextOrder
     })
     .select()
     .single()
 
   if (error) {
-    console.error('Error inserting project media:', error)
+    console.error('Error inserting product image:', error)
     throw new Error(error.message)
   }
 
-  console.log('Successfully inserted project media:', data)
+  console.log('Successfully inserted product image:', data)
   
   // If this is the first image, set it as thumbnail
-  if (nextOrder === 0 && type === 'image') {
+  if (nextOrder === 0) {
     await supabase
-      .from('projects')
+      .from('products')
       .update({ thumbnail: url })
-      .eq('id', projectId)
+      .eq('id', productId)
   }
 
-  revalidatePath(`/admin/projects/${projectId}`)
-  revalidatePath('/work')
+  revalidatePath(`/admin/products/${productId}`)
+  revalidatePath('/store')
   return data
 }
 
-export async function reorderProjectMedia(items: { id: string; display_order: number }[]) {
+export async function reorderProductImages(items: { id: string; display_order: number }[]) {
   const supabase = await createClient()
-  const projectId = (await supabase.from('project_media').select('project_id').eq('id', items[0].id).single()).data?.project_id
+  const productId = (await supabase.from('product_images').select('product_id').eq('id', items[0].id).single()).data?.product_id
 
   // Batch update using Promise.all for better performance
   await Promise.all(
     items.map(item =>
       supabase
-        .from('project_media')
+        .from('product_images')
         .update({ display_order: item.display_order })
         .eq('id', item.id)
     )
   )
 
-  if (projectId) {
+  if (productId) {
     // Update thumbnail to the first image in the new order
     const { data: firstImage } = await supabase
-        .from('project_media')
+        .from('product_images')
         .select('url')
-        .eq('project_id', projectId)
-        .eq('type', 'image')
+        .eq('product_id', productId)
         .order('display_order', { ascending: true })
         .limit(1)
         .single()
         
     if (firstImage) {
-        await supabase.from('projects').update({ thumbnail: firstImage.url }).eq('id', projectId)
+        await supabase.from('products').update({ thumbnail: firstImage.url }).eq('id', productId)
     }
   }
 
-  revalidatePath('/admin/projects')
-  revalidatePath('/work')
+  revalidatePath('/admin/products')
+  revalidatePath('/store')
 }
 
-export async function removeProjectMedia(id: string) {
+export async function removeProductImage(id: string) {
   const supabase = await createClient()
   
   const { error } = await supabase
-    .from('project_media')
+    .from('product_images')
     .delete()
     .eq('id', id)
 
   if (error) throw new Error(error.message)
   
-  revalidatePath('/admin/projects')
-  revalidatePath('/work')
+  revalidatePath('/admin/products')
+  revalidatePath('/store')
 }
 
-export async function getProjectMedia(projectId: string) {
+export async function getProductImages(productId: string) {
   const supabase = await createClient()
   
   const { data, error } = await supabase
-    .from('project_media')
+    .from('product_images')
     .select('*')
-    .eq('project_id', projectId)
+    .eq('product_id', productId)
     .order('display_order', { ascending: true })
 
   if (error) {
-    console.error('Error fetching project media:', error)
+    console.error('Error fetching product images:', error)
     return []
   }
 
-  console.log(`Fetched ${data?.length || 0} media items for project ${projectId}`)
-  return data as ProjectMedia[] || []
+  console.log(`Fetched ${data?.length || 0} images for product ${productId}`)
+  return data as ProductImage[] || []
 }

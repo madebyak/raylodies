@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-async function handleTransactionCompleted(data: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function handleTransactionCompleted(data: Record<string, any>) {
   const { id, customer, items, details, custom_data } = data;
   
   // ✅ CRITICAL: Use userId from customData first, fallback to email matching

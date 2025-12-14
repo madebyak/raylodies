@@ -37,7 +37,7 @@ export default async function AccountPage() {
         <div className="bg-[#0a0a0a] border border-white/5 rounded-xl p-6">
           <h3 className="text-white/40 text-sm font-light mb-2">Member Since</h3>
           <p className="text-xl font-light text-white">
-            {new Date(user?.created_at!).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'N/A'}
           </p>
         </div>
       </div>

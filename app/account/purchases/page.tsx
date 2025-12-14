@@ -1,12 +1,36 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
 import { Package } from "lucide-react";
+import Image from "next/image";
+
+interface ProductInfo {
+  title: string;
+  thumbnail: string | null;
+}
+
+interface OrderItemRaw {
+  price: number;
+  products: ProductInfo;
+}
+
+interface OrderRaw {
+  id: string;
+  created_at: string;
+  total: number;
+  status: string;
+  paddle_transaction_id: string;
+  order_items: OrderItemRaw[];
+}
 
 export default async function PurchasesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: orders } = await supabase
+  if (!user) {
+    return null;
+  }
+
+  const { data: ordersData } = await supabase
     .from('orders')
     .select(`
       *,
@@ -15,14 +39,27 @@ export default async function PurchasesPage() {
         products (title, thumbnail)
       )
     `)
-    .eq('user_id', user!.id)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+
+  // Transform to expected type
+  const orders: OrderRaw[] = (ordersData || []).map((order) => ({
+    id: order.id as string,
+    created_at: order.created_at as string,
+    total: order.total as number,
+    status: order.status as string,
+    paddle_transaction_id: order.paddle_transaction_id as string,
+    order_items: (order.order_items || []).map((item: { price: number; products: ProductInfo | ProductInfo[] }) => ({
+      price: item.price,
+      products: Array.isArray(item.products) ? item.products[0] : item.products
+    }))
+  }));
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-light text-white">Purchase History</h2>
 
-      {(!orders || orders.length === 0) ? (
+      {orders.length === 0 ? (
         <div className="bg-[#0a0a0a] border border-white/5 rounded-xl p-12 text-center">
           <Package className="w-12 h-12 text-white/20 mx-auto mb-4" />
           <p className="text-white/40 font-light">No purchases yet.</p>
@@ -53,11 +90,17 @@ export default async function PurchasesPage() {
               
               <div className="p-6">
                 <div className="space-y-4">
-                  {order.order_items.map((item: any, i: number) => (
+                  {order.order_items.map((item, i) => (
                     <div key={i} className="flex items-center gap-4">
                       {item.products?.thumbnail && (
                         <div className="w-12 h-12 bg-white/5 rounded-md overflow-hidden relative">
-                          <img src={item.products.thumbnail} alt="" className="object-cover w-full h-full" />
+                          <Image 
+                            src={item.products.thumbnail} 
+                            alt={item.products?.title || ''} 
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                          />
                         </div>
                       )}
                       <div>

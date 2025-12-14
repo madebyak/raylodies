@@ -70,8 +70,8 @@ export default async function ProductsPage() {
                 </td>
               </tr>
             ) : (
-              products.map((product: any) => (
-                <ProductRow key={product.id} product={product} />
+              products.map((product) => (
+                <ProductRow key={product.id} product={product as Product} />
               ))
             )}
           </tbody>

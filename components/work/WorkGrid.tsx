@@ -39,7 +39,7 @@ export default function WorkGrid({ initialProjects }: { initialProjects: Project
           transition={{ duration: 0.3 }}
           className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"
         >
-          {filteredProjects.map((project: any, index: number) => (
+          {filteredProjects.map((project, index) => (
             <WorkCard
               key={project.id}
               project={project}

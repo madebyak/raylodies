@@ -1,22 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Check, Download, FileIcon } from "lucide-react";
 import { BuyButton } from "@/components/store/BuyButton";
 import Button from "@/components/ui/Button";
 import { formatPrice } from "@/lib/utils";
+import { ProductImage } from "@/types/database";
+import ProductGallery from "@/components/store/ProductGallery";
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  // Fetch product
+  // Fetch product with images
   const { data: product } = await supabase
     .from("products")
     .select(`
       *,
-      categories (name)
+      categories (name),
+      product_images (
+        id,
+        url,
+        display_order
+      )
     `)
     .eq("slug", slug)
     .eq("is_published", true)
@@ -25,6 +31,11 @@ export default async function ProductPage({ params }: { params: { slug: string }
   if (!product) {
     notFound();
   }
+
+  // Sort images by display_order
+  const images = (product.product_images as ProductImage[] || []).sort(
+    (a, b) => a.display_order - b.display_order
+  );
 
   // Check if user has already purchased (if logged in)
   const { data: { user } } = await supabase.auth.getUser();
@@ -55,24 +66,11 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Left: Image Gallery */}
-          <div className="space-y-6">
-            <div className="aspect-[4/3] relative rounded-xl overflow-hidden bg-white/5 border border-white/5">
-              {product.thumbnail ? (
-                <Image
-                  src={product.thumbnail}
-                  alt={product.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-white/20">
-                  No Preview
-                </div>
-              )}
-            </div>
-            {/* Gallery thumbnails would go here if we had product_images table populated */}
-          </div>
+          <ProductGallery 
+            images={images} 
+            thumbnail={product.thumbnail} 
+            title={product.title} 
+          />
 
           {/* Right: Product Info */}
           <div className="space-y-8">

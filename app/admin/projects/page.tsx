@@ -69,8 +69,8 @@ export default async function ProjectsPage() {
                 </td>
               </tr>
             ) : (
-              projects.map((project: any) => (
-                <ProjectRow key={project.id} project={project} />
+              projects.map((project) => (
+                <ProjectRow key={project.id} project={project as Project} />
               ))
             )}
           </tbody>

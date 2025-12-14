@@ -130,7 +130,14 @@ export default function AdminDashboard() {
   );
 }
 
-function StatCard({ title, value, change, icon: Icon }: any) {
+interface StatCardProps {
+  title: string;
+  value: string;
+  change: string;
+  icon: React.ComponentType<{ size?: number }>;
+}
+
+function StatCard({ title, value, change, icon: Icon }: StatCardProps) {
   const isPositive = change.startsWith("+");
   
   return (

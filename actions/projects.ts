@@ -90,3 +90,31 @@ export async function toggleProjectStatus(id: string, currentStatus: boolean): P
   revalidatePath('/admin/projects')
   revalidatePath('/work')
 }
+
+// Get featured projects for homepage
+export const getFeaturedProjects = cache(async (limit: number = 4) => {
+  const supabase = await createClient()
+  
+  const { data: projects, error } = await supabase
+    .from('projects')
+    .select(`
+      *,
+      categories (
+        id,
+        name,
+        slug,
+        type
+      )
+    `)
+    .eq('is_published', true)
+    .eq('is_featured', true)
+    .order('display_order', { ascending: true })
+    .limit(limit)
+
+  if (error) {
+    console.error('Error fetching featured projects:', error)
+    return []
+  }
+
+  return projects
+})

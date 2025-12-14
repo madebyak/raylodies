@@ -28,9 +28,10 @@ export default function FileUploader({ productId, currentFile }: FileUploaderPro
       if (result.error) throw new Error(result.error);
       
       toast.success("File uploaded successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error("Upload failed: " + error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error("Upload failed: " + errorMessage);
     } finally {
       setIsUploading(false);
     }
@@ -50,10 +51,10 @@ export default function FileUploader({ productId, currentFile }: FileUploaderPro
       <div
         {...getRootProps()}
         className={cn(
-          "border border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors relative overflow-hidden",
+          "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 relative overflow-hidden",
           isDragActive 
-            ? "border-blue-500 bg-blue-500/5" 
-            : "border-white/10 hover:border-white/20 bg-white/[0.02]"
+            ? "border-blue-500 bg-blue-500/10" 
+            : "border-white/20 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.04]"
         )}
       >
         <input {...getInputProps()} />

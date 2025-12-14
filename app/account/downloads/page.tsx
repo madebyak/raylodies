@@ -2,33 +2,27 @@ import { createClient } from "@/lib/supabase/server";
 import { Download, FileIcon } from "lucide-react";
 import Image from "next/image";
 
+interface ProductInfo {
+  id: string;
+  title: string;
+  thumbnail: string | null;
+  file_url: string | null;
+}
+
+interface OrderItemWithProduct {
+  id: string;
+  products: ProductInfo;
+}
+
 export default async function DownloadsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Get all purchased products
-  const { data: purchasedItems } = await supabase
-    .from('order_items')
-    .select(`
-      id,
-      products (
-        id,
-        title,
-        thumbnail,
-        file_url
-      )
-    `)
-    .eq('order.user_id', user!.id)
-    .eq('order.status', 'completed')
-    // Join with order to filter by user and status
-    // Note: Supabase complex joins can be tricky, using !inner ensures inner join
-    .not('products.file_url', 'is', null);
+  if (!user) {
+    return null;
+  }
 
-  // Since the simple join above might be limited by RLS visibility of order_items 
-  // (we made a policy: Users view own order items), this should work.
-  // However, we need to explicitly join 'orders' table in the select to apply the filter.
-  
-  // Refined query:
+  // Get all purchased products with orders join
   const { data: items } = await supabase
     .from('order_items')
     .select(`
@@ -44,21 +38,27 @@ export default async function DownloadsPage() {
         status
       )
     `)
-    .eq('orders.user_id', user!.id)
+    .eq('orders.user_id', user.id)
     .eq('orders.status', 'completed');
+
+  // Transform items to expected format
+  const orderItems: OrderItemWithProduct[] = (items || []).map((item) => ({
+    id: item.id as string,
+    products: item.products as unknown as ProductInfo
+  }));
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-light text-white">Your Downloads</h2>
 
-      {(!items || items.length === 0) ? (
+      {orderItems.length === 0 ? (
         <div className="bg-[#0a0a0a] border border-white/5 rounded-xl p-12 text-center">
           <Download className="w-12 h-12 text-white/20 mx-auto mb-4" />
           <p className="text-white/40 font-light">No downloads available.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {items.map((item: any) => (
+          {orderItems.map((item) => (
             <div key={item.id} className="bg-[#0a0a0a] border border-white/5 rounded-xl p-4 flex items-center gap-4 hover:border-white/10 transition-colors">
               <div className="w-16 h-16 bg-white/5 rounded-lg overflow-hidden relative shrink-0">
                 {item.products.thumbnail ? (

@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
-interface MediaUploaderProps {
-  projectId: string;
-  onUploadComplete: (url: string, type: 'image' | 'video') => void;
+interface ProductImageUploaderProps {
+  productId: string;
+  onUploadComplete: (url: string) => void;
 }
 
-export default function MediaUploader({ projectId, onUploadComplete }: MediaUploaderProps) {
+export default function ProductImageUploader({ productId, onUploadComplete }: ProductImageUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -23,7 +23,7 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
       for (const file of acceptedFiles) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `projects/${projectId}/media/${fileName}`;
+        const filePath = `products/${productId}/images/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('public-assets')
@@ -34,13 +34,10 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
         const { data: { publicUrl } } = supabase.storage
           .from('public-assets')
           .getPublicUrl(filePath);
-
-        // Simple type detection based on MIME type
-        const type = file.type.startsWith('video/') ? 'video' : 'image';
         
-        onUploadComplete(publicUrl, type);
+        onUploadComplete(publicUrl);
       }
-      toast.success("Media uploaded successfully");
+      toast.success("Image uploaded successfully");
     } catch (error: unknown) {
       console.error(error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -48,13 +45,12 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
     } finally {
       setIsUploading(false);
     }
-  }, [projectId, onUploadComplete]);
+  }, [productId, onUploadComplete]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
-      'video/*': ['.mp4', '.webm']
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp']
     }
   });
 
@@ -77,10 +73,10 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
         )}
         <div className="space-y-1">
           <p className="text-sm text-white font-medium">
-            {isUploading ? "Uploading..." : "Click or drag to upload media"}
+            {isUploading ? "Uploading..." : "Click or drag to upload images"}
           </p>
           <p className="text-xs text-white/40">
-            Supports JPG, PNG, GIF, MP4 (Max 50MB)
+            Supports JPG, PNG, GIF, WebP (Max 10MB)
           </p>
         </div>
       </div>

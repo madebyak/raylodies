@@ -12,7 +12,8 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  FolderTree
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/projects", label: "Projects", icon: Palette },
   { href: "/admin/products", label: "Products", icon: ShoppingBag },
+  { href: "/admin/categories", label: "Categories", icon: FolderTree },
   { href: "/admin/orders", label: "Orders", icon: Package },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/inquiries", label: "Inquiries", icon: MessageSquare },

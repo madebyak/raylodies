@@ -4,10 +4,28 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { getFeaturedProjects } from "@/lib/data";
+import { Project } from "@/types/database";
 
-export default function FeaturedWork() {
-  const projects = getFeaturedProjects(4);
+interface FeaturedWorkProps {
+  projects: Project[];
+}
+
+export default function FeaturedWork({ projects }: FeaturedWorkProps) {
+  // If no featured projects from DB, show a message
+  if (!projects || projects.length === 0) {
+    return (
+      <section className="px-6 md:px-10 py-20 md:py-32">
+        <div className="max-w-[1800px] mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-light text-white mb-4">
+            Selected Work
+          </h2>
+          <p className="text-white/40 text-base font-light">
+            Featured projects will appear here. Mark projects as &quot;Featured&quot; in the dashboard.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="px-6 md:px-10 py-20 md:py-32">
@@ -64,25 +82,33 @@ export default function FeaturedWork() {
                       index === 0 ? "aspect-[21/9]" : "aspect-video"
                     }`}
                   >
-                    <Image
-                      src={project.thumbnail}
-                      alt={project.title}
-                      fill
-                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      sizes={
-                        index === 0
-                          ? "100vw"
-                          : "(max-width: 768px) 100vw, 50vw"
-                      }
-                    />
+                    {project.thumbnail ? (
+                      <Image
+                        src={project.thumbnail}
+                        alt={project.title}
+                        fill
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        sizes={
+                          index === 0
+                            ? "100vw"
+                            : "(max-width: 768px) 100vw, 50vw"
+                        }
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-white/20">
+                        No thumbnail
+                      </div>
+                    )}
 
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
 
                     {/* Category Tag */}
-                    <span className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white/80 text-xs font-light px-3 py-1 tracking-wide capitalize">
-                      {project.category.replace("-", " ")}
-                    </span>
+                    {project.categories && (
+                      <span className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white/80 text-xs font-light px-3 py-1 tracking-wide capitalize">
+                        {project.categories.name.replace("-", " ")}
+                      </span>
+                    )}
 
                     {/* View Indicator */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -116,4 +142,3 @@ export default function FeaturedWork() {
     </section>
   );
 }
-
