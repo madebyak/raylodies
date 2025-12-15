@@ -9,42 +9,55 @@ const supabase = createClient(
 );
 
 export async function POST(request: NextRequest) {
+  console.log('🔔 Paddle webhook received');
+  
   const body = await request.text();
   const signature = request.headers.get('paddle-signature');
   
+  console.log('📝 Signature present:', !!signature);
+  console.log('📝 Body length:', body.length);
+  
   if (!process.env.PADDLE_WEBHOOK_SECRET) {
-    console.error('Missing PADDLE_WEBHOOK_SECRET');
+    console.error('❌ Missing PADDLE_WEBHOOK_SECRET');
     return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
   }
 
   // 1. Verify webhook signature
   if (!verifyPaddleSignature(body, signature!)) {
-    console.error('Invalid Paddle signature');
+    console.error('❌ Invalid Paddle signature');
+    console.error('Expected secret starts with:', process.env.PADDLE_WEBHOOK_SECRET?.substring(0, 10));
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
   
+  console.log('✅ Signature verified');
+  
   const event = JSON.parse(body);
-  console.log('Received Paddle Webhook:', event.event_type);
+  console.log('📦 Event type:', event.event_type);
+  console.log('📦 Transaction ID:', event.data?.id);
   
   // 2. Handle event types
   try {
     switch (event.event_type) {
       case 'transaction.completed':
+        console.log('🎯 Processing transaction.completed');
         await handleTransactionCompleted(event.data);
         break;
       case 'transaction.updated': 
+        console.log('🎯 Processing transaction.updated, status:', event.data.status);
         // Sometimes status changes to completed in an update
         if (event.data.status === 'completed') {
             await handleTransactionCompleted(event.data);
         }
         break;
-      // Add other cases like refunded if needed
+      default:
+        console.log('⏭️ Ignoring event type:', event.event_type);
     }
   } catch (error) {
-    console.error('Webhook handler failed:', error);
+    console.error('❌ Webhook handler failed:', error);
     return NextResponse.json({ error: 'Handler failed' }, { status: 500 });
   }
   
+  console.log('✅ Webhook processed successfully');
   return NextResponse.json({ received: true });
 }
 
@@ -52,62 +65,72 @@ export async function POST(request: NextRequest) {
 async function handleTransactionCompleted(data: Record<string, any>) {
   const { id, customer, items, details, custom_data } = data;
   
+  console.log('👤 Processing transaction:', id);
+  console.log('👤 Custom data:', JSON.stringify(custom_data));
+  console.log('👤 Customer email:', customer?.email);
+  
   // ✅ CRITICAL: Use userId from customData first, fallback to email matching
   let userId: string | null = null;
   
   // Priority 1: Use the logged-in user ID we passed to Paddle
   if (custom_data?.userId) {
-    const { data: existingUser } = await supabase
+    console.log('🔍 Looking up user by ID:', custom_data.userId);
+    const { data: existingUser, error: userError } = await supabase
       .from('users')
       .select('id')
       .eq('id', custom_data.userId)
       .single();
     
+    if (userError) {
+      console.error('❌ Error looking up user by ID:', userError);
+    }
+    
     if (existingUser) {
+      console.log('✅ Found user by ID:', existingUser.id);
       userId = existingUser.id;
+    } else {
+      console.log('⚠️ User not found by ID');
     }
   }
   
   // Priority 2: Fallback to email matching
   if (!userId && customer?.email) {
-    const { data: userByEmail } = await supabase
+    console.log('🔍 Looking up user by email:', customer.email);
+    const { data: userByEmail, error: emailError } = await supabase
       .from('users')
       .select('id')
       .eq('email', customer.email)
       .single();
     
+    if (emailError) {
+      console.error('❌ Error looking up user by email:', emailError);
+    }
+    
     if (userByEmail) {
+      console.log('✅ Found user by email:', userByEmail.id);
       userId = userByEmail.id;
     } else {
-        // Here we could auto-create a user, but since our users table 
-        // is linked to auth.users, we can't easily create a "real" account 
-        // without them going through signup.
-        // For now, we will log this edge case. Ideally, you'd send them an invite email.
-        console.warn(`No user found for email ${customer.email}. Order will be orphaned.`);
+        console.warn(`⚠️ No user found for email ${customer.email}. Order will be orphaned.`);
     }
   }
   
   if (!userId) {
-    console.error('Failed to identify user for transaction:', id);
+    console.error('❌ Failed to identify user for transaction:', id);
     return;
   }
   
+  console.log('✅ User identified:', userId);
+  
   // Create order
+  console.log('💰 Creating order with total:', details.totals.total);
+  
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .upsert({
       paddle_transaction_id: id,
       user_id: userId,
       status: 'completed',
-      total: parseFloat(details.totals.total) / 100, // Paddle uses cents/lowest unit? Check currency. 
-      // V2 API uses string "10.00" usually, but sometimes raw units. 
-      // Let's assume standard formatting or check docs. 
-      // Actually Paddle Billing API sends totals as strings like "1000" for $10.00 usually?
-      // Wait, standard Paddle Billing API 'totals.total' is a string of the major unit (e.g. "10.00") or minor?
-      // Checking docs... Paddle Billing API totals are strings representing the value.
-      // Correction: It depends on the field. `totals.total` is usually a string formatted amount.
-      // Let's double check standard payload.
-      // Actually, safest is to parse whatever it is.
+      total: parseFloat(details.totals.total) / 100,
       currency: details.totals.currency_code,
       customer_email: customer.email,
     }, { onConflict: 'paddle_transaction_id' })
@@ -115,27 +138,47 @@ async function handleTransactionCompleted(data: Record<string, any>) {
     .single();
 
   if (orderError) {
-      console.error('Failed to create order:', orderError);
+      console.error('❌ Failed to create order:', orderError);
       throw orderError;
   }
   
+  console.log('✅ Order created:', order.id);
+  
   // Create order items
   for (const item of items) {
+    console.log('🛒 Processing item with price_id:', item.price.id);
+    
     // Map Paddle price_id to our product
-    const { data: product } = await supabase
+    const { data: product, error: productError } = await supabase
       .from('products')
-      .select('id')
+      .select('id, title')
       .eq('paddle_price_id', item.price.id)
       .single();
+    
+    if (productError) {
+      console.error('❌ Error finding product:', productError);
+    }
       
     if (product) {
-      await supabase.from('order_items').insert({
+      console.log('✅ Found product:', product.title);
+      
+      const { error: itemError } = await supabase.from('order_items').insert({
         order_id: order.id,
         product_id: product.id,
-        price: parseFloat(item.price.unit_price.amount) / 100, // Paddle sends amount in cents usually for items
+        price: parseFloat(item.price.unit_price.amount) / 100,
       });
+      
+      if (itemError) {
+        console.error('❌ Failed to create order item:', itemError);
+      } else {
+        console.log('✅ Order item created');
+      }
+    } else {
+      console.warn('⚠️ Product not found for price_id:', item.price.id);
     }
   }
+  
+  console.log('🎉 Transaction processing complete');
 }
 
 function verifyPaddleSignature(payload: string, signature: string): boolean {
