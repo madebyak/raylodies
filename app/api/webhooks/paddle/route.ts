@@ -65,9 +65,13 @@ export async function POST(request: NextRequest) {
 async function handleTransactionCompleted(data: Record<string, any>) {
   const { id, customer, items, details, custom_data } = data;
   
+  // Get email from multiple possible sources
+  const customerEmail = customer?.email || custom_data?.userEmail || null;
+  
   console.log('👤 Processing transaction:', id);
   console.log('👤 Custom data:', JSON.stringify(custom_data));
-  console.log('👤 Customer email:', customer?.email);
+  console.log('👤 Customer object:', JSON.stringify(customer));
+  console.log('👤 Customer email (resolved):', customerEmail);
   
   // ✅ CRITICAL: Use userId from customData first, fallback to email matching
   let userId: string | null = null;
@@ -94,12 +98,12 @@ async function handleTransactionCompleted(data: Record<string, any>) {
   }
   
   // Priority 2: Fallback to email matching
-  if (!userId && customer?.email) {
-    console.log('🔍 Looking up user by email:', customer.email);
+  if (!userId && customerEmail) {
+    console.log('🔍 Looking up user by email:', customerEmail);
     const { data: userByEmail, error: emailError } = await supabase
       .from('users')
       .select('id')
-      .eq('email', customer.email)
+      .eq('email', customerEmail)
       .single();
     
     if (emailError) {
@@ -110,7 +114,7 @@ async function handleTransactionCompleted(data: Record<string, any>) {
       console.log('✅ Found user by email:', userByEmail.id);
       userId = userByEmail.id;
     } else {
-        console.warn(`⚠️ No user found for email ${customer.email}. Order will be orphaned.`);
+        console.warn(`⚠️ No user found for email ${customerEmail}. Order will be orphaned.`);
     }
   }
   
@@ -122,7 +126,7 @@ async function handleTransactionCompleted(data: Record<string, any>) {
   console.log('✅ User identified:', userId);
   
   // Create order
-  console.log('💰 Creating order with total:', details.totals.total);
+  console.log('💰 Creating order with total:', details?.totals?.total);
   
   const { data: order, error: orderError } = await supabase
     .from('orders')
@@ -130,9 +134,9 @@ async function handleTransactionCompleted(data: Record<string, any>) {
       paddle_transaction_id: id,
       user_id: userId,
       status: 'completed',
-      total: parseFloat(details.totals.total) / 100,
-      currency: details.totals.currency_code,
-      customer_email: customer.email,
+      total: parseFloat(details?.totals?.total || '0') / 100,
+      currency: details?.totals?.currency_code || 'USD',
+      customer_email: customerEmail,
     }, { onConflict: 'paddle_transaction_id' })
     .select('id')
     .single();
