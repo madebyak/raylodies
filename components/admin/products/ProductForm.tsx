@@ -66,7 +66,15 @@ export default function ProductForm({
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success("Product saved successfully");
+      // Show appropriate message based on Paddle sync status
+      if (result.paddleSynced) {
+        toast.success("Product saved & synced with Paddle");
+      } else if (result.paddleError) {
+        toast.warning(`Product saved, but Paddle sync failed: ${result.paddleError}`);
+      } else {
+        toast.success("Product saved successfully");
+      }
+      
       if (isNew) {
         router.push(`/admin/products/${result.data.id}`);
       } else {
@@ -285,20 +293,28 @@ export default function ProductForm({
 
               <div className="pt-4 border-t border-white/10 space-y-4">
                 <h4 className="text-sm font-medium text-white">Paddle Integration</h4>
-                <Input
-                  name="paddle_product_id"
-                  label="Paddle Product ID"
-                  placeholder="pro_..."
-                  defaultValue={initialData?.paddle_product_id || ''}
-                  className="font-mono text-xs"
-                />
-                <Input
-                  name="paddle_price_id"
-                  label="Paddle Price ID"
-                  placeholder="pri_..."
-                  defaultValue={initialData?.paddle_price_id || ''}
-                  className="font-mono text-xs"
-                />
+                <p className="text-xs text-white/40">
+                  Paddle product and price IDs are automatically created when you save the product.
+                </p>
+                {initialData?.paddle_product_id && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/10">
+                      <span className="text-xs text-white/50">Product ID</span>
+                      <code className="text-xs text-green-400 font-mono">{initialData.paddle_product_id}</code>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/10">
+                      <span className="text-xs text-white/50">Price ID</span>
+                      <code className="text-xs text-green-400 font-mono">{initialData.paddle_price_id || 'Not set'}</code>
+                    </div>
+                  </div>
+                )}
+                {!initialData?.paddle_product_id && !isNew && (
+                  <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                    <p className="text-xs text-yellow-400">
+                      No Paddle IDs found. Save the product to auto-create them.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 border-t border-white/10">
