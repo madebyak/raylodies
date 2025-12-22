@@ -153,6 +153,38 @@ export default function ProjectForm({
               <Textarea name="description" label="Description" defaultValue={initialData?.description || ''} rows={6} />
             </div>
 
+            {/* SEO */}
+            <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
+              <div className="space-y-1">
+                <h3 className="text-lg font-light text-white">SEO</h3>
+                <p className="text-sm text-white/40">
+                  These fields control Google title/description and social previews for this project page.
+                </p>
+              </div>
+
+              <Input
+                name="meta_title"
+                label="Meta Title"
+                defaultValue={initialData?.meta_title || ''}
+                placeholder="e.g. Neon Futures | Raylodies"
+              />
+
+              <Textarea
+                name="meta_description"
+                label="Meta Description"
+                defaultValue={initialData?.meta_description || ''}
+                rows={3}
+                placeholder="Aim for ~140–160 characters. Describe the project + category."
+              />
+
+              <Input
+                name="og_image"
+                label="OG Image URL"
+                defaultValue={initialData?.og_image || ''}
+                placeholder="Optional: full image URL for social sharing (1200x630 recommended)"
+              />
+            </div>
+
             <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-light text-white">Media Gallery</h3>
@@ -249,3 +281,5 @@ export default function ProjectForm({
     </div>
   );
 }
+
+

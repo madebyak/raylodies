@@ -81,3 +81,4 @@ export async function getInquiryStats() {
     responded: inquiries.filter(i => i.status === 'responded').length,
   }
 }
+

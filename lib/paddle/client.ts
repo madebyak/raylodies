@@ -13,15 +13,12 @@ export async function getPaddle(): Promise<Paddle | undefined> {
     return undefined;
   }
 
-  console.log(`🏓 Initializing Paddle: environment=${environment}, token=${token.substring(0, 10)}...`);
-
   try {
     paddleInstance = await initializePaddle({
       environment: environment || 'sandbox',
       token: token,
     });
     
-    console.log("✅ Paddle initialized successfully");
     return paddleInstance;
   } catch (e) {
     console.error("❌ Failed to initialize Paddle:", e);
@@ -33,8 +30,6 @@ export async function openCheckout(
   priceId: string, 
   customData: { userId: string; userEmail: string; productId: string }
 ) {
-  console.log(`🛒 Opening checkout for price: ${priceId}`);
-  
   const paddle = await getPaddle();
   
   if (!paddle) {
@@ -51,12 +46,13 @@ export async function openCheckout(
       settings: {
         displayMode: 'overlay',
         theme: 'dark',
-        successUrl: `${window.location.origin}/account/purchases`,
+        successUrl: `${window.location.origin}/account/purchases?checkout=success`,
       },
     });
-    console.log("✅ Checkout opened");
   } catch (e) {
     console.error("❌ Failed to open checkout:", e);
     alert("Failed to open checkout. Please try again.");
   }
 }
+
+

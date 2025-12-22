@@ -1,4 +1,4 @@
-import { getOrderStats, getOrders } from "@/actions/orders";
+import { getDashboardOrders, getOrderStats } from "@/actions/orders";
 import { getCustomerStats } from "@/actions/customers";
 import { DollarSign, ShoppingBag, Users, TrendingUp, Package } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
@@ -10,7 +10,7 @@ export default async function AdminDashboard() {
   const [orderStats, customerStats, recentOrders] = await Promise.all([
     getOrderStats(),
     getCustomerStats(),
-    getOrders()
+    getDashboardOrders()
   ]);
 
   // Get last 5 orders
@@ -172,3 +172,5 @@ function QuickLink({ href, label, icon: Icon }: { href: string; label: string; i
     </Link>
   );
 }
+
+

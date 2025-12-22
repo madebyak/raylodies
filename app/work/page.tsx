@@ -1,9 +1,11 @@
-import { getProjects } from "@/actions/projects";
+import { getPublishedProjects } from "@/actions/projects";
 import WorkGrid from "@/components/work/WorkGrid";
+
+export const revalidate = 300;
 
 export default async function WorkPage() {
   // Fetch real projects from Supabase
-  const projects = await getProjects();
+  const projects = await getPublishedProjects();
 
   // Transform data to match the UI component structure if needed
   // Or update the UI component to use the new Project type
@@ -18,8 +20,7 @@ export default async function WorkPage() {
             Work
           </h1>
           <p className="text-white/50 text-lg md:text-xl font-light max-w-2xl">
-            A collection of AI-generated images and videos, exploring the
-            boundaries of digital creativity and artificial intelligence.
+            A collection of projects exploring the boundaries of digital creativity and artificial intelligence. A look into how I translate raw data into specific, curated visions.
           </p>
         </div>
 

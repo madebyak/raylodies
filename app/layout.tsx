@@ -3,8 +3,10 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import Providers from "@/components/providers";
-import { createClient } from "@/lib/supabase/server";
 import { Toaster } from "sonner";
+import { getSiteUrl } from "@/lib/seo/site";
+import JsonLd from "@/components/seo/JsonLd";
+import { absoluteUrl } from "@/lib/seo/site";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -14,6 +16,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: "Raylodies | AI Creative Director",
   description:
     "Raylodies is an AI creative director specializing in AI-generated images and videos. Explore the portfolio and shop digital AI presets.",
@@ -25,6 +28,29 @@ export const metadata: Metadata = {
     "AI presets",
     "digital art",
   ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    title: "Raylodies | AI Creative Director",
+    description:
+      "Raylodies is an AI creative director specializing in AI-generated images and videos. Explore the portfolio and shop digital AI presets.",
+    url: "/",
+    siteName: "Raylodies",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Raylodies | AI Creative Director",
+    description:
+      "Raylodies is an AI creative director specializing in AI-generated images and videos. Explore the portfolio and shop digital AI presets.",
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default async function RootLayout({
@@ -32,16 +58,28 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   return (
     <html lang="en">
       <body className={`${roboto.variable} antialiased`}>
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Raylodies",
+            url: absoluteUrl("/"),
+            logo: absoluteUrl("/favicon.ico"),
+          }}
+        />
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Raylodies",
+            url: absoluteUrl("/"),
+          }}
+        />
         <Providers>
-          <ConditionalLayout user={user}>
+          <ConditionalLayout>
             {children}
           </ConditionalLayout>
         </Providers>

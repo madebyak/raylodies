@@ -4,7 +4,15 @@ import { motion } from "framer-motion";
 import { FadeIn } from "@/components/layout/PageTransition";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Instagram, Linkedin, Twitter } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { SOCIAL_LINKS } from "@/lib/social";
+import { Ms_Madi } from "next/font/google";
+
+const msMadi = Ms_Madi({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
 
 const skills = [
   "AI Image Generation",
@@ -13,25 +21,19 @@ const skills = [
   "Creative Direction",
   "Visual Storytelling",
   "Brand Identity",
-  "Motion Design",
   "Digital Art",
 ];
 
 const tools = [
   "Midjourney",
   "Stable Diffusion",
-  "DALL-E",
   "Runway",
   "Sora",
   "ComfyUI",
   "After Effects",
-  "Photoshop",
-];
-
-const socialLinks = [
-  { href: "https://instagram.com", label: "Instagram", icon: Instagram },
-  { href: "https://linkedin.com", label: "LinkedIn", icon: Linkedin },
-  { href: "https://twitter.com", label: "Twitter", icon: Twitter },
+  "Kling AI",
+  "Veo3",
+  "Higgsfield",
 ];
 
 export default function AboutPage() {
@@ -216,7 +218,16 @@ export default function AboutPage() {
               {/* CTA */}
               <div className="space-y-6">
                 <h2 className="text-3xl md:text-4xl font-light text-white">
-                  Let&apos;s create something WOW.
+                  Let&apos;s create something{" "}
+                  <span
+                    className={[
+                      msMadi.className,
+                      "wow-gradient inline-block align-baseline",
+                    ].join(" ")}
+                  >
+                    WOW
+                  </span>
+                  .
                 </h2>
                 <p className="text-white/50 text-base font-light">
                   Available for select projects and collaborations.
@@ -239,7 +250,7 @@ export default function AboutPage() {
                   Connect
                 </h3>
                 <div className="flex md:justify-end items-center gap-6">
-                  {socialLinks.map((social) => (
+                  {SOCIAL_LINKS.map((social) => (
                     <a
                       key={social.label}
                       href={social.href}

@@ -4,9 +4,20 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 
+function safeRedirectPath(input: unknown, fallback: string = '/account'): string {
+  if (typeof input !== 'string') return fallback
+  const trimmed = input.trim()
+  // Only allow internal paths to avoid open redirects.
+  if (!trimmed.startsWith('/')) return fallback
+  if (trimmed.startsWith('//')) return fallback
+  if (trimmed.includes('://')) return fallback
+  return trimmed
+}
+
 export async function login(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const redirectTo = safeRedirectPath(formData.get('redirect'), '/account')
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -26,7 +37,7 @@ export async function login(formData: FormData) {
     redirect('/admin')
   }
 
-  redirect('/account')
+  redirect(redirectTo)
 }
 
 export async function signup(formData: FormData) {
@@ -34,6 +45,7 @@ export async function signup(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const fullName = formData.get('full_name') as string
+  const redirectTo = safeRedirectPath(formData.get('redirect'), '/account')
   
   const supabase = await createClient()
 
@@ -44,7 +56,7 @@ export async function signup(formData: FormData) {
       data: {
         full_name: fullName,
       },
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
     },
   })
 
@@ -56,14 +68,15 @@ export async function signup(formData: FormData) {
   return { success: true, message: 'Check your email to confirm your account.' }
 }
 
-export async function loginWithGoogle(): Promise<void> {
+export async function loginWithGoogle(formData?: FormData): Promise<void> {
   const origin = (await headers()).get('origin')
+  const redirectTo = safeRedirectPath(formData?.get('redirect'), '/account')
   const supabase = await createClient()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
     },
   })
 
@@ -79,3 +92,5 @@ export async function loginWithGoogle(): Promise<void> {
   // Fallback redirect if no URL (shouldn't happen)
   redirect('/login?error=Failed to initiate Google login')
 }
+
+

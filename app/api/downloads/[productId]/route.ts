@@ -13,79 +13,62 @@ export async function GET(
   { params }: { params: Promise<{ productId: string }> }
 ) {
   const { productId } = await params;
-  
-  console.log('📥 Download request for product:', productId);
+  const noStore = "no-store";
   
   // 1. Get authenticated user
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
-    console.log('❌ User not authenticated');
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  
-  console.log('👤 User:', user.id);
-  
-  // 2. Verify user purchased this product using admin client (bypasses RLS for reliable query)
-  // First, check if user has a completed order with this product
-  const { data: orderItems, error: queryError } = await supabaseAdmin
-    .from('order_items')
-    .select(`
-      id,
-      order_id,
-      product_id
-    `)
-    .eq('product_id', productId);
-  
-  if (queryError) {
-    console.error('❌ Error querying order_items:', queryError);
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
-  }
-  
-  console.log('📦 Found order items:', orderItems?.length || 0);
-  
-  // Check if any of these order_items belong to a completed order for this user
-  let hasValidPurchase = false;
-  
-  if (orderItems && orderItems.length > 0) {
-    for (const item of orderItems) {
-      const { data: order } = await supabaseAdmin
-        .from('orders')
-        .select('user_id, status')
-        .eq('id', item.order_id)
-        .single();
-      
-      if (order && order.user_id === user.id && order.status === 'completed') {
-        hasValidPurchase = true;
-        console.log('✅ Valid purchase found, order:', item.order_id);
-        break;
-      }
-    }
-  }
-  
-  if (!hasValidPurchase) {
-    console.log('❌ No valid purchase found');
     return NextResponse.json(
-      { error: 'Product not purchased or order not completed' }, 
-      { status: 403 }
+      { error: 'Unauthorized' },
+      { status: 401, headers: { "Cache-Control": noStore } }
     );
   }
   
-  // 3. Get product file URL
-  const { data: product } = await supabaseAdmin
-    .from('products')
-    .select('file_url, title')
-    .eq('id', productId)
-    .single();
+  // 2. Verify user purchased this product (single join query, no N+1)
+  const { data: purchase, error: purchaseError } = await supabaseAdmin
+    .from('order_items')
+    .select(`
+      id,
+      orders!inner (
+        user_id,
+        status
+      ),
+      products!inner (
+        file_url,
+        title
+      )
+    `)
+    .eq('product_id', productId)
+    .eq('orders.user_id', user.id)
+    .eq('orders.status', 'completed')
+    .limit(1)
+    .maybeSingle();
   
-  const fileUrl = product?.file_url;
-  console.log('📁 File URL:', fileUrl);
+  if (purchaseError) {
+    console.error('Download purchase lookup failed:', purchaseError);
+    return NextResponse.json(
+      { error: 'Database error' },
+      { status: 500, headers: { "Cache-Control": noStore } }
+    );
+  }
+  
+  if (!purchase) {
+    return NextResponse.json(
+      { error: 'Product not purchased or order not completed' }, 
+      { status: 403, headers: { "Cache-Control": noStore } }
+    );
+  }
+  
+  const productsValue = (purchase as unknown as { products?: { file_url?: string | null; title?: string | null } | { file_url?: string | null; title?: string | null }[] }).products;
+  const product = Array.isArray(productsValue) ? productsValue[0] : productsValue;
+  const fileUrl = product?.file_url ?? null;
   
   if (!fileUrl) {
     return NextResponse.json(
       { error: 'No file attached to this product' }, 
-      { status: 404 }
+      { status: 404, headers: { "Cache-Control": noStore } }
     );
   }
   
@@ -99,10 +82,14 @@ export async function GET(
     console.error('Signed URL Error:', error);
     return NextResponse.json(
       { error: 'Failed to generate download link' }, 
-      { status: 500 }
+      { status: 500, headers: { "Cache-Control": noStore } }
     );
   }
   
   // 4. Redirect to signed URL (browser will download)
-  return NextResponse.redirect(signedUrl.signedUrl);
+  const res = NextResponse.redirect(signedUrl.signedUrl);
+  res.headers.set("Cache-Control", noStore);
+  return res;
 }
+
+

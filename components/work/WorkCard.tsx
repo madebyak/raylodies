@@ -4,10 +4,10 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Play } from "lucide-react";
-import { Project } from "@/types/database";
+import { ProjectListItem } from "@/types/database";
 
 interface WorkCardProps {
-  project: Project;
+  project: ProjectListItem;
   index: number;
   featured?: boolean;
 }

@@ -2,6 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
+type PaddleEvent = {
+  event_type?: string;
+  data?: unknown;
+};
+
+type PaddleTransactionData = {
+  id: string;
+  status?: string;
+  customer?: { email?: string | null } | null;
+  items?: Array<{
+    price: {
+      id: string;
+      unit_price: { amount: string };
+    };
+  }>;
+  details?: { totals?: { total?: string | null; currency_code?: string | null } | null } | null;
+  custom_data?: { userId?: string; userEmail?: string | null } | null;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function asTransactionData(value: unknown): PaddleTransactionData | null {
+  if (!isRecord(value)) return null;
+  const id = value['id'];
+  if (typeof id !== 'string') return null;
+  return value as unknown as PaddleTransactionData;
+}
+
 // Use service role for webhooks to bypass RLS
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,76 +39,70 @@ const supabase = createClient(
 );
 
 export async function POST(request: NextRequest) {
-  console.log('🔔 Paddle webhook received');
-  
+  const noStoreHeaders = { "Cache-Control": "no-store" };
   const body = await request.text();
   const signature = request.headers.get('paddle-signature');
   
-  console.log('📝 Signature present:', !!signature);
-  console.log('📝 Body length:', body.length);
-  
   if (!process.env.PADDLE_WEBHOOK_SECRET) {
     console.error('❌ Missing PADDLE_WEBHOOK_SECRET');
-    return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
+    return NextResponse.json({ error: 'Configuration error' }, { status: 500, headers: noStoreHeaders });
   }
 
   // 1. Verify webhook signature
-  if (!verifyPaddleSignature(body, signature!)) {
+  if (!signature) {
+    return NextResponse.json({ error: 'Missing signature' }, { status: 400, headers: noStoreHeaders });
+  }
+  if (!verifyPaddleSignature(body, signature)) {
     console.error('❌ Invalid Paddle signature');
-    console.error('Expected secret starts with:', process.env.PADDLE_WEBHOOK_SECRET?.substring(0, 10));
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401, headers: noStoreHeaders });
   }
   
-  console.log('✅ Signature verified');
-  
-  const event = JSON.parse(body);
-  console.log('📦 Event type:', event.event_type);
-  console.log('📦 Transaction ID:', event.data?.id);
+  let event: PaddleEvent;
+  try {
+    const parsed = JSON.parse(body) as unknown;
+    if (!isRecord(parsed)) {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400, headers: noStoreHeaders });
+    }
+    event = parsed as PaddleEvent;
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400, headers: noStoreHeaders });
+  }
   
   // 2. Handle event types
   try {
+    const data = asTransactionData(event.data);
     switch (event.event_type) {
       case 'transaction.completed':
-        console.log('🎯 Processing transaction.completed');
-        await handleTransactionCompleted(event.data);
+        if (data) await handleTransactionCompleted(data);
         break;
       case 'transaction.updated': 
-        console.log('🎯 Processing transaction.updated, status:', event.data.status);
         // Sometimes status changes to completed in an update
-        if (event.data.status === 'completed') {
-            await handleTransactionCompleted(event.data);
+        if (data?.status === 'completed') {
+          await handleTransactionCompleted(data);
         }
         break;
       default:
-        console.log('⏭️ Ignoring event type:', event.event_type);
+        // Ignore
     }
   } catch (error) {
     console.error('❌ Webhook handler failed:', error);
-    return NextResponse.json({ error: 'Handler failed' }, { status: 500 });
+    return NextResponse.json({ error: 'Handler failed' }, { status: 500, headers: noStoreHeaders });
   }
   
-  console.log('✅ Webhook processed successfully');
-  return NextResponse.json({ received: true });
+  return NextResponse.json({ received: true }, { headers: noStoreHeaders });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleTransactionCompleted(data: Record<string, any>) {
+async function handleTransactionCompleted(data: PaddleTransactionData) {
   const { id, customer, items, details, custom_data } = data;
   
   // Get email from multiple possible sources
   const customerEmail = customer?.email || custom_data?.userEmail || null;
-  
-  console.log('👤 Processing transaction:', id);
-  console.log('👤 Custom data:', JSON.stringify(custom_data));
-  console.log('👤 Customer object:', JSON.stringify(customer));
-  console.log('👤 Customer email (resolved):', customerEmail);
   
   // ✅ CRITICAL: Use userId from customData first, fallback to email matching
   let userId: string | null = null;
   
   // Priority 1: Use the logged-in user ID we passed to Paddle
   if (custom_data?.userId) {
-    console.log('🔍 Looking up user by ID:', custom_data.userId);
     const { data: existingUser, error: userError } = await supabase
       .from('users')
       .select('id')
@@ -90,16 +114,12 @@ async function handleTransactionCompleted(data: Record<string, any>) {
     }
     
     if (existingUser) {
-      console.log('✅ Found user by ID:', existingUser.id);
       userId = existingUser.id;
-    } else {
-      console.log('⚠️ User not found by ID');
     }
   }
   
   // Priority 2: Fallback to email matching
   if (!userId && customerEmail) {
-    console.log('🔍 Looking up user by email:', customerEmail);
     const { data: userByEmail, error: emailError } = await supabase
       .from('users')
       .select('id')
@@ -111,10 +131,9 @@ async function handleTransactionCompleted(data: Record<string, any>) {
     }
     
     if (userByEmail) {
-      console.log('✅ Found user by email:', userByEmail.id);
       userId = userByEmail.id;
     } else {
-        console.warn(`⚠️ No user found for email ${customerEmail}. Order will be orphaned.`);
+      console.warn(`No user found for email ${customerEmail}. Transaction ${id} will be ignored.`);
     }
   }
   
@@ -122,11 +141,6 @@ async function handleTransactionCompleted(data: Record<string, any>) {
     console.error('❌ Failed to identify user for transaction:', id);
     return;
   }
-  
-  console.log('✅ User identified:', userId);
-  
-  // Create order
-  console.log('💰 Creating order with total:', details?.totals?.total);
   
   const { data: order, error: orderError } = await supabase
     .from('orders')
@@ -146,12 +160,8 @@ async function handleTransactionCompleted(data: Record<string, any>) {
       throw orderError;
   }
   
-  console.log('✅ Order created:', order.id);
-  
   // Create order items
-  for (const item of items) {
-    console.log('🛒 Processing item with price_id:', item.price.id);
-    
+  for (const item of items ?? []) {
     // Map Paddle price_id to our product
     const { data: product, error: productError } = await supabase
       .from('products')
@@ -164,25 +174,33 @@ async function handleTransactionCompleted(data: Record<string, any>) {
     }
       
     if (product) {
-      console.log('✅ Found product:', product.title);
-      
-      const { error: itemError } = await supabase.from('order_items').insert({
-        order_id: order.id,
-        product_id: product.id,
-        price: parseFloat(item.price.unit_price.amount) / 100,
-      });
-      
-      if (itemError) {
-        console.error('❌ Failed to create order item:', itemError);
-      } else {
-        console.log('✅ Order item created');
+      // Idempotency: avoid duplicates on webhook retries
+      const { data: existingItem, error: existingError } = await supabase
+        .from('order_items')
+        .select('id')
+        .eq('order_id', order.id)
+        .eq('product_id', product.id)
+        .maybeSingle();
+
+      if (existingError) {
+        console.error('❌ Failed checking existing order item:', existingError);
+      }
+
+      if (!existingItem) {
+        const { error: itemError } = await supabase.from('order_items').insert({
+          order_id: order.id,
+          product_id: product.id,
+          price: parseFloat(item.price.unit_price.amount) / 100,
+        });
+        
+        if (itemError) {
+          console.error('❌ Failed to create order item:', itemError);
+        }
       }
     } else {
       console.warn('⚠️ Product not found for price_id:', item.price.id);
     }
   }
-  
-  console.log('🎉 Transaction processing complete');
 }
 
 function verifyPaddleSignature(payload: string, signature: string): boolean {
@@ -198,6 +216,12 @@ function verifyPaddleSignature(payload: string, signature: string): boolean {
   
   const ts = tsPart.split('=')[1];
   const h1 = h1Part.split('=')[1];
+
+  const tsNum = Number(ts);
+  if (!Number.isFinite(tsNum)) return false;
+  // Basic replay protection: only accept signatures close to "now" (5 minutes).
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  if (Math.abs(nowSeconds - tsNum) > 300) return false;
   
   const signedPayload = `${ts}:${payload}`;
   
@@ -206,5 +230,14 @@ function verifyPaddleSignature(payload: string, signature: string): boolean {
     .update(signedPayload)
     .digest('hex');
   
-  return h1 === expectedHash;
+  try {
+    const expected = Buffer.from(expectedHash, 'hex');
+    const received = Buffer.from(h1, 'hex');
+    if (expected.length !== received.length) return false;
+    return crypto.timingSafeEqual(received, expected);
+  } catch {
+    return false;
+  }
 }
+
+

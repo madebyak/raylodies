@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { User } from "@supabase/supabase-js";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 const baseNavLinks = [
   { href: "/work", label: "Work" },
@@ -15,34 +15,17 @@ const baseNavLinks = [
   { href: "/start-a-project", label: "Start a Project" },
 ];
 
-export default function Header({ user }: { user?: User | null }) {
-  const [currentTime, setCurrentTime] = useState("");
+export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const userLink = user
     ? { href: "/account", label: "Account" }
     : { href: "/login", label: "Sign In" };
 
   const navLinks = [...baseNavLinks, userLink];
-
-  // Update time every second
-  useEffect(() => {
-    const updateTime = () => {
-      const time = new Intl.DateTimeFormat("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-        timeZone: "Asia/Dubai",
-      }).format(new Date());
-      setCurrentTime(time);
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Handle scroll
   useEffect(() => {
@@ -76,12 +59,6 @@ export default function Header({ user }: { user?: User | null }) {
         >
           Raylodies
         </Link>
-
-        {/* Time Display - Hidden on mobile */}
-        <div className="hidden md:flex items-center text-white/60 text-sm font-light">
-          <span>{currentTime}</span>
-          <span className="ml-1">UAE</span>
-        </div>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
@@ -122,11 +99,6 @@ export default function Header({ user }: { user?: User | null }) {
             className="md:hidden bg-black/95 backdrop-blur-md border-b border-white/5 overflow-hidden"
           >
             <div className="px-6 py-6 flex flex-col gap-4">
-              {/* Time Display */}
-              <div className="text-white/40 text-sm font-light pb-4 border-b border-white/10">
-                {currentTime} UAE
-              </div>
-
               {/* Nav Links */}
               {navLinks.map((link, index) => (
                 <motion.div

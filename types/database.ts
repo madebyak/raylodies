@@ -16,11 +16,27 @@ export interface Project {
   is_featured: boolean
   is_published: boolean
   display_order: number
+  meta_title?: string | null
+  meta_description?: string | null
+  og_image?: string | null
   created_at: string
   updated_at: string
   categories?: Category | null
   // For UI convenience
   category?: Category | null 
+}
+
+/**
+ * Lightweight shape for list/grid UIs (public pages).
+ * Avoids fetching unneeded columns.
+ */
+export interface ProjectListItem {
+  id: string
+  title: string
+  slug: string
+  year: string | null
+  thumbnail: string | null
+  categories?: Pick<Category, 'id' | 'name' | 'slug' | 'type'> | null
 }
 
 export interface ProjectMedia {
@@ -44,10 +60,26 @@ export interface Product {
   paddle_product_id: string | null
   paddle_price_id: string | null
   is_published: boolean
+  meta_title?: string | null
+  meta_description?: string | null
+  og_image?: string | null
   created_at: string
   updated_at: string
   category?: Category | null
   categories?: Category | null // For join queries
+}
+
+/**
+ * Lightweight shape for store grid cards.
+ */
+export interface ProductListItem {
+  id: string
+  title: string
+  slug: string
+  price: number
+  thumbnail: string | null
+  categories?: Pick<Category, 'id' | 'name' | 'slug' | 'type'> | null
+  keywords?: string[]
 }
 
 export interface ProductImage {
@@ -56,3 +88,5 @@ export interface ProductImage {
   url: string
   display_order: number
 }
+
+

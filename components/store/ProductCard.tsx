@@ -3,11 +3,11 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { Product } from "@/types/database";
+import { ProductListItem } from "@/types/database";
 import { formatPrice } from "@/lib/utils";
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductListItem;
   index: number;
 }
 

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { normalizeSlug } from '@/lib/slug'
 
 export async function upsertProject(formData: FormData) {
   const supabase = await createClient()
@@ -13,15 +14,13 @@ export async function upsertProject(formData: FormData) {
   const year = formData.get('year') as string
   const is_published = formData.get('is_published') === 'on'
   const is_featured = formData.get('is_featured') === 'on'
+  const meta_title = (formData.get('meta_title') as string) || null
+  const meta_description = (formData.get('meta_description') as string) || null
+  const og_image = (formData.get('og_image') as string) || null
   
   // Auto-generate slug from title if not provided
   let slug = formData.get('slug') as string
-  if (!slug) {
-    slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '')
-  }
+  slug = normalizeSlug(slug || title)
 
   const projectData = {
     title,
@@ -31,6 +30,9 @@ export async function upsertProject(formData: FormData) {
     year,
     is_published,
     is_featured,
+    meta_title,
+    meta_description,
+    og_image,
     updated_at: new Date().toISOString(),
   }
 
@@ -64,3 +66,5 @@ export async function upsertProject(formData: FormData) {
   
   return { success: true, data: result.data }
 }
+
+

@@ -120,3 +120,4 @@ export async function getProductImages(productId: string) {
   console.log(`Fetched ${data?.length || 0} images for product ${productId}`)
   return data as ProductImage[] || []
 }
+

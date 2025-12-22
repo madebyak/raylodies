@@ -142,6 +142,10 @@ CREATE TABLE public.order_items (
 
 ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 
+-- Idempotency for webhooks / purchases: prevent duplicates per order+product
+ALTER TABLE public.order_items
+  ADD CONSTRAINT order_items_order_id_product_id_unique UNIQUE (order_id, product_id);
+
 -- 10. INQUIRIES TABLE
 CREATE TABLE public.inquiries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -166,6 +170,63 @@ CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN (auth.jwt() -> 'app_metadata' ->> 'role') = 'super_admin';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Admin-only aggregated stats for dashboards (used by RPC in the app)
+CREATE OR REPLACE FUNCTION public.get_order_stats()
+RETURNS TABLE (
+  total_revenue NUMERIC,
+  total_orders BIGINT,
+  completed_orders BIGINT
+) AS $$
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'not authorized';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    COALESCE(SUM(o.total) FILTER (WHERE o.status = 'completed'), 0) AS total_revenue,
+    COUNT(*) AS total_orders,
+    COUNT(*) FILTER (WHERE o.status = 'completed') AS completed_orders
+  FROM public.orders o;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Admin-only customer list with aggregated stats (used by RPC in the app)
+CREATE OR REPLACE FUNCTION public.get_customers_with_stats()
+RETURNS TABLE (
+  id UUID,
+  email TEXT,
+  full_name TEXT,
+  avatar_url TEXT,
+  role TEXT,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ,
+  total_orders BIGINT,
+  total_spent NUMERIC
+) AS $$
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'not authorized';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    u.id,
+    u.email,
+    u.full_name,
+    u.avatar_url,
+    u.role,
+    u.created_at,
+    u.updated_at,
+    COALESCE(COUNT(o.id) FILTER (WHERE o.status = 'completed'), 0) AS total_orders,
+    COALESCE(SUM(o.total) FILTER (WHERE o.status = 'completed'), 0) AS total_spent
+  FROM public.users u
+  LEFT JOIN public.orders o ON o.user_id = u.id
+  GROUP BY u.id
+  ORDER BY u.created_at DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

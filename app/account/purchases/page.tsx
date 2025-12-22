@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
 import { Package } from "lucide-react";
 import Image from "next/image";
+import PurchasesAutoRefresh from "@/components/account/PurchasesAutoRefresh";
 
 interface ProductInfo {
   title: string;
@@ -22,7 +23,11 @@ interface OrderRaw {
   order_items: OrderItemRaw[];
 }
 
-export default async function PurchasesPage() {
+export default async function PurchasesPage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -33,7 +38,11 @@ export default async function PurchasesPage() {
   const { data: ordersData } = await supabase
     .from('orders')
     .select(`
-      *,
+      id,
+      created_at,
+      total,
+      status,
+      paddle_transaction_id,
       order_items (
         price,
         products (title, thumbnail)
@@ -58,6 +67,10 @@ export default async function PurchasesPage() {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-light text-white">Purchase History</h2>
+      <PurchasesAutoRefresh
+        enabled={searchParams?.checkout === "success"}
+        orderCount={orders.length}
+      />
 
       {orders.length === 0 ? (
         <div className="bg-[#0a0a0a] border border-white/5 rounded-xl p-12 text-center">
@@ -118,3 +131,5 @@ export default async function PurchasesPage() {
     </div>
   );
 }
+
+

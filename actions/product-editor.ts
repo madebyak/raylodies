@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { syncProductWithPaddle } from '@/lib/paddle/server'
+import { normalizeSlug } from '@/lib/slug'
 
 export async function upsertProduct(formData: FormData) {
   const supabase = await createClient()
@@ -13,15 +14,13 @@ export async function upsertProduct(formData: FormData) {
   const category_id = formData.get('category_id') as string
   const price = parseFloat(formData.get('price') as string)
   const is_published = formData.get('is_published') === 'on'
+  const meta_title = (formData.get('meta_title') as string) || null
+  const meta_description = (formData.get('meta_description') as string) || null
+  const og_image = (formData.get('og_image') as string) || null
   
   // Auto-generate slug from title if not provided
   let slug = formData.get('slug') as string
-  if (!slug) {
-    slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '')
-  }
+  slug = normalizeSlug(slug || title)
 
   // Get existing Paddle IDs if updating
   let existingPaddleProductId: string | null = null
@@ -63,6 +62,9 @@ export async function upsertProduct(formData: FormData) {
     paddle_product_id: paddleResult.paddleProductId || existingPaddleProductId || null,
     paddle_price_id: paddleResult.paddlePriceId || existingPaddlePriceId || null,
     is_published,
+    meta_title,
+    meta_description,
+    og_image,
     updated_at: new Date().toISOString(),
   }
 
@@ -129,3 +131,5 @@ export async function uploadProductFile(productId: string, formData: FormData) {
   revalidatePath(`/admin/products/${productId}`)
   return { success: true }
 }
+
+

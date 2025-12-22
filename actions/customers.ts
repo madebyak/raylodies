@@ -17,6 +17,12 @@ export interface CustomerWithStats {
 
 export const getCustomers = cache(async () => {
   const supabase = await createClient()
+
+  // Prefer DB aggregation (fast at scale). Falls back if the RPC isn't created yet.
+  const { data: rpcRows, error: rpcError } = await supabase.rpc('get_customers_with_stats')
+  if (!rpcError && Array.isArray(rpcRows)) {
+    return rpcRows as CustomerWithStats[]
+  }
   
   // Get all users
   const { data: users, error } = await supabase
@@ -112,3 +118,5 @@ export async function getCustomerStats() {
     newCustomersThisMonth: recentCustomers?.length || 0,
   }
 }
+
+

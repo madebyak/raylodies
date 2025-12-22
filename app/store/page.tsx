@@ -1,8 +1,10 @@
-import { getProducts } from "@/actions/products";
-import ProductGrid from "@/components/store/ProductGrid";
+import { getPublishedProducts } from "@/actions/products";
+import StoreSearch from "@/components/store/StoreSearch";
+
+export const revalidate = 300;
 
 export default async function StorePage() {
-  const products = await getProducts();
+  const products = await getPublishedProducts();
 
   return (
     <section className="px-6 md:px-10 pt-32 pb-20 md:pt-40 md:pb-32">
@@ -21,7 +23,7 @@ export default async function StorePage() {
 
         {/* Product Grid */}
         <div className="animate-fade-up delay-200">
-          <ProductGrid initialProducts={products} />
+          <StoreSearch initialProducts={products} />
         </div>
       </div>
     </section>

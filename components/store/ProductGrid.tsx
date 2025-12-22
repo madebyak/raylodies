@@ -1,9 +1,9 @@
 "use client";
 
 import ProductCard from "./ProductCard";
-import { Product } from "@/types/database";
+import { ProductListItem } from "@/types/database";
 
-export default function ProductGrid({ initialProducts }: { initialProducts: Product[] }) {
+export default function ProductGrid({ initialProducts }: { initialProducts: ProductListItem[] }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
       {initialProducts.length === 0 ? (

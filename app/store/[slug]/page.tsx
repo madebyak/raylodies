@@ -1,16 +1,24 @@
-import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { createPublicClient } from "@/lib/supabase/public";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Check, Download, FileIcon } from "lucide-react";
-import { BuyButton } from "@/components/store/BuyButton";
-import Button from "@/components/ui/Button";
+import { ArrowLeft, FileIcon } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { ProductImage } from "@/types/database";
 import ProductGallery from "@/components/store/ProductGallery";
+import ProductPurchasePanel from "@/components/store/ProductPurchasePanel";
+import JsonLd from "@/components/seo/JsonLd";
+import { absoluteUrl } from "@/lib/seo/site";
+import { normalizeSlug } from "@/lib/slug";
 
-export default async function ProductPage({ params }: { params: { slug: string } }) {
+export const revalidate = 300;
+
+export default async function ProductPage({
+  params,
+}: {
+  params: { slug: string } | Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Fetch product with images
   const { data: product } = await supabase
@@ -29,6 +37,20 @@ export default async function ProductPage({ params }: { params: { slug: string }
     .single();
 
   if (!product) {
+    const normalized = normalizeSlug(slug);
+    if (normalized && normalized !== slug) {
+      const { data: alt } = await supabase
+        .from("products")
+        .select("slug")
+        .eq("slug", normalized)
+        .eq("is_published", true)
+        .maybeSingle();
+
+      if (alt?.slug) {
+        redirect(`/store/${alt.slug}`);
+      }
+    }
+
     notFound();
   }
 
@@ -37,24 +59,48 @@ export default async function ProductPage({ params }: { params: { slug: string }
     (a, b) => a.display_order - b.display_order
   );
 
-  // Check if user has already purchased (if logged in)
-  const { data: { user } } = await supabase.auth.getUser();
-  let hasPurchased = false;
-
-  if (user) {
-    const { data: purchase } = await supabase
-      .from('order_items')
-      .select('id, order:orders!inner(user_id, status)')
-      .eq('product_id', product.id)
-      .eq('order.user_id', user.id)
-      .eq('order.status', 'completed')
-      .single();
-      
-    hasPurchased = !!purchase;
-  }
+  const productUrl = absoluteUrl(`/store/${product.slug}`);
+  const primaryImage =
+    product.og_image ||
+    product.thumbnail ||
+    (images[0]?.url ? images[0].url : undefined);
 
   return (
     <article className="min-h-screen bg-[#050505] pt-32 pb-20 px-6 md:px-10">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+            { "@type": "ListItem", position: 2, name: "Store", item: absoluteUrl("/store") },
+            { "@type": "ListItem", position: 3, name: product.title, item: productUrl },
+          ],
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: product.title,
+          description: product.description || undefined,
+          image: primaryImage ? [primaryImage] : undefined,
+          sku: product.id,
+          url: productUrl,
+          brand: {
+            "@type": "Brand",
+            name: "Raylodies",
+          },
+          offers: {
+            "@type": "Offer",
+            url: productUrl,
+            priceCurrency: "USD",
+            price: product.price,
+            availability: "https://schema.org/InStock",
+            itemCondition: "https://schema.org/NewCondition",
+          },
+        }}
+      />
       <div className="max-w-6xl mx-auto">
         <Link
           href="/store"
@@ -96,36 +142,11 @@ export default async function ProductPage({ params }: { params: { slug: string }
             </div>
 
             <div className="pt-8 border-t border-white/5">
-              {hasPurchased ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-green-400 bg-green-400/10 p-4 rounded-lg">
-                    <Check size={20} />
-                    <span>You own this product</span>
-                  </div>
-                  <Link href="/account/downloads">
-                    <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
-                      <Download size={18} />
-                      Go to Downloads
-                    </Button>
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {product.paddle_price_id ? (
-                    <BuyButton 
-                      priceId={product.paddle_price_id} 
-                      productId={product.id} 
-                    />
-                  ) : (
-                    <Button disabled className="w-full opacity-50 cursor-not-allowed">
-                      Not Available for Purchase
-                    </Button>
-                  )}
-                  <p className="text-center text-xs text-white/30">
-                    Secure payment via Paddle • Instant download
-                  </p>
-                </div>
-              )}
+              <ProductPurchasePanel
+                productId={product.id}
+                productSlug={product.slug}
+                paddlePriceId={product.paddle_price_id}
+              />
             </div>
           </div>
         </div>

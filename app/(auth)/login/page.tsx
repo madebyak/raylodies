@@ -4,15 +4,19 @@ import { login, loginWithGoogle } from '@/actions/auth'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/account'
 
   async function handleSubmit(formData: FormData) {
     setError(null)
     startTransition(async () => {
+      formData.set('redirect', redirectTo)
       const result = await login(formData)
       if (result?.error) {
         setError(result.error)
@@ -29,6 +33,7 @@ export default function LoginPage() {
         </div>
 
         <form action={handleSubmit} className="space-y-6">
+          <input type="hidden" name="redirect" value={redirectTo} />
           <Input
             name="email"
             type="email"
@@ -69,6 +74,7 @@ export default function LoginPage() {
         </div>
 
         <form action={loginWithGoogle}>
+          <input type="hidden" name="redirect" value={redirectTo} />
           <Button
             variant="secondary"
             className="w-full"
@@ -88,3 +94,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+

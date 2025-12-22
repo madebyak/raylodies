@@ -69,3 +69,4 @@ export default function SortableProductImage({ id, item, onRemove }: SortablePro
     </div>
   );
 }
+

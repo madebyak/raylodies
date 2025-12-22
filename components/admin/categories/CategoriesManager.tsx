@@ -347,3 +347,4 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
     </div>
   );
 }
+

@@ -140,6 +140,31 @@ img {
   }
 }
 
+/* About page WOW text treatment */
+.wow-gradient {
+  background: linear-gradient(90deg, #a855f7, #ec4899, #a855f7);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: wowGradient 2.8s linear infinite;
+}
+
+@keyframes wowGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wow-gradient {
+    animation: none;
+  }
+}
+
 /* Focus States */
 *:focus-visible {
   outline: 1px solid var(--color-foreground);

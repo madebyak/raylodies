@@ -122,3 +122,4 @@ export async function getProjectMedia(projectId: string) {
   console.log(`Fetched ${data?.length || 0} media items for project ${projectId}`)
   return data as ProjectMedia[] || []
 }
+

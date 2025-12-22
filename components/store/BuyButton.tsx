@@ -9,9 +9,11 @@ import { ShoppingBag } from 'lucide-react';
 export function BuyButton({ 
   priceId, 
   productId,
+  productSlug,
 }: { 
   priceId: string; 
   productId: string;
+  productSlug: string;
 }) {
   const router = useRouter();
   
@@ -21,7 +23,7 @@ export function BuyButton({
     
     if (!user) {
       // Redirect to login first
-      router.push(`/login?redirect=/store/${productId}`);
+      router.push(`/login?redirect=${encodeURIComponent(`/store/${productSlug}`)}`);
       return;
     }
     
@@ -39,3 +41,5 @@ export function BuyButton({
     </Button>
   );
 }
+
+

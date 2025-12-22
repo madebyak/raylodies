@@ -4,10 +4,10 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { Project } from "@/types/database";
+import { ProjectListItem } from "@/types/database";
 
 interface FeaturedWorkProps {
-  projects: Project[];
+  projects: ProjectListItem[];
 }
 
 export default function FeaturedWork({ projects }: FeaturedWorkProps) {
@@ -43,8 +43,7 @@ export default function FeaturedWork({ projects }: FeaturedWorkProps) {
               Selected Work
             </h2>
             <p className="text-white/40 text-base font-light max-w-md">
-              A curated selection of AI-generated images and videos, showcasing
-              the possibilities of creative AI.
+              Directed visual narratives spanning commercial projects and experimental concepts.
             </p>
           </div>
           <Link

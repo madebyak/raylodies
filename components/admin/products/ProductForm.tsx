@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { upsertProduct } from "@/actions/product-editor";
 import { addProductImage, getProductImages, removeProductImage, reorderProductImages } from "@/actions/product-images";
+import { getProductKeywords, setProductKeywords } from "@/actions/product-keywords";
 import Button from "@/components/ui/Button";
 import Input, { Textarea, Select } from "@/components/ui/Input";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
@@ -40,6 +41,8 @@ export default function ProductForm({
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [imageItems, setImageItems] = useState<ProductImage[]>([]);
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keywordInput, setKeywordInput] = useState("");
   const isNew = !initialData?.id;
 
   const sensors = useSensors(
@@ -56,6 +59,28 @@ export default function ProductForm({
     }
   }, [initialData?.id]);
 
+  // Load keywords on mount
+  useEffect(() => {
+    if (initialData?.id) {
+      getProductKeywords(initialData.id).then(setKeywords);
+    }
+  }, [initialData?.id]);
+
+  function addKeyword(raw: string) {
+    const k = raw.trim().replace(/\s+/g, " ");
+    if (!k) return;
+    setKeywords((prev) => {
+      const lower = new Set(prev.map((x) => x.toLowerCase()));
+      if (lower.has(k.toLowerCase())) return prev;
+      return [...prev, k];
+    });
+    setKeywordInput("");
+  }
+
+  function removeKeyword(k: string) {
+    setKeywords((prev) => prev.filter((x) => x !== k));
+  }
+
   async function handleSubmit(formData: FormData) {
     setIsSaving(true);
     if (initialData?.id) formData.append('id', initialData.id);
@@ -66,6 +91,14 @@ export default function ProductForm({
     if (result.error) {
       toast.error(result.error);
     } else {
+      // Save keywords (existing products only). For new products we redirect, so save on next edit.
+      if (!isNew && result.data?.id) {
+        const kwResult = await setProductKeywords(result.data.id, keywords);
+        if (kwResult.error) {
+          toast.warning(`Product saved, but keywords failed: ${kwResult.error}`);
+        }
+      }
+
       // Show appropriate message based on Paddle sync status
       if (result.paddleSynced) {
         toast.success("Product saved & synced with Paddle");
@@ -180,6 +213,94 @@ export default function ProductForm({
                 label="Description"
                 defaultValue={initialData?.description || ''}
                 rows={6}
+              />
+            </div>
+
+            {/* Keywords */}
+            <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-4">
+              <div className="space-y-1">
+                <h3 className="text-lg font-light text-white">Keywords</h3>
+                <p className="text-sm text-white/40">
+                  Add tags to help customers search products by topic.
+                </p>
+              </div>
+
+              {isNew ? (
+                <div className="text-sm text-white/30">
+                  Save the product first to add keywords.
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-end gap-3">
+                    <div className="flex-1">
+                      <Input
+                        name="keyword_input"
+                        label="Add keyword"
+                        value={keywordInput}
+                        onChange={(e) => setKeywordInput(e.target.value)}
+                        placeholder="e.g. presets, cinematic, sora, runway"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="h-11 px-5"
+                      onClick={() => addKeyword(keywordInput)}
+                    >
+                      Add
+                    </Button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {keywords.length === 0 ? (
+                      <span className="text-xs text-white/30">No keywords yet.</span>
+                    ) : (
+                      keywords.map((k) => (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => removeKeyword(k)}
+                          className="px-3 py-1.5 text-xs text-white/70 border border-white/10 hover:border-white/30 hover:text-white transition-colors"
+                          title="Click to remove"
+                        >
+                          {k}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* SEO */}
+            <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
+              <div className="space-y-1">
+                <h3 className="text-lg font-light text-white">SEO</h3>
+                <p className="text-sm text-white/40">
+                  These fields control Google title/description and social previews for this product page.
+                </p>
+              </div>
+
+              <Input
+                name="meta_title"
+                label="Meta Title"
+                defaultValue={initialData?.meta_title || ''}
+                placeholder="e.g. Cinematic Presets V1 (Digital Download) | Raylodies"
+              />
+
+              <Textarea
+                name="meta_description"
+                label="Meta Description"
+                defaultValue={initialData?.meta_description || ''}
+                rows={3}
+                placeholder="Aim for ~140–160 characters. Clear value + keywords."
+              />
+
+              <Input
+                name="og_image"
+                label="OG Image URL"
+                defaultValue={initialData?.og_image || ''}
+                placeholder="Optional: full image URL for social sharing (1200x630 recommended)"
               />
             </div>
 
@@ -354,3 +475,5 @@ export default function ProductForm({
     </div>
   );
 }
+
+

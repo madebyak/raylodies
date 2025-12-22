@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input, Textarea, Select } from "@/components/ui/Input";
-import { Instagram, Linkedin, Twitter, Send, CheckCircle } from "lucide-react";
+import { Send, CheckCircle } from "lucide-react";
+import { SOCIAL_LINKS } from "@/lib/social";
 
 const projectTypes = [
   { value: "", label: "Select project type" },
@@ -22,12 +23,6 @@ const budgetRanges = [
   { value: "10k-25k", label: "$10,000 - $25,000" },
   { value: "25k-50k", label: "$25,000 - $50,000" },
   { value: "50k-plus", label: "$50,000+" },
-];
-
-const socialLinks = [
-  { href: "https://instagram.com", label: "Instagram", icon: Instagram },
-  { href: "https://linkedin.com", label: "LinkedIn", icon: Linkedin },
-  { href: "https://twitter.com", label: "Twitter", icon: Twitter },
 ];
 
 export default function StartAProjectPage() {
@@ -75,7 +70,7 @@ export default function StartAProjectPage() {
             {/* Header */}
             <div className="space-y-6">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight">
-                Let&apos;s create something remarkable together.
+                Let&apos;s create something remarkable.
               </h1>
               <p className="text-white/50 text-lg font-light max-w-md">
                 Have a project in mind? I&apos;d love to hear about it. Fill out
@@ -98,23 +93,13 @@ export default function StartAProjectPage() {
                 </a>
               </div>
 
-              {/* Location */}
-              <div className="space-y-2">
-                <h3 className="text-white/40 text-sm font-light uppercase tracking-wider">
-                  Location
-                </h3>
-                <p className="text-white text-lg font-light">
-                  Dubai, UAE
-                </p>
-              </div>
-
               {/* Social */}
               <div className="space-y-4">
                 <h3 className="text-white/40 text-sm font-light uppercase tracking-wider">
                   Follow
                 </h3>
                 <div className="flex items-center gap-6">
-                  {socialLinks.map((social) => (
+                  {SOCIAL_LINKS.map((social) => (
                     <a
                       key={social.label}
                       href={social.href}

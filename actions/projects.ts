@@ -3,6 +3,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { cache } from 'react'
+import { createPublicClient } from '@/lib/supabase/public'
+import type { ProjectListItem } from '@/types/database'
+
+type CategoryJoin = { id: string; name: string; slug: string; type: 'project' | 'product' } | { id: string; name: string; slug: string; type: 'project' | 'product' }[] | null
+
+function firstCategory(value: CategoryJoin): ProjectListItem['categories'] {
+  if (!value) return null
+  return Array.isArray(value) ? value[0] ?? null : value
+}
 
 // Memoized version for the same request (React cache)
 // For admin pages - uses authenticated client
@@ -33,12 +42,17 @@ export const getProjects = cache(async () => {
 // Get published projects only (for public pages)
 // Uses the same client but filters for published only
 export const getPublishedProjects = cache(async () => {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   
   const { data: projects, error } = await supabase
     .from('projects')
     .select(`
-      *,
+      id,
+      title,
+      slug,
+      year,
+      thumbnail,
+      display_order,
       categories (
         id,
         name,
@@ -54,7 +68,14 @@ export const getPublishedProjects = cache(async () => {
     return []
   }
 
-  return projects
+  return (projects as unknown as Array<ProjectListItem & { categories: CategoryJoin }>).map((p) => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    year: p.year ?? null,
+    thumbnail: p.thumbnail ?? null,
+    categories: firstCategory(p.categories),
+  })) satisfies ProjectListItem[]
 })
 
 export async function deleteProject(id: string): Promise<void> {
@@ -93,12 +114,17 @@ export async function toggleProjectStatus(id: string, currentStatus: boolean): P
 
 // Get featured projects for homepage
 export const getFeaturedProjects = cache(async (limit: number = 4) => {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   
   const { data: projects, error } = await supabase
     .from('projects')
     .select(`
-      *,
+      id,
+      title,
+      slug,
+      year,
+      thumbnail,
+      display_order,
       categories (
         id,
         name,
@@ -116,5 +142,14 @@ export const getFeaturedProjects = cache(async (limit: number = 4) => {
     return []
   }
 
-  return projects
+  return (projects as unknown as Array<ProjectListItem & { categories: CategoryJoin }>).map((p) => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    year: p.year ?? null,
+    thumbnail: p.thumbnail ?? null,
+    categories: firstCategory(p.categories),
+  })) satisfies ProjectListItem[]
 })
+
+

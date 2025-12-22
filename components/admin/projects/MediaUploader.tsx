@@ -87,3 +87,4 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
     </div>
   );
 }
+

@@ -1,10 +1,15 @@
-import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { createPublicClient } from "@/lib/supabase/public";
+import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { ProjectMedia } from "@/types/database";
+import JsonLd from "@/components/seo/JsonLd";
+import { absoluteUrl } from "@/lib/seo/site";
+import { normalizeSlug } from "@/lib/slug";
+
+export const revalidate = 300;
 
 // Video Player Component
 function VideoPlayer({ url }: { url: string }) {
@@ -19,9 +24,13 @@ function VideoPlayer({ url }: { url: string }) {
   );
 }
 
-export default async function ProjectPage({ params }: { params: { slug: string } }) {
+export default async function ProjectPage({
+  params,
+}: {
+  params: { slug: string } | Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Fetch project with media
   const { data: project } = await supabase
@@ -41,6 +50,20 @@ export default async function ProjectPage({ params }: { params: { slug: string }
     .single();
 
   if (!project) {
+    const normalized = normalizeSlug(slug);
+    if (normalized && normalized !== slug) {
+      const { data: alt } = await supabase
+        .from("projects")
+        .select("slug")
+        .eq("slug", normalized)
+        .eq("is_published", true)
+        .maybeSingle();
+
+      if (alt?.slug) {
+        redirect(`/work/${alt.slug}`);
+      }
+    }
+
     notFound();
   }
 
@@ -49,8 +72,42 @@ export default async function ProjectPage({ params }: { params: { slug: string }
     (a, b) => a.display_order - b.display_order
   );
 
+  const projectUrl = absoluteUrl(`/work/${project.slug}`);
+  const primaryImage = project.og_image || project.thumbnail || undefined;
+
   return (
     <article className="min-h-screen bg-[#050505]">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+            { "@type": "ListItem", position: 2, name: "Work", item: absoluteUrl("/work") },
+            { "@type": "ListItem", position: 3, name: project.title, item: projectUrl },
+          ],
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          name: project.title,
+          description: project.description || undefined,
+          image: primaryImage ? [primaryImage] : undefined,
+          url: projectUrl,
+          dateCreated: project.year ? `${project.year}-01-01` : undefined,
+          creator: {
+            "@type": "Person",
+            name: "Ranya",
+          },
+          publisher: {
+            "@type": "Organization",
+            name: "Raylodies",
+            url: absoluteUrl("/"),
+          },
+        }}
+      />
       {/* Hero Header */}
       <div className="pt-32 pb-12 px-6 md:px-10">
         <div className="max-w-[1800px] mx-auto">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Project } from "@/types/database";
+import { ProjectListItem } from "@/types/database";
 import CategoryFilter from "./CategoryFilter";
 import WorkCard from "./WorkCard";
 
@@ -12,7 +12,7 @@ const categories = [
   { value: "ai-videos", label: "AI Videos" },
 ];
 
-export default function WorkGrid({ initialProjects }: { initialProjects: Project[] }) {
+export default function WorkGrid({ initialProjects }: { initialProjects: ProjectListItem[] }) {
   const [activeCategory, setActiveCategory] = useState("all");
 
   const filteredProjects =

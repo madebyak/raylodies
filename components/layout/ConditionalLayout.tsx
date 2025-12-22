@@ -4,17 +4,15 @@ import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
-import type { User } from "@supabase/supabase-js";
 
 interface ConditionalLayoutProps {
   children: ReactNode;
-  user: User | null;
 }
 
 // Routes that should NOT show the main Header/Footer
 const EXCLUDED_ROUTES = ["/admin"];
 
-export default function ConditionalLayout({ children, user }: ConditionalLayoutProps) {
+export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
   
   // Check if current route should hide the main layout
@@ -28,9 +26,11 @@ export default function ConditionalLayout({ children, user }: ConditionalLayoutP
   // Regular pages - render with Header and Footer
   return (
     <>
-      <Header user={user} />
+      <Header />
       <main className="min-h-screen">{children}</main>
       <Footer />
     </>
   );
 }
+
+

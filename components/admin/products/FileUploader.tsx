@@ -42,7 +42,14 @@ export default function FileUploader({ productId, currentFile }: FileUploaderPro
     maxFiles: 1,
     accept: {
       'application/zip': ['.zip'],
-      'application/x-rar-compressed': ['.rar']
+      'application/x-rar-compressed': ['.rar'],
+      'application/pdf': ['.pdf'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp'],
+      'video/mp4': ['.mp4'],
+      'video/quicktime': ['.mov'],
+      'video/webm': ['.webm'],
     }
   });
 
@@ -66,10 +73,10 @@ export default function FileUploader({ productId, currentFile }: FileUploaderPro
           )}
           <div className="space-y-1">
             <p className="text-sm text-white font-medium">
-              {isUploading ? "Uploading..." : "Upload Digital Product (.zip)"}
+              {isUploading ? "Uploading..." : "Upload Digital File"}
             </p>
             <p className="text-xs text-white/40">
-              Drag & drop or click to browse
+              Drag & drop or click to browse (.zip, .rar, .pdf, images, videos)
             </p>
           </div>
         </div>
@@ -94,3 +101,5 @@ export default function FileUploader({ productId, currentFile }: FileUploaderPro
     </div>
   );
 }
+
+

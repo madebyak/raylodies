@@ -7,11 +7,12 @@ export function cn(...inputs: ClassValue[]) {
 
 // Format price with currency
 export function formatPrice(price: number, currency: string = "USD"): string {
+  const isWholeNumber = Number.isFinite(price) && Math.abs(price - Math.round(price)) < 1e-9;
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: isWholeNumber ? 0 : 2,
+    maximumFractionDigits: 2,
   }).format(price);
 }
 

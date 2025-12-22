@@ -3,7 +3,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Work | Raylodies",
   description:
-    "Explore AI-generated images and videos by Raylodies. A collection pushing the boundaries of digital creativity and artificial intelligence.",
+    "A collection of projects exploring the boundaries of digital creativity and artificial intelligence. A look into how I translate raw data into specific, curated visions.",
 };
 
 export default function WorkLayout({

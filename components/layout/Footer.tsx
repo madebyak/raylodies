@@ -1,13 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Instagram, Linkedin, Twitter } from "lucide-react";
-
-const socialLinks = [
-  { href: "https://instagram.com", label: "Instagram", icon: Instagram },
-  { href: "https://linkedin.com", label: "LinkedIn", icon: Linkedin },
-  { href: "https://twitter.com", label: "Twitter", icon: Twitter },
-];
+import { SOCIAL_LINKS } from "@/lib/social";
 
 const footerLinks = [
   { href: "/work", label: "Work" },
@@ -62,7 +56,7 @@ export default function Footer() {
               Connect
             </h4>
             <div className="flex items-center gap-4">
-              {socialLinks.map((social) => (
+              {SOCIAL_LINKS.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
@@ -84,7 +78,16 @@ export default function Footer() {
             © {currentYear} Raylodies. All rights reserved.
           </p>
           <p className="text-white/30 text-xs font-light">
-            Crafted with AI & Creativity
+            <span>Crafted with AI & Creativity</span>
+            <span className="mx-2 text-white/20">•</span>
+            <a
+              href="https://www.moonswhale.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white/50 transition-colors"
+            >
+              Powered by MoonWhale
+            </a>
           </p>
         </div>
       </div>
