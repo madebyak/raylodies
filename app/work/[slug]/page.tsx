@@ -12,11 +12,12 @@ import { normalizeSlug } from "@/lib/slug";
 export const revalidate = 300;
 
 // Video Player Component
-function VideoPlayer({ url }: { url: string }) {
+function VideoPlayer({ url, poster }: { url: string; poster?: string | null }) {
   return (
     <video
       src={url}
-      className="w-full h-full object-cover"
+      poster={poster || undefined}
+      className="w-full h-full object-contain bg-black"
       controls
       loop
       playsInline
@@ -42,6 +43,9 @@ export default async function ProjectPage({
         id,
         type,
         url,
+        poster_url,
+        width,
+        height,
         display_order
       )
     `)
@@ -147,17 +151,35 @@ export default async function ProjectPage({
               className="relative w-full overflow-hidden rounded-lg bg-white/5"
             >
               {item.type === "video" ? (
-                <div className="aspect-video">
-                  <VideoPlayer url={item.url} />
+                <div
+                  className={`w-full max-h-[80vh] ${
+                    item.width && item.height && item.width < item.height
+                      ? "mx-auto max-w-[560px]"
+                      : ""
+                  }`}
+                  style={
+                    item.width && item.height
+                      ? { aspectRatio: `${item.width} / ${item.height}` }
+                      : undefined
+                  }
+                >
+                  <VideoPlayer
+                    url={item.url}
+                    poster={item.poster_url || project.og_image || project.thumbnail}
+                  />
                 </div>
               ) : (
                 <div className="relative w-full h-auto">
                   <Image
                     src={item.url}
                     alt={project.title}
-                    width={1920}
-                    height={1080}
-                    className="w-full h-auto object-cover"
+                    width={(item.width as number | null) || 1920}
+                    height={(item.height as number | null) || 1080}
+                    className={`w-full h-auto object-cover ${
+                      item.width && item.height && item.width < item.height
+                        ? "mx-auto max-w-[560px]"
+                        : ""
+                    }`}
                     sizes="100vw"
                     priority={item.display_order === 0}
                   />
