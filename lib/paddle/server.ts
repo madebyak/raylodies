@@ -150,6 +150,7 @@ export async function syncProductWithPaddle(
     description?: string
     price: number
     currency?: string
+    updatePrice?: boolean
   }
 ): Promise<{ 
   paddleProductId?: string
@@ -162,7 +163,8 @@ export async function syncProductWithPaddle(
     name, 
     description, 
     price,
-    currency = 'USD' 
+    currency = 'USD',
+    updatePrice = true
   } = options
 
   let paddleProductId = existingPaddleProductId
@@ -186,6 +188,14 @@ export async function syncProductWithPaddle(
 
   // Step 2: Handle price
   // Paddle prices are immutable - if price changes, archive old and create new
+  if (!updatePrice) {
+    // No price change requested; keep existing price id
+    return {
+      paddleProductId: paddleProductId!,
+      paddlePriceId: paddlePriceId || undefined,
+    }
+  }
+
   if (paddlePriceId) {
     // For now, we'll create a new price and archive the old one
     // In production, you might want to check if price actually changed
@@ -208,5 +218,6 @@ export async function syncProductWithPaddle(
     paddlePriceId: paddlePriceId!,
   }
 }
+
 
 

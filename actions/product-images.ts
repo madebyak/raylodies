@@ -4,6 +4,24 @@ import { createClient } from '@/lib/supabase/server'
 import { ProductImage } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
+async function syncProductThumbnailFromFirstImage(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  productId: string
+) {
+  const { data: first } = await supabase
+    .from('product_images')
+    .select('url')
+    .eq('product_id', productId)
+    .order('display_order', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  await supabase
+    .from('products')
+    .update({ thumbnail: first?.url ?? null })
+    .eq('id', productId)
+}
+
 export async function addProductImage(productId: string, url: string) {
   const supabase = await createClient()
 
@@ -43,13 +61,7 @@ export async function addProductImage(productId: string, url: string) {
 
   console.log('Successfully inserted product image:', data)
   
-  // If this is the first image, set it as thumbnail
-  if (nextOrder === 0) {
-    await supabase
-      .from('products')
-      .update({ thumbnail: url })
-      .eq('id', productId)
-  }
+  await syncProductThumbnailFromFirstImage(supabase, productId)
 
   revalidatePath(`/admin/products/${productId}`)
   revalidatePath('/store')
@@ -58,6 +70,7 @@ export async function addProductImage(productId: string, url: string) {
 
 export async function reorderProductImages(items: { id: string; display_order: number }[]) {
   const supabase = await createClient()
+  if (!items || items.length === 0) return
   const productId = (await supabase.from('product_images').select('product_id').eq('id', items[0].id).single()).data?.product_id
 
   // Batch update using Promise.all for better performance
@@ -71,18 +84,7 @@ export async function reorderProductImages(items: { id: string; display_order: n
   )
 
   if (productId) {
-    // Update thumbnail to the first image in the new order
-    const { data: firstImage } = await supabase
-        .from('product_images')
-        .select('url')
-        .eq('product_id', productId)
-        .order('display_order', { ascending: true })
-        .limit(1)
-        .single()
-        
-    if (firstImage) {
-        await supabase.from('products').update({ thumbnail: firstImage.url }).eq('id', productId)
-    }
+    await syncProductThumbnailFromFirstImage(supabase, productId)
   }
 
   revalidatePath('/admin/products')
@@ -92,12 +94,19 @@ export async function reorderProductImages(items: { id: string; display_order: n
 export async function removeProductImage(id: string) {
   const supabase = await createClient()
   
-  const { error } = await supabase
+  const { data: deleted, error } = await supabase
     .from('product_images')
     .delete()
     .eq('id', id)
+    .select('product_id')
+    .maybeSingle()
 
   if (error) throw new Error(error.message)
+
+  if (deleted?.product_id) {
+    await syncProductThumbnailFromFirstImage(supabase, deleted.product_id)
+    revalidatePath(`/admin/products/${deleted.product_id}`)
+  }
   
   revalidatePath('/admin/products')
   revalidatePath('/store')
@@ -120,5 +129,6 @@ export async function getProductImages(productId: string) {
   console.log(`Fetched ${data?.length || 0} images for product ${productId}`)
   return data as ProductImage[] || []
 }
+
 
 

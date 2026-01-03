@@ -4,6 +4,34 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { syncProductWithPaddle } from '@/lib/paddle/server'
 import { normalizeSlug } from '@/lib/slug'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+function getErrorCode(err: unknown): string | null {
+  if (!err || typeof err !== 'object') return null
+  const code = (err as Record<string, unknown>).code
+  return typeof code === 'string' ? code : null
+}
+
+async function generateUniqueProductSlug(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  baseInput: string,
+  excludeId?: string
+) {
+  const base = normalizeSlug(baseInput)
+  if (!base) return ''
+
+  for (let i = 0; i < 50; i++) {
+    const candidate = i === 0 ? base : `${base}-${i + 1}`
+    const q = supabase.from('products').select('id').eq('slug', candidate)
+    const { data, error } = excludeId ? await q.neq('id', excludeId).maybeSingle() : await q.maybeSingle()
+    if (!data) return candidate
+    if (error && getErrorCode(error) !== 'PGRST116') {
+      console.warn('Slug check error:', error)
+    }
+  }
+
+  throw new Error('Failed to generate a unique slug. Please try a different title.')
+}
 
 export async function upsertProduct(formData: FormData) {
   const supabase = await createClient()
@@ -18,9 +46,12 @@ export async function upsertProduct(formData: FormData) {
   const meta_description = (formData.get('meta_description') as string) || null
   const og_image = (formData.get('og_image') as string) || null
   
-  // Auto-generate slug from title if not provided
-  let slug = formData.get('slug') as string
-  slug = normalizeSlug(slug || title)
+  // Slug policy:
+  // - Create: auto-generate from title and ensure uniqueness
+  // - Edit: keep existing slug stable (we no longer expose slug editing in the admin UI)
+  const isEdit = Boolean(id && id !== 'new')
+  let slug = ''
+  let existingDbPrice: number | null = null
 
   // Get existing Paddle IDs if updating
   let existingPaddleProductId: string | null = null
@@ -29,12 +60,17 @@ export async function upsertProduct(formData: FormData) {
   if (id && id !== 'new') {
     const { data: existing } = await supabase
       .from('products')
-      .select('paddle_product_id, paddle_price_id')
+      .select('paddle_product_id, paddle_price_id, slug, price')
       .eq('id', id)
       .single()
     
     existingPaddleProductId = existing?.paddle_product_id || null
     existingPaddlePriceId = existing?.paddle_price_id || null
+    slug = existing?.slug || (await generateUniqueProductSlug(supabase, title, id))
+    existingDbPrice = typeof existing?.price === 'number' ? existing.price : null
+  }
+  if (!isEdit) {
+    slug = await generateUniqueProductSlug(supabase, title)
   }
 
   // Sync with Paddle - create/update product and price
@@ -44,6 +80,7 @@ export async function upsertProduct(formData: FormData) {
     name: title,
     description,
     price,
+    updatePrice: existingDbPrice === null ? true : existingDbPrice !== price,
   })
 
   if (paddleResult.error) {
@@ -103,16 +140,19 @@ export async function upsertProduct(formData: FormData) {
 }
 
 export async function uploadProductFile(productId: string, formData: FormData) {
-  // Use service role for admin operations (uploads to private bucket)
-  // Note: For now we use the regular client but ensure the bucket has correct RLS policies
-  // Ideally, use the admin client from lib/supabase/admin.ts if RLS blocks regular users completely
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = user?.app_metadata?.role === 'super_admin'
+  if (!user || !isAdmin) {
+    return { error: 'Unauthorized' }
+  }
+  const admin = createAdminClient()
   
   const file = formData.get('file') as File
   const fileName = `products/${productId}/${file.name}`
   
   // Upload to private bucket 'product-files'
-  const { error } = await supabase.storage
+  const { error } = await admin.storage
     .from('product-files')
     .upload(fileName, file, {
       upsert: true,

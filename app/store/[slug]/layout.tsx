@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createPublicClient } from "@/lib/supabase/public";
 import { formatPrice } from "@/lib/utils";
 import { normalizeSlug } from "@/lib/slug";
+import { absoluteUrl } from "@/lib/seo/site";
 
 function clampDescription(text: string, max = 160) {
   const t = text.replace(/\s+/g, " ").trim();
@@ -80,7 +81,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     );
 
   const image = product.og_image || product.thumbnail || undefined;
-  const canonical = `/store/${product.slug}`;
+  const canonicalPath = `/store/${product.slug}`;
+  const canonical = absoluteUrl(canonicalPath);
 
   return {
     title,

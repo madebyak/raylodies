@@ -200,13 +200,12 @@ export default function ProductForm({
                 placeholder="e.g. Cinematic Presets V1"
                 required
               />
-              
-              <Input
-                name="slug"
-                label="Slug"
-                defaultValue={initialData?.slug}
-                className="font-mono text-white/60"
-              />
+              <div className="space-y-1">
+                <p className="text-sm text-white/80">URL</p>
+                <p className="text-xs text-white/40 font-mono break-all">
+                  {initialData?.slug ? `/store/${initialData.slug}` : "Auto-generated after save (from title)."}
+                </p>
+              </div>
               
               <Textarea
                 name="description"
