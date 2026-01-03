@@ -6,7 +6,8 @@ import { cache } from 'react'
 import { createPublicClient } from '@/lib/supabase/public'
 import type { ProjectListItem } from '@/types/database'
 
-type CategoryJoin = { id: string; name: string; slug: string; type: 'project' | 'product' } | { id: string; name: string; slug: string; type: 'project' | 'product' }[] | null
+type CategoryRow = { id: string; name: string; slug: string; type: 'project' | 'product' }
+type CategoryJoin = CategoryRow | CategoryRow[] | null
 
 function firstCategory(value: CategoryJoin): ProjectListItem['categories'] {
   if (!value) return null
@@ -52,6 +53,8 @@ export const getPublishedProjects = cache(async () => {
       slug,
       year,
       thumbnail,
+      thumbnail_width,
+      thumbnail_height,
       display_order,
       categories (
         id,
@@ -68,12 +71,16 @@ export const getPublishedProjects = cache(async () => {
     return []
   }
 
-  return (projects as unknown as Array<ProjectListItem & { categories: CategoryJoin }>).map((p) => ({
+  type ProjectRow = ProjectListItem & { categories: CategoryJoin; thumbnail_width?: number | null; thumbnail_height?: number | null }
+
+  return (projects as unknown as ProjectRow[]).map((p) => ({
     id: p.id,
     title: p.title,
     slug: p.slug,
     year: p.year ?? null,
     thumbnail: p.thumbnail ?? null,
+    thumbnail_width: p.thumbnail_width ?? null,
+    thumbnail_height: p.thumbnail_height ?? null,
     categories: firstCategory(p.categories),
   })) satisfies ProjectListItem[]
 })
@@ -93,6 +100,7 @@ export async function deleteProject(id: string): Promise<void> {
 
   revalidatePath('/admin/projects')
   revalidatePath('/work')
+  revalidatePath('/')
 }
 
 export async function toggleProjectStatus(id: string, currentStatus: boolean): Promise<void> {
@@ -110,6 +118,7 @@ export async function toggleProjectStatus(id: string, currentStatus: boolean): P
 
   revalidatePath('/admin/projects')
   revalidatePath('/work')
+  revalidatePath('/')
 }
 
 // Get featured projects for homepage
@@ -124,6 +133,8 @@ export const getFeaturedProjects = cache(async (limit: number = 4) => {
       slug,
       year,
       thumbnail,
+      thumbnail_width,
+      thumbnail_height,
       display_order,
       categories (
         id,
@@ -142,12 +153,16 @@ export const getFeaturedProjects = cache(async (limit: number = 4) => {
     return []
   }
 
-  return (projects as unknown as Array<ProjectListItem & { categories: CategoryJoin }>).map((p) => ({
+  type ProjectRow = ProjectListItem & { categories: CategoryJoin; thumbnail_width?: number | null; thumbnail_height?: number | null }
+
+  return (projects as unknown as ProjectRow[]).map((p) => ({
     id: p.id,
     title: p.title,
     slug: p.slug,
     year: p.year ?? null,
     thumbnail: p.thumbnail ?? null,
+    thumbnail_width: p.thumbnail_width ?? null,
+    thumbnail_height: p.thumbnail_height ?? null,
     categories: firstCategory(p.categories),
   })) satisfies ProjectListItem[]
 })

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createPublicClient } from "@/lib/supabase/public";
 import { normalizeSlug } from "@/lib/slug";
+import { absoluteUrl } from "@/lib/seo/site";
 
 function clampDescription(text: string, max = 160) {
   const t = text.replace(/\s+/g, " ").trim();
@@ -75,7 +76,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     clampDescription(project.description || "AI-generated work by Raylodies.");
 
   const image = project.og_image || project.thumbnail || undefined;
-  const canonical = `/work/${project.slug}`;
+  const canonicalPath = `/work/${project.slug}`;
+  const canonical = absoluteUrl(canonicalPath);
 
   return {
     title,

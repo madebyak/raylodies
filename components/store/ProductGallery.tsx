@@ -75,3 +75,4 @@ export default function ProductGallery({ images, thumbnail, title }: ProductGall
   );
 }
 
+

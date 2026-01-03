@@ -9,13 +9,16 @@ import { ProjectListItem } from "@/types/database";
 interface WorkCardProps {
   project: ProjectListItem;
   index: number;
-  featured?: boolean;
 }
 
-export default function WorkCard({ project, index, featured = false }: WorkCardProps) {
+export default function WorkCard({ project, index }: WorkCardProps) {
   // Determine if it's a video based on category or media type
   // For now, simple check on category slug
   const isVideo = project.categories?.slug === "ai-videos";
+  const fallbackW = 1200;
+  const fallbackH = 675;
+  const w = project.thumbnail_width ?? fallbackW;
+  const h = project.thumbnail_height ?? fallbackH;
 
   return (
     <motion.div
@@ -27,22 +30,20 @@ export default function WorkCard({ project, index, featured = false }: WorkCardP
         delay: index * 0.1,
         ease: [0.16, 1, 0.3, 1],
       }}
+      className="[break-inside:avoid] mb-6 md:mb-8"
     >
       <Link href={`/work/${project.slug}`} className="group block">
         <article className="space-y-4">
           {/* Image Container */}
-          <div
-            className={`relative overflow-hidden bg-white/5 ${
-              featured ? "aspect-[21/9]" : "aspect-video"
-            }`}
-          >
+          <div className="relative overflow-hidden bg-white/5">
             {project.thumbnail ? (
               <Image
                 src={project.thumbnail}
                 alt={project.title}
-                fill
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                sizes={featured ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
+                width={w}
+                height={h}
+                className="w-full h-auto object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             ) : (
               <div className="absolute inset-0 bg-white/5 flex items-center justify-center text-white/20">

@@ -88,3 +88,4 @@ export default function InquiryActions({ inquiry }: { inquiry: Inquiry }) {
   );
 }
 
+

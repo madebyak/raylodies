@@ -13,6 +13,8 @@ export interface Project {
   category_id: string | null
   year: string | null
   thumbnail: string | null
+  thumbnail_width?: number | null
+  thumbnail_height?: number | null
   is_featured: boolean
   is_published: boolean
   display_order: number
@@ -36,6 +38,8 @@ export interface ProjectListItem {
   slug: string
   year: string | null
   thumbnail: string | null
+  thumbnail_width?: number | null
+  thumbnail_height?: number | null
   categories?: Pick<Category, 'id' | 'name' | 'slug' | 'type'> | null
 }
 
@@ -44,6 +48,9 @@ export interface ProjectMedia {
   project_id: string
   type: 'image' | 'video'
   url: string
+  width?: number | null
+  height?: number | null
+  poster_url?: string | null
   video_provider?: 'supabase' | 'mux' | 'youtube' | 'vimeo' | 'cloudflare' | null
   display_order: number
 }

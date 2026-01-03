@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { upsertProject } from "@/actions/project-editor";
 import { addProjectMedia, getProjectMedia, removeProjectMedia, reorderProjectMedia } from "@/actions/media";
+import { deleteProject } from "@/actions/projects";
 import Button from "@/components/ui/Button";
 import Input, { Textarea, Select } from "@/components/ui/Input";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
@@ -15,7 +16,7 @@ import { Project, Category, ProjectMedia } from "@/types/database";
 
 import {
   DndContext,
-  closestCenter,
+  rectIntersection,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -40,6 +41,7 @@ export default function ProjectForm({
   const [isSaving, setIsSaving] = useState(false);
   const [mediaItems, setMediaItems] = useState<ProjectMedia[]>([]);
   const isNew = !initialData?.id;
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -74,10 +76,14 @@ export default function ProjectForm({
     }
   }
 
-  async function handleMediaUpload(url: string, type: 'image' | 'video') {
+  async function handleMediaUpload(
+    url: string,
+    type: 'image' | 'video',
+    meta?: { width?: number | null; height?: number | null; poster_url?: string | null }
+  ) {
     if (!initialData?.id) return;
     try {
-        const newItem = await addProjectMedia(initialData.id, url, type);
+        const newItem = await addProjectMedia(initialData.id, url, type, meta);
         setMediaItems(prev => [...prev, newItem]);
         toast.success("Media added");
     } catch {
@@ -97,11 +103,13 @@ export default function ProjectForm({
 
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    if (!over) return;
 
     if (active.id !== over?.id) {
       setMediaItems((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over?.id);
+        if (oldIndex === -1 || newIndex === -1) return items;
         
         const newItems = arrayMove(items, oldIndex, newIndex);
         
@@ -113,6 +121,24 @@ export default function ProjectForm({
 
         return newItems;
       });
+    }
+  }
+
+  async function handleDeleteProject() {
+    if (!initialData?.id) return;
+    const ok = window.confirm("Delete this project? This cannot be undone.");
+    if (!ok) return;
+    setIsDeleting(true);
+    try {
+      await deleteProject(initialData.id);
+      toast.success("Project deleted");
+      router.push("/admin/projects");
+      router.refresh();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      toast.error(`Failed to delete project: ${msg}`);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -149,7 +175,12 @@ export default function ProjectForm({
             <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
               <h3 className="text-lg font-light text-white mb-4">Basic Information</h3>
               <Input name="title" label="Project Title" defaultValue={initialData?.title} required />
-              <Input name="slug" label="Slug (URL)" defaultValue={initialData?.slug} className="font-mono text-white/60" />
+              <div className="space-y-1">
+                <p className="text-sm text-white/80">URL</p>
+                <p className="text-xs text-white/40 font-mono break-all">
+                  {initialData?.slug ? `/work/${initialData.slug}` : "Auto-generated after save (from title)."}
+                </p>
+              </div>
               <Textarea name="description" label="Description" defaultValue={initialData?.description || ''} rows={6} />
             </div>
 
@@ -188,7 +219,7 @@ export default function ProjectForm({
             <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-light text-white">Media Gallery</h3>
-                {!isNew && <span className="text-xs text-white/40">Drag to reorder • First image = thumbnail</span>}
+                {!isNew && <span className="text-xs text-white/40">Drag to reorder • First item = thumbnail</span>}
               </div>
               
               {isNew ? (
@@ -213,7 +244,7 @@ export default function ProjectForm({
                   
                   <DndContext 
                     sensors={sensors} 
-                    collisionDetection={closestCenter} 
+                    collisionDetection={rectIntersection} 
                     onDragEnd={handleDragEnd}
                   >
                     <SortableContext items={mediaItems.map(i => i.id)} strategy={rectSortingStrategy}>
@@ -273,6 +304,17 @@ export default function ProjectForm({
                 {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                 {isSaving ? 'Saving...' : 'Save Project'}
               </Button>
+              {!isNew && initialData?.id && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full mt-3"
+                  onClick={handleDeleteProject}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete Project"}
+                </Button>
+              )}
               {isNew && <p className="text-xs text-white/40 text-center mt-4">Save first to upload media</p>}
             </div>
           </div>

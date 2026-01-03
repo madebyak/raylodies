@@ -37,15 +37,10 @@ export default function WorkGrid({ initialProjects }: { initialProjects: Project
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"
+          className="columns-1 md:columns-2 lg:columns-3 2xl:columns-4 [column-gap:1.5rem] md:[column-gap:2rem]"
         >
           {filteredProjects.map((project, index) => (
-            <WorkCard
-              key={project.id}
-              project={project}
-              index={index}
-              featured={index === 0 && activeCategory === "all"}
-            />
+            <WorkCard key={project.id} project={project} index={index} />
           ))}
         </motion.div>
       </AnimatePresence>
