@@ -10,6 +10,12 @@ const footerLinks = [
   { href: "/start-a-project", label: "Start a Project" },
 ];
 
+const legalLinks = [
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/refund", label: "Refunds" },
+];
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -17,7 +23,7 @@ export default function Footer() {
     <footer className="border-t border-white/5 bg-black">
       <div className="max-w-[1800px] mx-auto px-6 md:px-10">
         {/* Main Footer Content */}
-        <div className="py-12 md:py-16 grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="py-12 md:py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="space-y-4">
             <Link
@@ -69,6 +75,24 @@ export default function Footer() {
                 </a>
               ))}
             </div>
+          </div>
+
+          {/* Legal */}
+          <div className="space-y-4">
+            <h4 className="text-white/60 text-sm font-light uppercase tracking-wider">
+              Legal
+            </h4>
+            <nav className="flex flex-col gap-2">
+              {legalLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-white/40 text-sm font-light hover:text-white transition-colors duration-300 w-fit"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </div>
         </div>
 

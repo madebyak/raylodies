@@ -91,7 +91,24 @@ export default function ProductPurchasePanel({
   ) : (
     <div className="space-y-4">
       {paddlePriceId ? (
-        <BuyButton priceId={paddlePriceId} productId={productId} productSlug={productSlug} />
+        <>
+          <BuyButton priceId={paddlePriceId} productId={productId} productSlug={productSlug} />
+          <p className="text-center text-[11px] text-white/40 leading-relaxed">
+            By purchasing, you agree to our{" "}
+            <Link href="/terms" className="text-white/70 hover:text-white transition-colors">
+              Terms
+            </Link>
+            ,{" "}
+            <Link href="/privacy" className="text-white/70 hover:text-white transition-colors">
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link href="/refund" className="text-white/70 hover:text-white transition-colors">
+              Refund Policy
+            </Link>
+            .
+          </p>
+        </>
       ) : (
         <Button disabled className="w-full opacity-50 cursor-not-allowed">
           Not Available for Purchase
