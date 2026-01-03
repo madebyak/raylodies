@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import LegalPageLayout from "@/components/legal/LegalPageLayout";
 
 export const metadata: Metadata = {
   title: "Terms of Service | Raylodies",
@@ -7,27 +8,49 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
-  return (
-    <section className="px-6 md:px-10 pt-32 pb-20 md:pt-40 md:pb-32">
-      <div className="max-w-[900px] mx-auto">
-        <header className="mb-10 md:mb-14">
-          <h1 className="text-3xl md:text-4xl font-light text-white mb-3">
-            Terms of Service
-          </h1>
-          <p className="text-white/50 text-sm font-light">
-            Effective Date: <span className="text-white/70">22 December 2025</span>
-            <span className="mx-2 text-white/20">•</span>
-            Support:{" "}
-            <a
-              href="mailto:hello@raylodies.com"
-              className="text-white/70 hover:text-white transition-colors"
-            >
-              hello@raylodies.com
-            </a>
-          </p>
-        </header>
+  const toc = [
+    { href: "#general", label: "General Conditions" },
+    { href: "#payments", label: "Payments (Paddle)" },
+    { href: "#delivery", label: "Delivery & Access" },
+    { href: "#product-info", label: "Product Information" },
+    { href: "#changes", label: "Changes to Products & Prices" },
+    { href: "#licensing", label: "Licensing" },
+    { href: "#ip", label: "Intellectual Property" },
+    { href: "#conduct", label: "User Conduct" },
+    { href: "#liability", label: "Limitation of Liability" },
+    { href: "#indemnification", label: "Indemnification" },
+    { href: "#law", label: "Governing Law" },
+    { href: "#updates", label: "Changes to Terms" },
+    { href: "#agreement", label: "Entire Agreement" },
+  ];
 
-        <div className="prose prose-invert prose-sm md:prose-base max-w-none prose-headings:font-light prose-headings:text-white prose-p:text-white/70 prose-li:text-white/70 prose-strong:text-white">
+  return (
+    <LegalPageLayout
+      title="Terms of Service"
+      meta={
+        <>
+          Effective Date: <span className="text-white/70">22 December 2025</span>
+          <span className="mx-2 text-white/20">•</span>
+          Support:{" "}
+          <a
+            href="mailto:hello@raylodies.com"
+            className="text-white/70 hover:text-white transition-colors"
+          >
+            hello@raylodies.com
+          </a>
+        </>
+      }
+      toc={toc}
+    >
+      <div className="prose prose-invert prose-sm md:prose-base max-w-none
+        prose-headings:font-light prose-headings:text-white prose-headings:scroll-mt-28
+        prose-h2:text-2xl md:prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-3 prose-h2:border-b prose-h2:border-white/10
+        prose-h3:text-lg md:prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+        prose-p:text-white/70 prose-p:leading-7 prose-p:my-4
+        prose-li:text-white/70 prose-li:my-1
+        prose-a:text-white/80 hover:prose-a:text-white prose-a:underline prose-a:decoration-white/20 hover:prose-a:decoration-white/60
+        prose-strong:text-white prose-strong:font-medium
+        prose-hr:my-12 prose-hr:border-white/10">
           <p>
             These Terms of Service (“Terms”) govern your access to and use of the Raylodies website
             and any purchase or use of our digital products, downloads, and related services
@@ -39,7 +62,7 @@ export default function TermsPage() {
             do not agree, do not use the Service.
           </p>
 
-          <h2>1. General Conditions</h2>
+          <h2 id="general">1. General Conditions</h2>
           <h3>1.1 Eligibility</h3>
           <p>
             You must be able to form a legally binding contract in your jurisdiction to use the
@@ -57,7 +80,7 @@ export default function TermsPage() {
             Service means you accept any posted updates.
           </p>
 
-          <h2>2. Merchant of Record &amp; Payments</h2>
+          <h2 id="payments">2. Merchant of Record &amp; Payments</h2>
           <h3>2.1 Merchant of Record</h3>
           <p>
             Checkout is handled by Paddle.com (“Paddle”), which acts as the Merchant of Record for
@@ -76,7 +99,7 @@ export default function TermsPage() {
             <a href="mailto:hello@raylodies.com">hello@raylodies.com</a>.
           </p>
 
-          <h2>3. Digital Products, Delivery &amp; Access</h2>
+          <h2 id="delivery">3. Digital Products, Delivery &amp; Access</h2>
           <h3>3.1 Digital Products</h3>
           <p>
             Our products are digital goods (e.g., prompts, digital prints, mockups, blueprints,
@@ -94,21 +117,21 @@ export default function TermsPage() {
             software, outdated versions, or user error.
           </p>
 
-          <h2>4. Product Information &amp; Availability</h2>
+          <h2 id="product-info">4. Product Information &amp; Availability</h2>
           <p>
             We aim to display products accurately. However, previews are illustrative and may vary
             by device, software, or AI model behaviour (where relevant). We do not guarantee that
             product descriptions, previews, or any site content are error-free.
           </p>
 
-          <h2>5. Modifications to Products &amp; Prices</h2>
+          <h2 id="changes">5. Modifications to Products &amp; Prices</h2>
           <p>
             Prices and product contents may change at any time. We may modify or discontinue
             products without notice. Where required by law, changes will not affect orders already
             completed.
           </p>
 
-          <h2>6. Licensing Terms</h2>
+          <h2 id="licensing">6. Licensing Terms</h2>
           <p>
             These licensing terms explain what you may and may not do with what you purchase.
           </p>
@@ -262,14 +285,14 @@ export default function TermsPage() {
             to that product. If there is a conflict, the product-specific terms control.
           </p>
 
-          <h2>7. Intellectual Property</h2>
+          <h2 id="ip">7. Intellectual Property</h2>
           <p>
             All site content and Licensed Content are owned by Raylodies or its licensors and
             protected by applicable intellectual property laws. Except for the licence granted
             above, no rights are granted.
           </p>
 
-          <h2>8. User Conduct</h2>
+          <h2 id="conduct">8. User Conduct</h2>
           <p>You agree not to misuse the Service, including attempting to:</p>
           <ul>
             <li>bypass payment mechanisms,</li>
@@ -279,7 +302,7 @@ export default function TermsPage() {
             <li>violate third-party rights or applicable laws.</li>
           </ul>
 
-          <h2>9. Limitation of Liability</h2>
+          <h2 id="liability">9. Limitation of Liability</h2>
           <p>
             To the maximum extent permitted by law, Raylodies (including its employees, contractors,
             affiliates, licensors, and service providers) will not be liable for any indirect,
@@ -291,7 +314,7 @@ export default function TermsPage() {
             specific product giving rise to the claim (or the minimum required by law, if higher).
           </p>
 
-          <h2>10. Indemnification</h2>
+          <h2 id="indemnification">10. Indemnification</h2>
           <p>
             You agree to indemnify and hold harmless Raylodies and its affiliates, officers,
             directors, employees, and agents from claims, liabilities, damages, and expenses
@@ -299,20 +322,20 @@ export default function TermsPage() {
             the Service.
           </p>
 
-          <h2>11. Governing Law</h2>
+          <h2 id="law">11. Governing Law</h2>
           <p>
             These Terms are governed by the laws of the United States of America, without regard to
             conflict of law principles, except that payment disputes may be handled through
             Paddle’s processes as Merchant of Record.
           </p>
 
-          <h2>12. Changes to These Terms</h2>
+          <h2 id="updates">12. Changes to These Terms</h2>
           <p>
             We may update these Terms from time to time. Updates will be posted with a new
             Effective Date. Continued use after changes means you accept the updated Terms.
           </p>
 
-          <h2>13. Severability &amp; Entire Agreement</h2>
+          <h2 id="agreement">13. Severability &amp; Entire Agreement</h2>
           <p>
             If any part of these Terms is found unenforceable, the remainder remains in effect.
             These Terms and the policies referenced form the entire agreement regarding the
@@ -325,8 +348,7 @@ export default function TermsPage() {
             <Link href="/refund">Refund Policy</Link>.
           </p>
         </div>
-      </div>
-    </section>
+    </LegalPageLayout>
   );
 }
 

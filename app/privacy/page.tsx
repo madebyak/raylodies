@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import LegalPageLayout from "@/components/legal/LegalPageLayout";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Raylodies",
@@ -7,33 +8,51 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
-  return (
-    <section className="px-6 md:px-10 pt-32 pb-20 md:pt-40 md:pb-32">
-      <div className="max-w-[900px] mx-auto">
-        <header className="mb-10 md:mb-14">
-          <h1 className="text-3xl md:text-4xl font-light text-white mb-3">
-            Privacy Policy
-          </h1>
-          <p className="text-white/50 text-sm font-light">
-            Effective Date: <span className="text-white/70">22 December 2025</span>
-            <span className="mx-2 text-white/20">•</span>
-            Contact:{" "}
-            <a
-              href="mailto:hello@raylodies.com"
-              className="text-white/70 hover:text-white transition-colors"
-            >
-              hello@raylodies.com
-            </a>
-          </p>
-        </header>
+  const toc = [
+    { href: "#info", label: "Information We Collect" },
+    { href: "#use", label: "How We Use Information" },
+    { href: "#payments", label: "Payments" },
+    { href: "#cookies", label: "Cookies & Analytics" },
+    { href: "#sharing", label: "Sharing" },
+    { href: "#retention", label: "Data Retention" },
+    { href: "#security", label: "Security" },
+    { href: "#rights", label: "Your Rights" },
+    { href: "#transfers", label: "International Transfers" },
+    { href: "#changes", label: "Changes" },
+  ];
 
-        <div className="prose prose-invert prose-sm md:prose-base max-w-none prose-headings:font-light prose-headings:text-white prose-p:text-white/70 prose-li:text-white/70 prose-strong:text-white">
+  return (
+    <LegalPageLayout
+      title="Privacy Policy"
+      meta={
+        <>
+          Effective Date: <span className="text-white/70">22 December 2025</span>
+          <span className="mx-2 text-white/20">•</span>
+          Contact:{" "}
+          <a
+            href="mailto:hello@raylodies.com"
+            className="text-white/70 hover:text-white transition-colors"
+          >
+            hello@raylodies.com
+          </a>
+        </>
+      }
+      toc={toc}
+    >
+      <div className="prose prose-invert prose-sm md:prose-base max-w-none
+        prose-headings:font-light prose-headings:text-white prose-headings:scroll-mt-28
+        prose-h2:text-2xl md:prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-3 prose-h2:border-b prose-h2:border-white/10
+        prose-p:text-white/70 prose-p:leading-7 prose-p:my-4
+        prose-li:text-white/70 prose-li:my-1
+        prose-a:text-white/80 hover:prose-a:text-white prose-a:underline prose-a:decoration-white/20 hover:prose-a:decoration-white/60
+        prose-strong:text-white prose-strong:font-medium
+        prose-hr:my-12 prose-hr:border-white/10">
           <p>
             This Privacy Policy describes how we collect, use, and share personal information when
             you visit or purchase from our website.
           </p>
 
-          <h2>1. Information We Collect</h2>
+          <h2 id="info">1. Information We Collect</h2>
           <ul>
             <li>
               <strong>Device Information</strong>: browser type, IP address, time zone, cookies, and
@@ -48,7 +67,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
-          <h2>2. How We Use Information</h2>
+          <h2 id="use">2. How We Use Information</h2>
           <p>We use information to:</p>
           <ul>
             <li>deliver products and provide access,</li>
@@ -58,19 +77,19 @@ export default function PrivacyPage() {
             <li>comply with legal/accounting obligations.</li>
           </ul>
 
-          <h2>3. Payments</h2>
+          <h2 id="payments">3. Payments</h2>
           <p>
             Purchases are processed by Paddle as Merchant of Record. Paddle processes payment and
             billing data under its own privacy policy. We do not store full payment card details.
           </p>
 
-          <h2>4. Cookies &amp; Analytics</h2>
+          <h2 id="cookies">4. Cookies &amp; Analytics</h2>
           <p>
             We may use cookies and similar technologies for functionality and analytics. You can
             manage cookies through your browser settings.
           </p>
 
-          <h2>5. Sharing</h2>
+          <h2 id="sharing">5. Sharing</h2>
           <p>We share information only as needed with:</p>
           <ul>
             <li>Paddle (payments/tax/invoicing),</li>
@@ -79,31 +98,31 @@ export default function PrivacyPage() {
           </ul>
           <p>We do not sell your personal information.</p>
 
-          <h2>6. Data Retention</h2>
+          <h2 id="retention">6. Data Retention</h2>
           <p>
             We retain order and support records as required for business, accounting, and legal
             compliance, then delete or anonymise when no longer needed.
           </p>
 
-          <h2>7. Security</h2>
+          <h2 id="security">7. Security</h2>
           <p>
             We use reasonable technical and organisational safeguards, but no system is 100% secure.
           </p>
 
-          <h2>8. Your Rights</h2>
+          <h2 id="rights">8. Your Rights</h2>
           <p>
             Depending on your location, you may have rights to access, correct, or delete your
             personal information. Contact us at <a href="mailto:hello@raylodies.com">hello@raylodies.com</a>.
           </p>
 
-          <h2>9. International Transfers</h2>
+          <h2 id="transfers">9. International Transfers</h2>
           <p>
             Your information may be processed outside your country depending on Paddle and our
             service providers. We take steps intended to ensure appropriate safeguards where
             required.
           </p>
 
-          <h2>10. Changes</h2>
+          <h2 id="changes">10. Changes</h2>
           <p>
             We may update this policy and will post changes with a new Effective Date.
           </p>
@@ -114,8 +133,7 @@ export default function PrivacyPage() {
             <Link href="/refund">Refund Policy</Link>.
           </p>
         </div>
-      </div>
-    </section>
+    </LegalPageLayout>
   );
 }
 
