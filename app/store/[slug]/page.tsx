@@ -101,7 +101,7 @@ export default async function ProductPage({
           },
         }}
       />
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-[1800px] mx-auto">
         <Link
           href="/store"
           className="inline-flex items-center gap-2 text-white/40 hover:text-white mb-8 transition-colors text-sm"
@@ -110,18 +110,20 @@ export default async function ProductPage({
           Back to Store
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
           {/* Left: Image Gallery */}
-          <ProductGallery 
-            images={images} 
-            thumbnail={product.thumbnail} 
-            title={product.title} 
-          />
+          <div className="lg:col-span-7">
+            <ProductGallery 
+              images={images} 
+              thumbnail={product.thumbnail} 
+              title={product.title} 
+            />
+          </div>
 
           {/* Right: Product Info */}
-          <div className="space-y-8">
+          <div className="space-y-8 lg:col-span-5">
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-sm text-white/40">
+              <div className="flex items-center gap-3 text-sm text-white/60">
                 <span className="uppercase tracking-wider">{product.categories?.name}</span>
                 {product.file_url && (
                   <span className="flex items-center gap-1 text-green-400/80 bg-green-400/10 px-2 py-0.5 rounded">
@@ -137,7 +139,7 @@ export default async function ProductPage({
               </p>
             </div>
 
-            <div className="prose prose-invert prose-sm text-white/60 font-light leading-relaxed max-w-none">
+            <div className="prose prose-invert prose-sm text-white/70 font-light leading-relaxed max-w-none">
               <p className="whitespace-pre-wrap">{product.description}</p>
             </div>
 

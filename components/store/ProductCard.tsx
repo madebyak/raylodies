@@ -64,7 +64,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             <h3 className="text-white text-base font-light group-hover:text-white/80 transition-colors duration-300 line-clamp-1">
               {product.title}
             </h3>
-            <p className="text-white/60 text-lg font-light">
+            <p className="text-white text-lg font-light">
               {formatPrice(product.price)}
             </p>
           </div>
