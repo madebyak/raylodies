@@ -8,7 +8,12 @@
 
 -- Allow admins to upload product files to the private bucket.
 -- (We use unique paths, so INSERT is sufficient; no UPDATE policy needed.)
-CREATE POLICY IF NOT EXISTS "Admin Upload Private (product-files)"
+--
+-- Note: Postgres does NOT support `CREATE POLICY IF NOT EXISTS`.
+-- Use DROP ... IF EXISTS to make this script re-runnable.
+DROP POLICY IF EXISTS "Admin Upload Private (product-files)" ON storage.objects;
+
+CREATE POLICY "Admin Upload Private (product-files)"
 ON storage.objects
 FOR INSERT
 WITH CHECK (bucket_id = 'product-files' AND public.is_admin());
