@@ -39,11 +39,11 @@ export default function PrivacyPage() {
       }
       toc={toc}
     >
-      <div className="prose prose-invert prose-sm md:prose-base max-w-none
+      <div className="prose prose-invert prose-base md:prose-lg max-w-none
         prose-headings:font-light prose-headings:text-white prose-headings:scroll-mt-28
         prose-h2:text-2xl md:prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-3 prose-h2:border-b prose-h2:border-white/10
-        prose-p:text-white/70 prose-p:leading-7 prose-p:my-4
-        prose-li:text-white/70 prose-li:my-1
+        prose-p:text-white/70 prose-p:leading-8 prose-p:my-5
+        prose-li:text-white/70 prose-li:leading-7 prose-li:my-2
         prose-a:text-white/80 hover:prose-a:text-white prose-a:underline prose-a:decoration-white/20 hover:prose-a:decoration-white/60
         prose-strong:text-white prose-strong:font-medium
         prose-hr:my-12 prose-hr:border-white/10">
