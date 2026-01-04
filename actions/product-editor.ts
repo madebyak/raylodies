@@ -172,4 +172,28 @@ export async function uploadProductFile(productId: string, formData: FormData) {
   return { success: true }
 }
 
+/**
+ * Prefer this for admin UI: upload the file directly to Supabase Storage from the client,
+ * then call this action to persist the storage path on the product.
+ * This avoids Next.js Server Actions request body limits for large files.
+ */
+export async function setProductFilePath(productId: string, filePath: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = user?.app_metadata?.role === 'super_admin'
+  if (!user || !isAdmin) return { error: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('products')
+    .update({ file_url: filePath })
+    .eq('id', productId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${productId}`)
+  revalidatePath('/store')
+  return { success: true }
+}
+
 
