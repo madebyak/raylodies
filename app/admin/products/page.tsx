@@ -1,10 +1,11 @@
-import { getProducts, deleteProduct, toggleProductStatus } from "@/actions/products";
+import { getProducts } from "@/actions/products";
 import Button from "@/components/ui/Button";
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, ShoppingBag, Download } from "lucide-react";
+import { Plus, Search, Edit, ShoppingBag, Download } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/types/database";
 import { formatPrice } from "@/lib/utils";
+import ProductRowActions from "@/components/admin/products/ProductRowActions";
 
 export default async function ProductsPage() {
   const products = await getProducts();
@@ -128,22 +129,13 @@ function ProductRow({ product }: { product: Product }) {
         <StatusBadge isPublished={product.is_published} />
       </td>
       <td className="py-4 px-6 text-right">
-        <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-          <form action={toggleProductStatus.bind(null, product.id, product.is_published)}>
-             <button title="Toggle Status" className="p-2 hover:bg-white/10 rounded-md transition-colors text-white/60 hover:text-white">
-                {product.is_published ? <Eye size={16} /> : <EyeOff size={16} />}
-             </button>
-          </form>
+        <div className="flex items-center justify-end gap-2">
           <Link href={`/admin/products/${product.id}`}>
             <button title="Edit" className="p-2 hover:bg-white/10 rounded-md transition-colors text-white/60 hover:text-blue-400">
               <Edit size={16} />
             </button>
           </Link>
-          <form action={deleteProduct.bind(null, product.id)}>
-            <button title="Delete" className="p-2 hover:bg-white/10 rounded-md transition-colors text-white/60 hover:text-red-400">
-              <Trash2 size={16} />
-            </button>
-          </form>
+          <ProductRowActions productId={product.id} isPublished={product.is_published} />
         </div>
       </td>
     </tr>
@@ -165,6 +157,7 @@ function StatusBadge({ isPublished }: { isPublished: boolean }) {
 }
 
 import { cn } from "@/lib/utils";
+
 
 
 

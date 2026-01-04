@@ -1,10 +1,11 @@
-import { getProjects, deleteProject, toggleProjectStatus } from "@/actions/projects";
+import { getProjects } from "@/actions/projects";
 import Button from "@/components/ui/Button";
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, Palette } from "lucide-react";
+import { Plus, Search, Edit, Palette } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Project } from "@/types/database";
 import { cn } from "@/lib/utils";
+import ProjectRowActions from "@/components/admin/projects/ProjectRowActions";
 
 export default async function ProjectsPage() {
   const projects = await getProjects();
@@ -124,22 +125,13 @@ function ProjectRow({ project }: { project: Project }) {
         <StatusBadge isPublished={project.is_published} />
       </td>
       <td className="py-4 px-6 text-right">
-        <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-          <form action={toggleProjectStatus.bind(null, project.id, project.is_published)}>
-             <button title="Toggle Status" className="p-2 hover:bg-white/10 rounded-md transition-colors text-white/60 hover:text-white">
-                {project.is_published ? <Eye size={16} /> : <EyeOff size={16} />}
-             </button>
-          </form>
+        <div className="flex items-center justify-end gap-2">
           <Link href={`/admin/projects/${project.id}`}>
             <button title="Edit" className="p-2 hover:bg-white/10 rounded-md transition-colors text-white/60 hover:text-blue-400">
               <Edit size={16} />
             </button>
           </Link>
-          <form action={deleteProject.bind(null, project.id)}>
-            <button title="Delete" className="p-2 hover:bg-white/10 rounded-md transition-colors text-white/60 hover:text-red-400">
-              <Trash2 size={16} />
-            </button>
-          </form>
+          <ProjectRowActions projectId={project.id} isPublished={project.is_published} />
         </div>
       </td>
     </tr>
@@ -159,6 +151,7 @@ function StatusBadge({ isPublished }: { isPublished: boolean }) {
     </span>
   );
 }
+
 
 
 

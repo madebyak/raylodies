@@ -85,7 +85,7 @@ export const getPublishedProjects = cache(async () => {
   })) satisfies ProjectListItem[]
 })
 
-export async function deleteProject(id: string): Promise<void> {
+export async function deleteProject(id: string): Promise<{ success?: true; error?: string }> {
   const supabase = await createClient()
   
   const { error } = await supabase
@@ -95,15 +95,16 @@ export async function deleteProject(id: string): Promise<void> {
 
   if (error) {
     console.error('Error deleting project:', error)
-    return
+    return { error: error.message }
   }
 
   revalidatePath('/admin/projects')
   revalidatePath('/work')
   revalidatePath('/')
+  return { success: true }
 }
 
-export async function toggleProjectStatus(id: string, currentStatus: boolean): Promise<void> {
+export async function toggleProjectStatus(id: string, currentStatus: boolean): Promise<{ success?: true; error?: string }> {
   const supabase = await createClient()
   
   const { error } = await supabase
@@ -113,12 +114,13 @@ export async function toggleProjectStatus(id: string, currentStatus: boolean): P
 
   if (error) {
     console.error('Error toggling project status:', error)
-    return
+    return { error: error.message }
   }
 
   revalidatePath('/admin/projects')
   revalidatePath('/work')
   revalidatePath('/')
+  return { success: true }
 }
 
 // Get featured projects for homepage

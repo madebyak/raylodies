@@ -82,25 +82,48 @@ export const getPublishedProducts = cache(async () => {
   })) satisfies ProductListItem[]
 })
 
-export async function deleteProduct(id: string): Promise<void> {
+export async function deleteProduct(id: string): Promise<{ success?: true; archived?: true; error?: string }> {
   const supabase = await createClient()
   
-  const { error } = await supabase
-    .from('products')
-    .delete()
-    .eq('id', id)
+  // If a product has order_items, deleting it can break purchase history and downloads.
+  // Our schema also blocks deletion due to FK constraints. In that case, we "archive" by unpublishing.
+  const { data: anyItem, error: oiErr } = await supabase
+    .from('order_items')
+    .select('id')
+    .eq('product_id', id)
+    .limit(1)
+    .maybeSingle()
+
+  if (!oiErr && anyItem?.id) {
+    const { error: archiveErr } = await supabase
+      .from('products')
+      .update({ is_published: false })
+      .eq('id', id)
+
+    if (archiveErr) {
+      console.error('Error archiving product:', archiveErr)
+      return { error: archiveErr.message }
+    }
+
+    revalidatePath('/admin/products')
+    revalidatePath('/store')
+    return { success: true, archived: true }
+  }
+
+  const { error } = await supabase.from('products').delete().eq('id', id)
 
   if (error) {
     console.error('Error deleting product:', error)
-    // In production, you might want to use a toast notification service
-    return
+    return { error: error.message }
   }
 
   revalidatePath('/admin/products')
   revalidatePath('/store')
+  revalidatePath('/')
+  return { success: true }
 }
 
-export async function toggleProductStatus(id: string, currentStatus: boolean): Promise<void> {
+export async function toggleProductStatus(id: string, currentStatus: boolean): Promise<{ success?: true; error?: string }> {
   const supabase = await createClient()
   
   const { error } = await supabase
@@ -110,11 +133,13 @@ export async function toggleProductStatus(id: string, currentStatus: boolean): P
 
   if (error) {
     console.error('Error toggling product status:', error)
-    return
+    return { error: error.message }
   }
 
   revalidatePath('/admin/products')
   revalidatePath('/store')
+  revalidatePath('/')
+  return { success: true }
 }
 
 

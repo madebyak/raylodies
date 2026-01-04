@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { upsertProduct } from "@/actions/product-editor";
 import { addProductImage, getProductImages, removeProductImage, reorderProductImages } from "@/actions/product-images";
 import { getProductKeywords, setProductKeywords } from "@/actions/product-keywords";
+import { deleteProduct } from "@/actions/products";
 import Button from "@/components/ui/Button";
 import Input, { Textarea, Select } from "@/components/ui/Input";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
@@ -40,6 +41,7 @@ export default function ProductForm({
 }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [imageItems, setImageItems] = useState<ProductImage[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [keywordInput, setKeywordInput] = useState("");
@@ -113,6 +115,27 @@ export default function ProductForm({
       } else {
         router.refresh();
       }
+    }
+  }
+
+  async function handleDeleteProduct() {
+    if (!initialData?.id) return;
+    const ok = window.confirm(
+      "Delete this product?\n\nIf it has purchases, it will be archived (unpublished) instead."
+    );
+    if (!ok) return;
+    setIsDeleting(true);
+    try {
+      const res = await deleteProduct(initialData.id);
+      if (res?.error) throw new Error(res.error);
+      toast.success(res?.archived ? "Product archived (unpublished)" : "Product deleted");
+      router.push("/admin/products");
+      router.refresh();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      toast.error(`Failed to delete product: ${msg}`);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -462,6 +485,17 @@ export default function ProductForm({
                 {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                 {isSaving ? 'Saving...' : 'Save Product'}
               </Button>
+              {!isNew && initialData?.id && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full mt-3"
+                  onClick={handleDeleteProduct}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete Product"}
+                </Button>
+              )}
               {isNew && (
                 <p className="text-xs text-white/40 text-center mt-4">
                   Save first to upload files and images
