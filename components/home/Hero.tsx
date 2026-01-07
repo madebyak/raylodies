@@ -28,7 +28,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light text-white/60 leading-[1.1] tracking-tight mb-8"
+            className="text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-light text-white/60 leading-[1.1] tracking-tight mb-8"
           >
             I craft bold visual stories at the crossroads of{" "}
             <span className="text-white">AI</span> and{" "}
