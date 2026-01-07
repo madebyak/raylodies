@@ -7,5 +7,3 @@ export function normalizeSlug(input: string): string {
     .replace(/-+/g, "-")
     .replace(/(^-|-$)+/g, "");
 }
-
-

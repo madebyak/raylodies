@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       meta_title,
       meta_description,
       categories (name, slug)
-    `
+    `,
     )
     .eq("slug", slug)
     .eq("is_published", true)
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           meta_title,
           meta_description,
           categories (name, slug)
-        `
+        `,
         )
         .eq("slug", normalized)
         .eq("is_published", true)
@@ -108,7 +108,9 @@ export async function generateStaticParams() {
     .order("updated_at", { ascending: false })
     .limit(2000);
 
-  return (data || []).filter((r) => r.slug).map((r) => ({ slug: r.slug as string }));
+  return (data || [])
+    .filter((r) => r.slug)
+    .map((r) => ({ slug: r.slug as string }));
 }
 
 export default function ProjectLayout({
@@ -118,4 +120,3 @@ export default function ProjectLayout({
 }) {
   return <>{children}</>;
 }
-

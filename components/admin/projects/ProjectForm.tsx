@@ -3,9 +3,17 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { upsertProject } from "@/actions/project-editor";
-import { addProjectMedia, getProjectMedia, removeProjectMedia, reorderProjectMedia } from "@/actions/media";
+import {
+  addProjectMedia,
+  getProjectMedia,
+  removeProjectMedia,
+  reorderProjectMedia,
+} from "@/actions/media";
 import { deleteProject } from "@/actions/projects";
-import { updateProjectThumbnail, removeProjectThumbnail } from "@/actions/project-thumbnail";
+import {
+  updateProjectThumbnail,
+  removeProjectThumbnail,
+} from "@/actions/project-thumbnail";
 import Button from "@/components/ui/Button";
 import Input, { Textarea, Select } from "@/components/ui/Input";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
@@ -32,12 +40,12 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 
-export default function ProjectForm({ 
-  initialData, 
-  categories 
-}: { 
-  initialData?: Partial<Project>, 
-  categories: Category[] 
+export default function ProjectForm({
+  initialData,
+  categories,
+}: {
+  initialData?: Partial<Project>;
+  categories: Category[];
 }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -49,7 +57,7 @@ export default function ProjectForm({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   // Load media on mount
@@ -61,10 +69,10 @@ export default function ProjectForm({
 
   async function handleSubmit(formData: FormData) {
     setIsSaving(true);
-    if (initialData?.id) formData.append('id', initialData.id);
+    if (initialData?.id) formData.append("id", initialData.id);
 
     const result = await upsertProject(formData);
-    
+
     setIsSaving(false);
     if (result.error) {
       toast.error(result.error);
@@ -80,26 +88,30 @@ export default function ProjectForm({
 
   async function handleMediaUpload(
     url: string,
-    type: 'image' | 'video',
-    meta?: { width?: number | null; height?: number | null; poster_url?: string | null }
+    type: "image" | "video",
+    meta?: {
+      width?: number | null;
+      height?: number | null;
+      poster_url?: string | null;
+    },
   ) {
     if (!initialData?.id) return;
     try {
-        const newItem = await addProjectMedia(initialData.id, url, type, meta);
-        setMediaItems(prev => [...prev, newItem]);
-        toast.success("Media added");
+      const newItem = await addProjectMedia(initialData.id, url, type, meta);
+      setMediaItems((prev) => [...prev, newItem]);
+      toast.success("Media added");
     } catch {
-        toast.error("Failed to add media to DB");
+      toast.error("Failed to add media to DB");
     }
   }
 
   async function handleRemoveMedia(id: string) {
-    setMediaItems(prev => prev.filter(item => item.id !== id));
+    setMediaItems((prev) => prev.filter((item) => item.id !== id));
     try {
-        await removeProjectMedia(id);
-        toast.success("Media removed");
+      await removeProjectMedia(id);
+      toast.success("Media removed");
     } catch {
-        toast.error("Failed to remove media");
+      toast.error("Failed to remove media");
     }
   }
 
@@ -112,14 +124,16 @@ export default function ProjectForm({
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over?.id);
         if (oldIndex === -1 || newIndex === -1) return items;
-        
+
         const newItems = arrayMove(items, oldIndex, newIndex);
-        
+
         // Save new order to DB
-        reorderProjectMedia(newItems.map((item, index) => ({
+        reorderProjectMedia(
+          newItems.map((item, index) => ({
             id: item.id,
-            display_order: index
-        }))).catch(() => toast.error("Failed to save order"));
+            display_order: index,
+          })),
+        ).catch(() => toast.error("Failed to save order"));
 
         return newItems;
       });
@@ -144,10 +158,19 @@ export default function ProjectForm({
     }
   }
 
-  async function handleThumbnailUpload(url: string, width: number, height: number) {
+  async function handleThumbnailUpload(
+    url: string,
+    width: number,
+    height: number,
+  ) {
     if (!initialData?.id) return;
     try {
-      const result = await updateProjectThumbnail(initialData.id, url, width, height);
+      const result = await updateProjectThumbnail(
+        initialData.id,
+        url,
+        width,
+        height,
+      );
       if (result.error) {
         toast.error(result.error);
       } else {
@@ -177,7 +200,10 @@ export default function ProjectForm({
     <div className="max-w-4xl mx-auto space-y-8 pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/admin/projects" className="p-2 hover:bg-white/5 rounded-full text-white/60 hover:text-white transition-colors">
+          <Link
+            href="/admin/projects"
+            className="p-2 hover:bg-white/5 rounded-full text-white/60 hover:text-white transition-colors"
+          >
             <ArrowLeft size={20} />
           </Link>
           <div>
@@ -185,16 +211,20 @@ export default function ProjectForm({
               {isNew ? "New Project" : "Edit Project"}
             </h1>
             <p className="text-sm text-white/40">
-              {isNew ? "Create a new portfolio item" : `Editing ${initialData?.title}`}
+              {isNew
+                ? "Create a new portfolio item"
+                : `Editing ${initialData?.title}`}
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg border border-white/5">
-            <div className={`w-2 h-2 rounded-full ${initialData?.is_published ? 'bg-green-500' : 'bg-yellow-500'}`} />
+            <div
+              className={`w-2 h-2 rounded-full ${initialData?.is_published ? "bg-green-500" : "bg-yellow-500"}`}
+            />
             <span className="text-sm text-white/60">
-              {initialData?.is_published ? 'Published' : 'Draft'}
+              {initialData?.is_published ? "Published" : "Draft"}
             </span>
           </div>
         </div>
@@ -204,15 +234,29 @@ export default function ProjectForm({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
-              <h3 className="text-lg font-light text-white mb-4">Basic Information</h3>
-              <Input name="title" label="Project Title" defaultValue={initialData?.title} required />
+              <h3 className="text-lg font-light text-white mb-4">
+                Basic Information
+              </h3>
+              <Input
+                name="title"
+                label="Project Title"
+                defaultValue={initialData?.title}
+                required
+              />
               <div className="space-y-1">
                 <p className="text-sm text-white/80">URL</p>
                 <p className="text-xs text-white/40 font-mono break-all">
-                  {initialData?.slug ? `/work/${initialData.slug}` : "Auto-generated after save (from title)."}
+                  {initialData?.slug
+                    ? `/work/${initialData.slug}`
+                    : "Auto-generated after save (from title)."}
                 </p>
               </div>
-              <Textarea name="description" label="Description" defaultValue={initialData?.description || ''} rows={6} />
+              <Textarea
+                name="description"
+                label="Description"
+                defaultValue={initialData?.description || ""}
+                rows={6}
+              />
             </div>
 
             {/* SEO */}
@@ -220,21 +264,22 @@ export default function ProjectForm({
               <div className="space-y-1">
                 <h3 className="text-lg font-light text-white">SEO</h3>
                 <p className="text-sm text-white/40">
-                  These fields control Google title/description and social previews for this project page.
+                  These fields control Google title/description and social
+                  previews for this project page.
                 </p>
               </div>
 
               <Input
                 name="meta_title"
                 label="Meta Title"
-                defaultValue={initialData?.meta_title || ''}
+                defaultValue={initialData?.meta_title || ""}
                 placeholder="e.g. Neon Futures | Raylodies"
               />
 
               <Textarea
                 name="meta_description"
                 label="Meta Description"
-                defaultValue={initialData?.meta_description || ''}
+                defaultValue={initialData?.meta_description || ""}
                 rows={3}
                 placeholder="Aim for ~140–160 characters. Describe the project + category."
               />
@@ -242,7 +287,7 @@ export default function ProjectForm({
               <Input
                 name="og_image"
                 label="OG Image URL"
-                defaultValue={initialData?.og_image || ''}
+                defaultValue={initialData?.og_image || ""}
                 placeholder="Optional: full image URL for social sharing (1200x630 recommended)"
               />
             </div>
@@ -252,13 +297,16 @@ export default function ProjectForm({
               <div className="space-y-1">
                 <h3 className="text-lg font-light text-white">Thumbnail</h3>
                 <p className="text-sm text-white/40">
-                  This image appears in the work grid and social previews. It won&apos;t show in the project gallery.
+                  This image appears in the work grid and social previews. It
+                  won&apos;t show in the project gallery.
                 </p>
               </div>
-              
+
               {isNew ? (
                 <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center opacity-50 cursor-not-allowed">
-                  <p className="text-sm text-white/40">Save project first to upload thumbnail</p>
+                  <p className="text-sm text-white/40">
+                    Save project first to upload thumbnail
+                  </p>
                 </div>
               ) : initialData?.id ? (
                 <ThumbnailUploader
@@ -273,9 +321,11 @@ export default function ProjectForm({
             <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-light text-white">Media Gallery</h3>
-                {!isNew && <span className="text-xs text-white/40">Drag to reorder</span>}
+                {!isNew && (
+                  <span className="text-xs text-white/40">Drag to reorder</span>
+                )}
               </div>
-              
+
               {isNew ? (
                 <div className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center opacity-50 cursor-not-allowed">
                   <div className="flex flex-col items-center gap-3">
@@ -294,30 +344,37 @@ export default function ProjectForm({
                 </div>
               ) : initialData?.id ? (
                 <>
-                  <MediaUploader projectId={initialData.id} onUploadComplete={handleMediaUpload} />
-                  
-                  <DndContext 
-                    sensors={sensors} 
-                    collisionDetection={rectIntersection} 
+                  <MediaUploader
+                    projectId={initialData.id}
+                    onUploadComplete={handleMediaUpload}
+                  />
+
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={rectIntersection}
                     onDragEnd={handleDragEnd}
                   >
-                    <SortableContext items={mediaItems.map(i => i.id)} strategy={rectSortingStrategy}>
+                    <SortableContext
+                      items={mediaItems.map((i) => i.id)}
+                      strategy={rectSortingStrategy}
+                    >
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {mediaItems.map((item) => (
-                          <SortableMediaItem 
-                            key={item.id} 
-                            id={item.id} 
-                            item={item} 
-                            onRemove={handleRemoveMedia} 
+                          <SortableMediaItem
+                            key={item.id}
+                            id={item.id}
+                            item={item}
+                            onRemove={handleRemoveMedia}
                           />
                         ))}
                       </div>
                     </SortableContext>
                   </DndContext>
-                  
+
                   {mediaItems.length === 0 && (
                     <p className="text-sm text-white/30 text-center py-4">
-                      No media yet. Upload images or videos to showcase your project.
+                      No media yet. Upload images or videos to showcase your
+                      project.
                     </p>
                   )}
                 </>
@@ -331,32 +388,67 @@ export default function ProjectForm({
               <Select
                 name="category_id"
                 label="Category"
-                defaultValue={initialData?.category_id || ''}
-                options={[{ value: '', label: 'Select Category' }, ...categories.map(c => ({ value: c.id, label: c.name }))]}
+                defaultValue={initialData?.category_id || ""}
+                options={[
+                  { value: "", label: "Select Category" },
+                  ...categories.map((c) => ({ value: c.id, label: c.name })),
+                ]}
               />
-              <Input name="year" label="Year" defaultValue={initialData?.year || new Date().getFullYear().toString()} />
+              <Input
+                name="year"
+                label="Year"
+                defaultValue={
+                  initialData?.year || new Date().getFullYear().toString()
+                }
+              />
               <div className="space-y-3 pt-4 border-t border-white/10">
                 <label className="flex items-center justify-between cursor-pointer group p-3 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/[0.02] transition-all">
                   <div className="flex flex-col">
-                    <span className="text-sm text-white/80 group-hover:text-white transition-colors">Published</span>
-                    <span className="text-xs text-white/40">Visible on public pages</span>
+                    <span className="text-sm text-white/80 group-hover:text-white transition-colors">
+                      Published
+                    </span>
+                    <span className="text-xs text-white/40">
+                      Visible on public pages
+                    </span>
                   </div>
-                  <input type="checkbox" name="is_published" defaultChecked={initialData?.is_published} className="accent-white w-5 h-5 rounded" />
+                  <input
+                    type="checkbox"
+                    name="is_published"
+                    defaultChecked={initialData?.is_published}
+                    className="accent-white w-5 h-5 rounded"
+                  />
                 </label>
                 <label className="flex items-center justify-between cursor-pointer group p-3 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/[0.02] transition-all">
                   <div className="flex flex-col">
-                    <span className="text-sm text-white/80 group-hover:text-white transition-colors">Featured</span>
-                    <span className="text-xs text-white/40">Show on homepage</span>
+                    <span className="text-sm text-white/80 group-hover:text-white transition-colors">
+                      Featured
+                    </span>
+                    <span className="text-xs text-white/40">
+                      Show on homepage
+                    </span>
                   </div>
-                  <input type="checkbox" name="is_featured" defaultChecked={initialData?.is_featured} className="accent-white w-5 h-5 rounded" />
+                  <input
+                    type="checkbox"
+                    name="is_featured"
+                    defaultChecked={initialData?.is_featured}
+                    className="accent-white w-5 h-5 rounded"
+                  />
                 </label>
               </div>
             </div>
 
             <div className="sticky top-24">
-              <Button type="submit" className="w-full flex items-center justify-center gap-2" disabled={isSaving}>
-                {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                {isSaving ? 'Saving...' : 'Save Project'}
+              <Button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2"
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <Loader2 className="animate-spin" size={18} />
+                ) : (
+                  <Save size={18} />
+                )}
+                {isSaving ? "Saving..." : "Save Project"}
               </Button>
               {!isNew && initialData?.id && (
                 <Button
@@ -369,7 +461,11 @@ export default function ProjectForm({
                   {isDeleting ? "Deleting..." : "Delete Project"}
                 </Button>
               )}
-              {isNew && <p className="text-xs text-white/40 text-center mt-4">Save first to upload media</p>}
+              {isNew && (
+                <p className="text-xs text-white/40 text-center mt-4">
+                  Save first to upload media
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -377,5 +473,3 @@ export default function ProjectForm({
     </div>
   );
 }
-
-

@@ -62,7 +62,3 @@ export default function ProductEditorLoading() {
     </div>
   );
 }
-
-
-
-

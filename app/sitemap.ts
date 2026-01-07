@@ -11,7 +11,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/work`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/store`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/about`, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/start-a-project`, changeFrequency: "monthly", priority: 0.6 },
+    {
+      url: `${baseUrl}/start-a-project`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
   ];
 
   const [{ data: productRows }, { data: projectRows }] = await Promise.all([
@@ -49,5 +53,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [...staticRoutes, ...projectRoutes, ...productRoutes];
 }
-
-

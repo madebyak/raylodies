@@ -155,12 +155,10 @@ export default async function RootLayout({
           }}
         />
         <Providers>
-          <ConditionalLayout>
-            {children}
-          </ConditionalLayout>
+          <ConditionalLayout>{children}</ConditionalLayout>
         </Providers>
         <Toaster theme="dark" position="bottom-right" richColors />
-        
+
         {/* Pinterest SDK - loaded for Rich Pins support */}
         {/* We use a custom PinterestSaveButton component instead of the hover button */}
         {/* Setting data-pin-hover="false" disables the automatic hover buttons */}

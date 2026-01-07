@@ -19,12 +19,16 @@ export default function SettingsPage() {
             </div>
             <div>
               <h3 className="text-white font-light">Profile</h3>
-              <p className="text-xs text-white/40">Manage your profile information</p>
+              <p className="text-xs text-white/40">
+                Manage your profile information
+              </p>
             </div>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-white/40 block mb-1">Display Name</label>
+              <label className="text-xs text-white/40 block mb-1">
+                Display Name
+              </label>
               <input
                 type="text"
                 placeholder="Your name"
@@ -51,17 +55,29 @@ export default function SettingsPage() {
             </div>
             <div>
               <h3 className="text-white font-light">Notifications</h3>
-              <p className="text-xs text-white/40">Manage notification preferences</p>
+              <p className="text-xs text-white/40">
+                Manage notification preferences
+              </p>
             </div>
           </div>
           <div className="space-y-4">
             <label className="flex items-center justify-between cursor-pointer group">
               <span className="text-sm text-white/60">Email on new order</span>
-              <input type="checkbox" className="accent-white w-4 h-4" defaultChecked />
+              <input
+                type="checkbox"
+                className="accent-white w-4 h-4"
+                defaultChecked
+              />
             </label>
             <label className="flex items-center justify-between cursor-pointer group">
-              <span className="text-sm text-white/60">Email on new inquiry</span>
-              <input type="checkbox" className="accent-white w-4 h-4" defaultChecked />
+              <span className="text-sm text-white/60">
+                Email on new inquiry
+              </span>
+              <input
+                type="checkbox"
+                className="accent-white w-4 h-4"
+                defaultChecked
+              />
             </label>
             <label className="flex items-center justify-between cursor-pointer group">
               <span className="text-sm text-white/60">Weekly summary</span>
@@ -99,7 +115,9 @@ export default function SettingsPage() {
             </div>
             <div>
               <h3 className="text-white font-light">Appearance</h3>
-              <p className="text-xs text-white/40">Customize the look and feel</p>
+              <p className="text-xs text-white/40">
+                Customize the look and feel
+              </p>
             </div>
           </div>
           <div className="space-y-4">
@@ -134,7 +152,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-
-
-

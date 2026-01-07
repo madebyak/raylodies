@@ -24,7 +24,9 @@ export default function ThumbnailUploader({
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentThumbnail);
 
-  async function getImageSize(file: File): Promise<{ width: number; height: number }> {
+  async function getImageSize(
+    file: File,
+  ): Promise<{ width: number; height: number }> {
     try {
       const bitmap = await createImageBitmap(file);
       return { width: bitmap.width, height: bitmap.height };
@@ -74,13 +76,14 @@ export default function ThumbnailUploader({
         toast.success("Thumbnail uploaded");
       } catch (error: unknown) {
         console.error(error);
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         toast.error("Upload failed: " + errorMessage);
       } finally {
         setIsUploading(false);
       }
     },
-    [projectId, onUploadComplete]
+    [projectId, onUploadComplete],
   );
 
   const handleRemove = () => {
@@ -132,7 +135,7 @@ export default function ThumbnailUploader({
         "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-300",
         isDragActive
           ? "border-blue-500 bg-blue-500/10"
-          : "border-white/20 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.04]"
+          : "border-white/20 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.04]",
       )}
     >
       <input {...getInputProps()} />
@@ -156,4 +159,3 @@ export default function ThumbnailUploader({
     </div>
   );
 }
-

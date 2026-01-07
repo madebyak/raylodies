@@ -12,7 +12,11 @@ interface SortableMediaItemProps {
   onRemove: (id: string) => void;
 }
 
-export default function SortableMediaItem({ id, item, onRemove }: SortableMediaItemProps) {
+export default function SortableMediaItem({
+  id,
+  item,
+  onRemove,
+}: SortableMediaItemProps) {
   const {
     attributes,
     listeners,
@@ -36,18 +40,13 @@ export default function SortableMediaItem({ id, item, onRemove }: SortableMediaI
       className="group relative aspect-square bg-[#0a0a0a] rounded-lg border border-white/10 overflow-hidden"
     >
       {/* Media Preview */}
-      {item.type === 'image' ? (
-        <Image
-          src={item.url}
-          alt="Media"
-          fill
-          className="object-cover"
-        />
+      {item.type === "image" ? (
+        <Image src={item.url} alt="Media" fill className="object-cover" />
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-black">
           <Video className="text-white/40 mb-2" size={24} />
-          <video 
-            src={item.url} 
+          <video
+            src={item.url}
             className="absolute inset-0 w-full h-full object-cover opacity-60"
             muted
             loop
@@ -57,8 +56,8 @@ export default function SortableMediaItem({ id, item, onRemove }: SortableMediaI
       )}
 
       {/* Drag Handle Overlay */}
-      <div 
-        {...attributes} 
+      <div
+        {...attributes}
         {...listeners}
         className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors cursor-grab active:cursor-grabbing flex items-center justify-center opacity-0 group-hover:opacity-100"
       >
@@ -67,8 +66,8 @@ export default function SortableMediaItem({ id, item, onRemove }: SortableMediaI
 
       {/* Type Badge */}
       <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded text-[10px] text-white/80 font-medium flex items-center gap-1">
-        {item.type === 'image' ? <ImageIcon size={10} /> : <Video size={10} />}
-        {item.type === 'image' ? 'IMG' : 'VID'}
+        {item.type === "image" ? <ImageIcon size={10} /> : <Video size={10} />}
+        {item.type === "image" ? "IMG" : "VID"}
       </div>
 
       {/* Remove Button */}
@@ -84,7 +83,3 @@ export default function SortableMediaItem({ id, item, onRemove }: SortableMediaI
     </div>
   );
 }
-
-
-
-

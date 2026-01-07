@@ -9,7 +9,10 @@ export default function CustomersLoading() {
       {/* Stats skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[1, 2].map((i) => (
-          <div key={i} className="bg-white/[0.02] border border-white/5 rounded-xl p-6">
+          <div
+            key={i}
+            className="bg-white/[0.02] border border-white/5 rounded-xl p-6"
+          >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-white/5 rounded-lg animate-pulse" />
               <div className="space-y-2">
@@ -32,7 +35,3 @@ export default function CustomersLoading() {
     </div>
   );
 }
-
-
-
-

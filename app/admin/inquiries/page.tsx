@@ -5,7 +5,7 @@ import InquiryActions from "@/components/admin/inquiries/InquiryActions";
 export default async function InquiriesPage() {
   const [inquiries, stats] = await Promise.all([
     getInquiries(),
-    getInquiryStats()
+    getInquiryStats(),
   ]);
 
   return (
@@ -30,7 +30,7 @@ export default async function InquiriesPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-yellow-500/10 rounded-lg">
@@ -42,7 +42,7 @@ export default async function InquiriesPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-500/10 rounded-lg">
@@ -50,7 +50,9 @@ export default async function InquiriesPage() {
             </div>
             <div>
               <p className="text-sm text-white/40">Responded</p>
-              <p className="text-2xl font-light text-white">{stats.responded}</p>
+              <p className="text-2xl font-light text-white">
+                {stats.responded}
+              </p>
             </div>
           </div>
         </div>
@@ -72,49 +74,49 @@ export default async function InquiriesPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center gap-3">
-                    <h3 className="text-lg text-white font-light">{inquiry.name}</h3>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      inquiry.status === 'new' 
-                        ? 'bg-yellow-500/10 text-yellow-400'
-                        : inquiry.status === 'responded'
-                        ? 'bg-green-500/10 text-green-400'
-                        : 'bg-white/5 text-white/40'
-                    }`}>
+                    <h3 className="text-lg text-white font-light">
+                      {inquiry.name}
+                    </h3>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        inquiry.status === "new"
+                          ? "bg-yellow-500/10 text-yellow-400"
+                          : inquiry.status === "responded"
+                            ? "bg-green-500/10 text-green-400"
+                            : "bg-white/5 text-white/40"
+                      }`}
+                    >
                       {inquiry.status}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-4 text-sm text-white/40">
                     <span className="flex items-center gap-1">
                       <Mail className="w-4 h-4" />
                       {inquiry.email}
                     </span>
-                    {inquiry.company && (
-                      <span>• {inquiry.company}</span>
-                    )}
+                    {inquiry.company && <span>• {inquiry.company}</span>}
                     {inquiry.project_type && (
                       <span>• {inquiry.project_type}</span>
                     )}
-                    {inquiry.budget && (
-                      <span>• Budget: {inquiry.budget}</span>
-                    )}
+                    {inquiry.budget && <span>• Budget: {inquiry.budget}</span>}
                   </div>
-                  
+
                   <p className="text-sm text-white/60 leading-relaxed">
                     {inquiry.message}
                   </p>
-                  
+
                   <p className="text-xs text-white/30">
-                    {new Date(inquiry.created_at).toLocaleDateString('en-US', {
-                      month: 'long',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                    {new Date(inquiry.created_at).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </p>
                 </div>
-                
+
                 <InquiryActions inquiry={inquiry} />
               </div>
             </div>
@@ -124,7 +126,3 @@ export default async function InquiriesPage() {
     </div>
   );
 }
-
-
-
-

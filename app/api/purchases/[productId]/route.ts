@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ productId: string }> }
+  { params }: { params: Promise<{ productId: string }> },
 ) {
   const { productId } = await params;
   const noStoreHeaders = { "Cache-Control": "no-store" };
@@ -18,7 +18,7 @@ export async function GET(
   if (userError || !user) {
     return NextResponse.json(
       { authenticated: false, hasPurchased: false },
-      { headers: noStoreHeaders }
+      { headers: noStoreHeaders },
     );
   }
 
@@ -33,7 +33,7 @@ export async function GET(
         user_id,
         status
       )
-    `
+    `,
     )
     .eq("product_id", productId)
     .eq("orders.user_id", user.id)
@@ -45,7 +45,7 @@ export async function GET(
     console.error("Purchase lookup failed:", error);
     return NextResponse.json(
       { authenticated: true, hasPurchased: false },
-      { status: 500, headers: noStoreHeaders }
+      { status: 500, headers: noStoreHeaders },
     );
   }
 
@@ -62,7 +62,7 @@ export async function GET(
     console.error("Entitlement lookup failed:", entErr);
     return NextResponse.json(
       { authenticated: true, hasPurchased: !!purchase },
-      { headers: noStoreHeaders }
+      { headers: noStoreHeaders },
     );
   }
 
@@ -71,8 +71,6 @@ export async function GET(
       authenticated: true,
       hasPurchased: !!purchase || !!entitlement,
     },
-    { headers: noStoreHeaders }
+    { headers: noStoreHeaders },
   );
 }
-
-

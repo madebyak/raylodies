@@ -19,7 +19,10 @@ export default function ProductsLoading() {
           <div className="h-4 w-full bg-white/5 rounded animate-pulse" />
         </div>
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="p-6 border-b border-white/5 flex items-center gap-4">
+          <div
+            key={i}
+            className="p-6 border-b border-white/5 flex items-center gap-4"
+          >
             <div className="w-12 h-12 bg-white/5 rounded animate-pulse" />
             <div className="flex-1 space-y-2">
               <div className="h-4 w-48 bg-white/5 rounded animate-pulse" />
@@ -34,7 +37,3 @@ export default function ProductsLoading() {
     </div>
   );
 }
-
-
-
-

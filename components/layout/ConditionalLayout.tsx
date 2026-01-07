@@ -12,11 +12,15 @@ interface ConditionalLayoutProps {
 // Routes that should NOT show the main Header/Footer
 const EXCLUDED_ROUTES = ["/admin"];
 
-export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
+export default function ConditionalLayout({
+  children,
+}: ConditionalLayoutProps) {
   const pathname = usePathname();
-  
+
   // Check if current route should hide the main layout
-  const shouldHideLayout = EXCLUDED_ROUTES.some(route => pathname.startsWith(route));
+  const shouldHideLayout = EXCLUDED_ROUTES.some((route) =>
+    pathname.startsWith(route),
+  );
 
   if (shouldHideLayout) {
     // Admin and other excluded routes - render children only (they have their own layout)
@@ -32,5 +36,3 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     </>
   );
 }
-
-

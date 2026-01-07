@@ -20,7 +20,8 @@ export default function PurchasesAutoRefresh({
     if (!notifiedRef.current) {
       notifiedRef.current = true;
       toast.message("Payment received", {
-        description: "We’re confirming your purchase. This page will refresh automatically.",
+        description:
+          "We’re confirming your purchase. This page will refresh automatically.",
       });
     }
 
@@ -28,7 +29,8 @@ export default function PurchasesAutoRefresh({
     if (orderCount > 0) {
       router.replace("/account/purchases");
       toast.success("Purchase updated", {
-        description: "If you don’t see your new item yet, it may take a few seconds to appear.",
+        description:
+          "If you don’t see your new item yet, it may take a few seconds to appear.",
       });
       return;
     }
@@ -41,7 +43,8 @@ export default function PurchasesAutoRefresh({
       if (attempts >= maxAttempts) {
         clearInterval(interval);
         toast.message("Still processing", {
-          description: "If this takes longer, refresh in a minute or check Downloads later.",
+          description:
+            "If this takes longer, refresh in a minute or check Downloads later.",
         });
       }
     }, 3000);
@@ -55,10 +58,10 @@ export default function PurchasesAutoRefresh({
     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 text-sm text-white/60">
       <div className="font-light">
         Processing your purchase…{" "}
-        <span className="text-white/40">This page will auto-refresh for about a minute.</span>
+        <span className="text-white/40">
+          This page will auto-refresh for about a minute.
+        </span>
       </div>
     </div>
   );
 }
-
-

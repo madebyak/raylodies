@@ -30,16 +30,16 @@ export default function AccountSidebar() {
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
-            
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 text-sm font-light rounded-lg transition-all duration-200 group",
-                  isActive 
-                    ? "bg-white/10 text-white" 
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                  isActive
+                    ? "bg-white/10 text-white"
+                    : "text-white/60 hover:text-white hover:bg-white/5",
                 )}
               >
                 <Icon size={18} />
@@ -62,7 +62,3 @@ export default function AccountSidebar() {
     </div>
   );
 }
-
-
-
-

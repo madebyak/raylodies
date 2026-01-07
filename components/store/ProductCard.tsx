@@ -65,7 +65,9 @@ export default function ProductCard({ product, index }: ProductCardProps) {
               {product.title}
             </h3>
             <p className="text-white text-lg font-light">
-              {product.is_free || product.price === 0 ? "Free" : formatPrice(product.price)}
+              {product.is_free || product.price === 0
+                ? "Free"
+                : formatPrice(product.price)}
             </p>
           </div>
         </article>

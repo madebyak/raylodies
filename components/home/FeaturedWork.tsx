@@ -6,7 +6,10 @@ import { ArrowRight } from "lucide-react";
 import { ProjectListItem } from "@/types/database";
 import WorkCard from "@/components/work/WorkCard";
 import { useEffect, useRef } from "react";
-import { LabelReveal, ParagraphReveal, ButtonReveal } from "@/components/animations/TextReveal";
+import {
+  ParagraphReveal,
+  ButtonReveal,
+} from "@/components/animations/TextReveal";
 
 // Codrops-style easing
 const EASING = [0.77, 0, 0.175, 1] as const;
@@ -83,7 +86,8 @@ export default function FeaturedWork({ projects }: FeaturedWorkProps) {
         <div className="max-w-[1800px] mx-auto text-center">
           <SectionHeading />
           <ParagraphReveal className="text-white/40 text-base font-light">
-            Featured projects will appear here. Mark projects as &quot;Featured&quot; in the dashboard.
+            Featured projects will appear here. Mark projects as
+            &quot;Featured&quot; in the dashboard.
           </ParagraphReveal>
         </div>
       </section>
@@ -101,7 +105,8 @@ export default function FeaturedWork({ projects }: FeaturedWorkProps) {
               delay={0.2}
               className="text-white/40 text-base font-light max-w-md"
             >
-              Directed visual narratives spanning commercial projects and experimental concepts.
+              Directed visual narratives spanning commercial projects and
+              experimental concepts.
             </ParagraphReveal>
           </div>
           <ButtonReveal delay={0.3}>

@@ -19,7 +19,8 @@ export default function NotFound() {
             Page not found
           </h2>
           <p className="text-white/50 text-base font-light max-w-md mx-auto">
-            The page you&apos;re looking for doesn&apos;t exist or has been moved.
+            The page you&apos;re looking for doesn&apos;t exist or has been
+            moved.
           </p>
           <div className="pt-6">
             <Link
@@ -35,4 +36,3 @@ export default function NotFound() {
     </section>
   );
 }
-

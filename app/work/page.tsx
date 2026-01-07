@@ -20,7 +20,9 @@ export default async function WorkPage() {
             Work
           </h1>
           <p className="text-white/50 text-lg md:text-xl font-light max-w-2xl">
-            A collection of projects exploring the boundaries of digital creativity and artificial intelligence. A look into how I translate raw data into specific, curated visions.
+            A collection of projects exploring the boundaries of digital
+            creativity and artificial intelligence. A look into how I translate
+            raw data into specific, curated visions.
           </p>
         </div>
 

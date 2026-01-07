@@ -23,7 +23,9 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     redirect("/login");
@@ -31,7 +33,7 @@ export default async function AdminLayout({
 
   // Double check admin role here just in case middleware missed it
   // or for better security depth
-  const isAdmin = user.app_metadata?.role === 'super_admin';
+  const isAdmin = user.app_metadata?.role === "super_admin";
   if (!isAdmin) {
     redirect("/");
   }
@@ -44,15 +46,11 @@ export default async function AdminLayout({
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
         <AdminHeader userEmail={user.email} />
-        
+
         <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
     </div>
   );
 }
-
-

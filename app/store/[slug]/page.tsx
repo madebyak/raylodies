@@ -23,7 +23,8 @@ export default async function ProductPage({
   // Fetch product with images
   const { data: product } = await supabase
     .from("products")
-    .select(`
+    .select(
+      `
       *,
       categories (name),
       product_images (
@@ -31,7 +32,8 @@ export default async function ProductPage({
         url,
         display_order
       )
-    `)
+    `,
+    )
     .eq("slug", slug)
     .eq("is_published", true)
     .single();
@@ -55,8 +57,8 @@ export default async function ProductPage({
   }
 
   // Sort images by display_order
-  const images = (product.product_images as ProductImage[] || []).sort(
-    (a, b) => a.display_order - b.display_order
+  const images = ((product.product_images as ProductImage[]) || []).sort(
+    (a, b) => a.display_order - b.display_order,
   );
 
   const productUrl = absoluteUrl(`/store/${product.slug}`);
@@ -72,9 +74,24 @@ export default async function ProductPage({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-            { "@type": "ListItem", position: 2, name: "Store", item: absoluteUrl("/store") },
-            { "@type": "ListItem", position: 3, name: product.title, item: productUrl },
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "Home",
+              item: absoluteUrl("/"),
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "Store",
+              item: absoluteUrl("/store"),
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: product.title,
+              item: productUrl,
+            },
           ],
         }}
       />
@@ -113,9 +130,9 @@ export default async function ProductPage({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
           {/* Left: Image Gallery */}
           <div className="lg:col-span-7">
-            <ProductGallery 
-              images={images} 
-              thumbnail={product.thumbnail} 
+            <ProductGallery
+              images={images}
+              thumbnail={product.thumbnail}
               title={product.title}
               productUrl={productUrl}
             />
@@ -125,7 +142,9 @@ export default async function ProductPage({
           <div className="space-y-8 lg:col-span-5">
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-sm text-white/60">
-                <span className="uppercase tracking-wider">{product.categories?.name}</span>
+                <span className="uppercase tracking-wider">
+                  {product.categories?.name}
+                </span>
                 {product.file_url && (
                   <span className="flex items-center gap-1 text-green-400/80 bg-green-400/10 px-2 py-0.5 rounded">
                     <FileIcon size={12} /> Digital Download
@@ -136,7 +155,9 @@ export default async function ProductPage({
                 {product.title}
               </h1>
               <p className="text-2xl text-white font-light">
-                {product.is_free || product.price === 0 ? "Free" : formatPrice(product.price)}
+                {product.is_free || product.price === 0
+                  ? "Free"
+                  : formatPrice(product.price)}
               </p>
             </div>
 

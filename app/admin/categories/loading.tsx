@@ -7,7 +7,3 @@ export default function CategoriesLoading() {
     </div>
   );
 }
-
-
-
-

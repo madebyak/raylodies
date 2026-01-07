@@ -48,11 +48,7 @@ function NavLink({ href, label, isActive, showIcon }: NavLinkProps) {
         }}
       >
         {showIcon && (
-          <UserRound
-            size={16}
-            strokeWidth={1}
-            className="text-white"
-          />
+          <UserRound size={16} strokeWidth={1} className="text-white" />
         )}
         {label}
       </motion.span>
@@ -110,7 +106,7 @@ export default function Header() {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled
           ? "bg-black/80 backdrop-blur-md border-b border-white/5"
-          : "bg-transparent"
+          : "bg-transparent",
       )}
     >
       <nav className="max-w-[1800px] mx-auto px-6 md:px-10 h-16 md:h-20 flex items-center justify-between">
@@ -179,11 +175,15 @@ export default function Header() {
                       "inline-flex items-center gap-2 text-lg font-light transition-colors duration-300",
                       pathname === link.href
                         ? "text-white"
-                        : "text-white hover:text-white/80"
+                        : "text-white hover:text-white/80",
                     )}
                   >
                     {link.isUserLink && user && (
-                      <UserRound size={18} strokeWidth={1} className="text-white" />
+                      <UserRound
+                        size={18}
+                        strokeWidth={1}
+                        className="text-white"
+                      />
                     )}
                     {link.label}
                   </Link>

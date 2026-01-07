@@ -7,7 +7,8 @@ export function cn(...inputs: ClassValue[]) {
 
 // Format price with currency
 export function formatPrice(price: number, currency: string = "USD"): string {
-  const isWholeNumber = Number.isFinite(price) && Math.abs(price - Math.round(price)) < 1e-9;
+  const isWholeNumber =
+    Number.isFinite(price) && Math.abs(price - Math.round(price)) < 1e-9;
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
@@ -29,7 +30,7 @@ export function getCurrentTime(timezone: string = "Asia/Dubai"): string {
 // Debounce function
 export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
@@ -39,6 +40,9 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
 }
 
 // Generate stagger delay for animations
-export function getStaggerDelay(index: number, baseDelay: number = 0.1): number {
+export function getStaggerDelay(
+  index: number,
+  baseDelay: number = 0.1,
+): number {
   return index * baseDelay;
 }

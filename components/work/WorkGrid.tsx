@@ -12,13 +12,23 @@ const categories = [
   { value: "ai-videos", label: "AI Videos" },
 ];
 
-export default function WorkGrid({ initialProjects }: { initialProjects: ProjectListItem[] }) {
+export default function WorkGrid({
+  initialProjects,
+}: {
+  initialProjects: ProjectListItem[];
+}) {
   const [activeCategory, setActiveCategory] = useState("all");
 
   const filteredProjects =
     activeCategory === "all"
       ? initialProjects
-      : initialProjects.filter((p) => p.categories?.slug === activeCategory || p.categories?.name.toLowerCase().includes(activeCategory.replace('ai-', '')));
+      : initialProjects.filter(
+          (p) =>
+            p.categories?.slug === activeCategory ||
+            p.categories?.name
+              .toLowerCase()
+              .includes(activeCategory.replace("ai-", "")),
+        );
 
   return (
     <div className="space-y-10">

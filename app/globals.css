@@ -11,11 +11,11 @@
   --color-border: rgba(255, 255, 255, 0.1);
   --color-border-hover: rgba(255, 255, 255, 0.2);
   --color-accent: #6d15f9;
-  
+
   --font-light: 300;
   --font-regular: 400;
   --font-medium: 500;
-  
+
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
 }
@@ -100,15 +100,15 @@ img {
   .text-balance {
     text-wrap: balance;
   }
-  
+
   .animate-fade-in {
     animation: fadeIn 0.6s var(--ease-out-expo) forwards;
   }
-  
+
   .animate-slide-up {
     animation: slideUp 0.6s var(--ease-out-expo) forwards;
   }
-  
+
   .animate-slide-down {
     animation: slideDown 0.6s var(--ease-out-expo) forwards;
   }
@@ -197,4 +197,3 @@ video {
   max-width: 100%;
   height: auto;
 }
-

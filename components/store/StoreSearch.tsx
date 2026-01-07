@@ -5,7 +5,11 @@ import { Search } from "lucide-react";
 import ProductGrid from "@/components/store/ProductGrid";
 import type { ProductListItem } from "@/types/database";
 
-export default function StoreSearch({ initialProducts }: { initialProducts: ProductListItem[] }) {
+export default function StoreSearch({
+  initialProducts,
+}: {
+  initialProducts: ProductListItem[];
+}) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -14,7 +18,9 @@ export default function StoreSearch({ initialProducts }: { initialProducts: Prod
 
     return initialProducts.filter((p) => {
       const inTitle = p.title?.toLowerCase().includes(q);
-      const inKeywords = (p.keywords || []).some((k) => k.toLowerCase().includes(q));
+      const inKeywords = (p.keywords || []).some((k) =>
+        k.toLowerCase().includes(q),
+      );
       return inTitle || inKeywords;
     });
   }, [initialProducts, query]);
@@ -43,5 +49,3 @@ export default function StoreSearch({ initialProducts }: { initialProducts: Prod
     </div>
   );
 }
-
-

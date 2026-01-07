@@ -28,7 +28,12 @@ const nextConfig: NextConfig = {
 
     const hsts =
       process.env.NODE_ENV === "production"
-        ? [{ key: "Strict-Transport-Security", value: "max-age=15552000; includeSubDomains" }]
+        ? [
+            {
+              key: "Strict-Transport-Security",
+              value: "max-age=15552000; includeSubDomains",
+            },
+          ]
         : [];
 
     return [
@@ -41,4 +46,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-

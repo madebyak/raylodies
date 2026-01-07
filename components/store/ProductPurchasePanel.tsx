@@ -33,7 +33,9 @@ export default function ProductPurchasePanel({
     let mounted = true;
     async function run() {
       try {
-        const res = await fetch(`/api/purchases/${productId}`, { cache: "no-store" });
+        const res = await fetch(`/api/purchases/${productId}`, {
+          cache: "no-store",
+        });
         if (!res.ok) throw new Error(`status ${res.status}`);
         const json = (await res.json()) as { hasPurchased?: boolean };
         if (!mounted) return;
@@ -56,7 +58,9 @@ export default function ProductPurchasePanel({
   async function refresh() {
     setIsRefreshing(true);
     try {
-      const res = await fetch(`/api/purchases/${productId}`, { cache: "no-store" });
+      const res = await fetch(`/api/purchases/${productId}`, {
+        cache: "no-store",
+      });
       if (!res.ok) return;
       const json = (await res.json()) as { hasPurchased?: boolean };
       setHasPurchased(!!json.hasPurchased);
@@ -78,12 +82,16 @@ export default function ProductPurchasePanel({
       });
 
       if (res.status === 401) {
-        router.push(`/login?redirect=${encodeURIComponent(`/store/${productSlug}`)}`);
+        router.push(
+          `/login?redirect=${encodeURIComponent(`/store/${productSlug}`)}`,
+        );
         return;
       }
 
       if (!res.ok) {
-        const msg = (await res.json().catch(() => null)) as { error?: string } | null;
+        const msg = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
         toast.error(msg?.error || "Failed to claim free product.");
         return;
       }
@@ -121,7 +129,10 @@ export default function ProductPurchasePanel({
         <span>You own this product</span>
       </div>
       <Link href="/account/downloads">
-        <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
+        <Button
+          variant="secondary"
+          className="w-full flex items-center justify-center gap-2"
+        >
           <Download size={18} />
           Go to Downloads
         </Button>
@@ -138,7 +149,11 @@ export default function ProductPurchasePanel({
             disabled={isClaiming || !hasFile}
           >
             <Download size={18} />
-            {hasFile ? (isClaiming ? "Claiming…" : "Get Free Download") : "No file attached"}
+            {hasFile
+              ? isClaiming
+                ? "Claiming…"
+                : "Get Free Download"
+              : "No file attached"}
           </Button>
           <p className="text-center text-xs text-white/30">
             Free download • Login required
@@ -146,18 +161,31 @@ export default function ProductPurchasePanel({
         </>
       ) : paddlePriceId ? (
         <>
-          <BuyButton priceId={paddlePriceId} productId={productId} productSlug={productSlug} />
+          <BuyButton
+            priceId={paddlePriceId}
+            productId={productId}
+            productSlug={productSlug}
+          />
           <p className="text-center text-[11px] text-white/40 leading-relaxed">
             By purchasing, you agree to our{" "}
-            <Link href="/terms" className="text-white/70 hover:text-white transition-colors">
+            <Link
+              href="/terms"
+              className="text-white/70 hover:text-white transition-colors"
+            >
               Terms
             </Link>
             ,{" "}
-            <Link href="/privacy" className="text-white/70 hover:text-white transition-colors">
+            <Link
+              href="/privacy"
+              className="text-white/70 hover:text-white transition-colors"
+            >
               Privacy Policy
             </Link>{" "}
             and{" "}
-            <Link href="/refund" className="text-white/70 hover:text-white transition-colors">
+            <Link
+              href="/refund"
+              className="text-white/70 hover:text-white transition-colors"
+            >
               Refund Policy
             </Link>
             .
@@ -179,10 +207,10 @@ export default function ProductPurchasePanel({
         {isRefreshing ? "Refreshing…" : "Refresh purchase status"}
       </Button>
       <p className="text-center text-xs text-white/30">
-        {isFree ? "Instant access after login" : "Secure payment via Paddle • Instant download"}
+        {isFree
+          ? "Instant access after login"
+          : "Secure payment via Paddle • Instant download"}
       </p>
     </div>
   );
 }
-
-

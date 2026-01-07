@@ -126,7 +126,10 @@ export function TextReveal({
 }
 
 // Split text helper
-function splitText(text: string, splitBy: "lines" | "words" | "chars"): string[] {
+function splitText(
+  text: string,
+  splitBy: "lines" | "words" | "chars",
+): string[] {
   switch (splitBy) {
     case "lines":
       return text.split("\n").filter(Boolean);
@@ -230,8 +233,15 @@ function processChildren(children: ReactNode, variants: Variants): ReactNode {
   }
 
   // Handle React elements (like <span className="text-white">)
-  if (typeof children === "object" && children !== null && "props" in children) {
-    const element = children as React.ReactElement<{ children?: ReactNode; className?: string }>;
+  if (
+    typeof children === "object" &&
+    children !== null &&
+    "props" in children
+  ) {
+    const element = children as React.ReactElement<{
+      children?: ReactNode;
+      className?: string;
+    }>;
     const { children: innerChildren, className, ...props } = element.props;
 
     if (typeof innerChildren === "string") {
@@ -251,7 +261,11 @@ function processChildren(children: ReactNode, variants: Variants): ReactNode {
 
     return (
       <span className="inline-block overflow-hidden">
-        <motion.span className={`inline-block ${className || ""}`} variants={variants} {...props}>
+        <motion.span
+          className={`inline-block ${className || ""}`}
+          variants={variants}
+          {...props}
+        >
           {innerChildren}
         </motion.span>
       </span>
@@ -500,4 +514,3 @@ export function ButtonReveal({
     </motion.div>
   );
 }
-

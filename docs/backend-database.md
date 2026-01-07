@@ -27,14 +27,14 @@ This document outlines the recommended backend architecture for Raylodies, cover
 
 ### Primary Stack
 
-| Layer | Technology | Rationale |
-|-------|------------|-----------|
-| **Database** | Supabase (PostgreSQL) | Real-time, Row Level Security, excellent DX |
-| **Auth** | Supabase Auth | Built-in, supports OAuth, magic links |
-| **Storage** | Supabase Storage | Integrated with auth, CDN-ready |
-| **Payments** | Paddle.com | Handles taxes, global payments, digital products |
-| **API** | Next.js Server Actions + API Routes | Type-safe, serverless, integrated |
-| **Admin UI** | Custom Next.js pages under `/admin` | Full control, matches site design |
+| Layer        | Technology                          | Rationale                                        |
+| ------------ | ----------------------------------- | ------------------------------------------------ |
+| **Database** | Supabase (PostgreSQL)               | Real-time, Row Level Security, excellent DX      |
+| **Auth**     | Supabase Auth                       | Built-in, supports OAuth, magic links            |
+| **Storage**  | Supabase Storage                    | Integrated with auth, CDN-ready                  |
+| **Payments** | Paddle.com                          | Handles taxes, global payments, digital products |
+| **API**      | Next.js Server Actions + API Routes | Type-safe, serverless, integrated                |
+| **Admin UI** | Custom Next.js pages under `/admin` | Full control, matches site design                |
 
 ### Why Supabase Over Alternatives?
 
@@ -64,18 +64,18 @@ This document outlines the recommended backend architecture for Raylodies, cover
 
 ### Permission Matrix
 
-| Action | Guest | Customer | Super Admin |
-|--------|-------|----------|-------------|
-| View Work | ✅ | ✅ | ✅ |
-| View Store | ✅ | ✅ | ✅ |
-| Purchase Products | ❌ | ✅ | ✅ |
-| View Purchase History | ❌ | ✅ (own) | ✅ (all) |
-| Download Purchased Files | ❌ | ✅ (own) | ✅ |
-| Access Dashboard | ❌ | ❌ | ✅ |
-| Manage Work/Projects | ❌ | ❌ | ✅ |
-| Manage Products | ❌ | ❌ | ✅ |
-| Manage Users | ❌ | ❌ | ✅ |
-| View Analytics | ❌ | ❌ | ✅ |
+| Action                   | Guest | Customer | Super Admin |
+| ------------------------ | ----- | -------- | ----------- |
+| View Work                | ✅    | ✅       | ✅          |
+| View Store               | ✅    | ✅       | ✅          |
+| Purchase Products        | ❌    | ✅       | ✅          |
+| View Purchase History    | ❌    | ✅ (own) | ✅ (all)    |
+| Download Purchased Files | ❌    | ✅ (own) | ✅          |
+| Access Dashboard         | ❌    | ❌       | ✅          |
+| Manage Work/Projects     | ❌    | ❌       | ✅          |
+| Manage Products          | ❌    | ❌       | ✅          |
+| Manage Users             | ❌    | ❌       | ✅          |
+| View Analytics           | ❌    | ❌       | ✅          |
 
 ---
 
@@ -180,12 +180,14 @@ CREATE TABLE users (
 ```
 
 **Why this matters:**
+
 - Supabase Auth creates users in `auth.users` table
 - Your `public.users` is a "profile" table extending auth
 - `auth.uid()` in RLS policies returns the auth.users ID
 - If you generate your own ID, `auth.uid() = id` will NEVER match!
 
 **Auto-create profile on signup (Database Trigger):**
+
 ```sql
 -- Trigger function to create profile when user signs up
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -209,11 +211,13 @@ CREATE TRIGGER on_auth_user_created
 ```
 
 This trigger:
+
 - Automatically creates a `public.users` row when someone signs up
 - Syncs the avatar from Google OAuth if available
 - Prevents "User not found" errors in your app
 
 #### `categories` Table
+
 ```sql
 CREATE TABLE categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -240,20 +244,21 @@ The `type` field prevents mixing up project and product categories, but the data
 ```typescript
 // In Project edit form - only show project categories
 const { data: categories } = await supabase
-  .from('categories')
-  .select('*')
-  .eq('type', 'project');
+  .from("categories")
+  .select("*")
+  .eq("type", "project");
 
 // In Product edit form - only show product categories
 const { data: categories } = await supabase
-  .from('categories')
-  .select('*')
-  .eq('type', 'product');
+  .from("categories")
+  .select("*")
+  .eq("type", "product");
 ```
 
 Without this, you could accidentally assign a product to "AI Images" (a project category).
 
 #### `projects` Table
+
 ```sql
 CREATE TABLE projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -272,6 +277,7 @@ CREATE TABLE projects (
 ```
 
 #### `project_media` Table
+
 ```sql
 CREATE TABLE project_media (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -287,7 +293,7 @@ CREATE TABLE project_media (
 -- ✅ Multiple image projects (gallery)
 -- ✅ Single video projects
 -- ✅ Mixed image + video projects
--- 
+--
 -- Example: A project with 3 images and 1 video
 -- INSERT INTO project_media (project_id, type, url, display_order) VALUES
 --   ('proj-uuid', 'image', 'https://...img1.jpg', 0),
@@ -297,6 +303,7 @@ CREATE TABLE project_media (
 ```
 
 #### `products` Table
+
 ```sql
 CREATE TABLE products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -316,6 +323,7 @@ CREATE TABLE products (
 ```
 
 #### `product_images` Table
+
 ```sql
 CREATE TABLE product_images (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -338,6 +346,7 @@ CREATE TABLE product_images (
 ```
 
 #### `product_keywords` Table
+
 ```sql
 CREATE TABLE product_keywords (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -348,6 +357,7 @@ CREATE TABLE product_keywords (
 ```
 
 #### `orders` Table
+
 ```sql
 CREATE TABLE orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -364,6 +374,7 @@ CREATE TABLE orders (
 ```
 
 #### `order_items` Table
+
 ```sql
 CREATE TABLE order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -375,6 +386,7 @@ CREATE TABLE order_items (
 ```
 
 #### `inquiries` Table (Contact Form)
+
 ```sql
 CREATE TABLE inquiries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -436,12 +448,12 @@ CREATE TABLE inquiries (
 ```typescript
 // Recommended auth options
 const authOptions = {
-  providers: ['google', 'email'],
+  providers: ["google", "email"],
   emailAuth: {
     enableMagicLink: true,
     enablePassword: true,
   },
-  redirectTo: '/auth/callback',
+  redirectTo: "/auth/callback",
 };
 ```
 
@@ -451,12 +463,12 @@ const authOptions = {
 // middleware.ts
 export function middleware(request: NextRequest) {
   // Protect admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  if (request.nextUrl.pathname.startsWith("/admin")) {
     // Check for valid session and super_admin role
   }
-  
+
   // Protect customer account routes
-  if (request.nextUrl.pathname.startsWith('/account')) {
+  if (request.nextUrl.pathname.startsWith("/account")) {
     // Check for valid session
   }
 }
@@ -500,6 +512,7 @@ export function middleware(request: NextRequest) {
 The main dashboard provides an at-a-glance view of everything important.
 
 #### Layout
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  SIDEBAR          │  MAIN CONTENT                               │
@@ -535,14 +548,14 @@ The main dashboard provides an at-a-glance view of everything important.
 
 #### Key Metrics Cards
 
-| Metric | Description | Comparison |
-|--------|-------------|------------|
-| **Revenue** | Total revenue this month | vs last month % |
-| **Orders** | Total orders this month | vs last month % |
-| **Customers** | New customers this month | vs last month % |
-| **Inquiries** | Pending inquiries count | Badge if > 0 |
-| **Conversion Rate** | Orders / Product Views | vs last month % |
-| **Avg Order Value** | Revenue / Orders | vs last month % |
+| Metric              | Description              | Comparison      |
+| ------------------- | ------------------------ | --------------- |
+| **Revenue**         | Total revenue this month | vs last month % |
+| **Orders**          | Total orders this month  | vs last month % |
+| **Customers**       | New customers this month | vs last month % |
+| **Inquiries**       | Pending inquiries count  | Badge if > 0    |
+| **Conversion Rate** | Orders / Product Views   | vs last month % |
+| **Avg Order Value** | Revenue / Orders         | vs last month % |
 
 #### Dashboard Widgets
 
@@ -592,6 +605,7 @@ The main dashboard provides an at-a-glance view of everything important.
 ```
 
 **Metrics Available:**
+
 - Total Revenue (with period comparison)
 - Total Orders
 - Average Order Value
@@ -642,6 +656,7 @@ This page displays data from **Google Analytics 4** (or alternative).
 #### Option 1: Google Analytics 4 (Recommended)
 
 **Pros:**
+
 - Free and powerful
 - Industry standard
 - E-commerce tracking
@@ -649,6 +664,7 @@ This page displays data from **Google Analytics 4** (or alternative).
 - Conversion funnels
 
 **Integration:**
+
 ```typescript
 // app/layout.tsx
 import { GoogleAnalytics } from '@next/third-parties/google';
@@ -664,6 +680,7 @@ export default function RootLayout({ children }) {
 ```
 
 **E-commerce Events to Track:**
+
 ```typescript
 // Track product view
 gtag('event', 'view_item', {
@@ -686,6 +703,7 @@ gtag('event', 'purchase', {
 ```
 
 **Display in Admin Dashboard:**
+
 - Use **Google Analytics Data API** to fetch data
 - Or embed GA4 reports via iframe (simpler)
 - Or use a library like `@google-analytics/data`
@@ -693,12 +711,14 @@ gtag('event', 'purchase', {
 #### Option 2: Vercel Analytics (If hosting on Vercel)
 
 **Pros:**
+
 - Zero config
 - Privacy-focused
 - Real-time
 - Core Web Vitals
 
 **Integration:**
+
 ```typescript
 // app/layout.tsx
 import { Analytics } from '@vercel/analytics/react';
@@ -720,18 +740,21 @@ export default function RootLayout({ children }) {
 #### Option 3: Plausible (Privacy-Focused Alternative)
 
 **Pros:**
+
 - GDPR compliant (no cookie banner needed)
 - Simple, clean dashboard
 - Self-hostable or cloud
 - Lightweight (< 1KB)
 
 **Cons:**
+
 - Paid ($9/month for 10k views)
 - Less detailed than GA4
 
 #### Option 4: PostHog (Product Analytics)
 
 **Pros:**
+
 - Session recordings
 - Feature flags
 - A/B testing
@@ -742,13 +765,14 @@ export default function RootLayout({ children }) {
 
 ### Recommended Analytics Stack
 
-| Tool | Purpose | Cost |
-|------|---------|------|
-| **Google Analytics 4** | Traffic, audience, conversions | Free |
-| **Vercel Analytics** | Performance, Core Web Vitals | Free tier |
-| **Custom Dashboard** | Sales data from Supabase | Built-in |
+| Tool                   | Purpose                        | Cost      |
+| ---------------------- | ------------------------------ | --------- |
+| **Google Analytics 4** | Traffic, audience, conversions | Free      |
+| **Vercel Analytics**   | Performance, Core Web Vitals   | Free tier |
+| **Custom Dashboard**   | Sales data from Supabase       | Built-in  |
 
 **Why this combo?**
+
 1. **GA4** handles traffic analytics (no need to rebuild this)
 2. **Vercel Analytics** for performance monitoring
 3. **Custom dashboard** for sales/order data from your database
@@ -758,6 +782,7 @@ export default function RootLayout({ children }) {
 ### Page 3: Projects Management (`/admin/projects`)
 
 #### List View
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  PROJECTS                                    [+ New Project]     │
@@ -779,6 +804,7 @@ export default function RootLayout({ children }) {
 ```
 
 #### Edit View (`/admin/projects/[id]`)
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  ← Back to Projects           EDIT PROJECT            [Save]    │
@@ -836,6 +862,7 @@ export default function RootLayout({ children }) {
 Similar to Projects but with additional fields:
 
 #### Product Edit View
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  ← Back to Products          EDIT PRODUCT            [Save]     │
@@ -913,6 +940,7 @@ Similar to Projects but with additional fields:
 ```
 
 #### Order Detail View (`/admin/orders/[id]`)
+
 - Order summary
 - Customer info (link to customer profile)
 - Products purchased
@@ -941,6 +969,7 @@ Similar to Projects but with additional fields:
 ```
 
 #### Customer Detail (`/admin/customers/[id]`)
+
 - Profile info
 - Order history
 - Total lifetime value
@@ -973,6 +1002,7 @@ Similar to Projects but with additional fields:
 ```
 
 #### Inquiry Detail (`/admin/inquiries/[id]`)
+
 - Full message
 - Customer info
 - Budget range
@@ -986,6 +1016,7 @@ Similar to Projects but with additional fields:
 ### Page 8: Settings (`/admin/settings`)
 
 #### General Settings
+
 - Site name
 - Logo upload
 - Contact email
@@ -993,22 +1024,22 @@ Similar to Projects but with additional fields:
 - Default currency
 
 #### SEO Settings
+
 - Default meta title template
 - Default meta description
 - Default OG image
 - Google Search Console verification
 
 #### Integration Settings
+
 - **Paddle**
   - API Key (masked)
   - Webhook Secret (masked)
   - Environment (Sandbox/Production)
   - Test connection button
-  
 - **Google Analytics**
   - GA4 Measurement ID
   - Enable/Disable toggle
-  
 - **Email (Future)**
   - SMTP settings or Resend API key
   - Email templates
@@ -1045,17 +1076,17 @@ CREATE INDEX idx_product_views_product ON product_views(product_id);
 
 ### Admin Dashboard Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| **Charts** | Recharts or Chart.js |
-| **Tables** | TanStack Table (sorting, filtering, pagination) |
-| **Forms** | React Hook Form + Zod validation |
-| **Rich Text** | Tiptap or Slate |
-| **Drag & Drop** | @dnd-kit/core |
-| **Date Picker** | react-day-picker |
-| **File Upload** | react-dropzone |
-| **Toasts** | Sonner |
-| **Modals** | Radix UI Dialog |
+| Component       | Technology                                      |
+| --------------- | ----------------------------------------------- |
+| **Charts**      | Recharts or Chart.js                            |
+| **Tables**      | TanStack Table (sorting, filtering, pagination) |
+| **Forms**       | React Hook Form + Zod validation                |
+| **Rich Text**   | Tiptap or Slate                                 |
+| **Drag & Drop** | @dnd-kit/core                                   |
+| **Date Picker** | react-day-picker                                |
+| **File Upload** | react-dropzone                                  |
+| **Toasts**      | Sonner                                          |
+| **Modals**      | Radix UI Dialog                                 |
 
 ### Project Management Features
 
@@ -1116,12 +1147,12 @@ CREATE INDEX idx_product_views_product ON product_views(product_id);
 
 ### Storage Provider Comparison
 
-| Provider | Free Tier | Pricing | Best For | Recommendation |
-|----------|-----------|---------|----------|----------------|
-| **Supabase Storage** | 1GB | $0.021/GB/month | Integrated solution | ✅ **Recommended** |
-| **Vercel Blob** | 1GB | $0.15/GB/month | Edge delivery | Alternative |
-| **Cloudinary** | 25GB | Complex pricing | Image transforms | Overkill |
-| **AWS S3** | 5GB (12mo) | $0.023/GB/month | Enterprise scale | Too complex |
+| Provider             | Free Tier  | Pricing         | Best For            | Recommendation     |
+| -------------------- | ---------- | --------------- | ------------------- | ------------------ |
+| **Supabase Storage** | 1GB        | $0.021/GB/month | Integrated solution | ✅ **Recommended** |
+| **Vercel Blob**      | 1GB        | $0.15/GB/month  | Edge delivery       | Alternative        |
+| **Cloudinary**       | 25GB       | Complex pricing | Image transforms    | Overkill           |
+| **AWS S3**           | 5GB (12mo) | $0.023/GB/month | Enterprise scale    | Too complex        |
 
 ### Why Supabase Storage?
 
@@ -1137,17 +1168,20 @@ CREATE INDEX idx_product_views_product ON product_views(product_id);
 > ⚠️ **IMPORTANT**: Supabase Storage is NOT a video streaming server!
 
 **The Problem:**
+
 - Supabase serves files as direct downloads
 - A 100MB video must download significantly before playback starts
 - No adaptive bitrate streaming (quality doesn't adjust to internet speed)
 - No HLS/DASH support
 
 **When Supabase Storage is OK for videos:**
+
 - ✅ Short loops (< 10 seconds, < 20MB)
 - ✅ Background videos that can buffer
 - ✅ Downloadable video products (not streaming)
 
 **When you need a dedicated video service:**
+
 - ❌ Long-form portfolio videos (> 30 seconds)
 - ❌ Cinematic showreels
 - ❌ Videos that need instant playback
@@ -1155,12 +1189,12 @@ CREATE INDEX idx_product_views_product ON product_views(product_id);
 
 #### Recommended Video Hosting Options
 
-| Service | Best For | Pricing | Features |
-|---------|----------|---------|----------|
-| **Mux** | Professional streaming | $0.007/min watched | HLS, analytics, thumbnails |
-| **Cloudflare Stream** | Simple & cheap | $5/1000 min stored | HLS, no egress fees |
-| **YouTube/Vimeo** | Free embedding | Free | Easy, but branded |
-| **Bunny Stream** | Budget option | $0.005/min | HLS, global CDN |
+| Service               | Best For               | Pricing            | Features                   |
+| --------------------- | ---------------------- | ------------------ | -------------------------- |
+| **Mux**               | Professional streaming | $0.007/min watched | HLS, analytics, thumbnails |
+| **Cloudflare Stream** | Simple & cheap         | $5/1000 min stored | HLS, no egress fees        |
+| **YouTube/Vimeo**     | Free embedding         | Free               | Easy, but branded          |
+| **Bunny Stream**      | Budget option          | $0.005/min         | HLS, global CDN            |
 
 #### Hybrid Approach (Recommended)
 
@@ -1190,7 +1224,7 @@ CREATE INDEX idx_product_views_product ON product_views(product_id);
 -- 1. Supabase URL for images/short clips
 -- 2. Mux playback ID for streaming videos
 
-ALTER TABLE project_media ADD COLUMN video_provider TEXT 
+ALTER TABLE project_media ADD COLUMN video_provider TEXT
   CHECK (video_provider IN ('supabase', 'mux', 'cloudflare', 'youtube', 'vimeo'));
 
 -- Example entries:
@@ -1205,21 +1239,21 @@ ALTER TABLE project_media ADD COLUMN video_provider TEXT
 // components/VideoPlayer.tsx
 import MuxPlayer from '@mux/mux-player-react';
 
-export function VideoPlayer({ 
-  url, 
-  provider 
-}: { 
-  url: string; 
-  provider: 'supabase' | 'mux' | 'youtube' 
+export function VideoPlayer({
+  url,
+  provider
+}: {
+  url: string;
+  provider: 'supabase' | 'mux' | 'youtube'
 }) {
   if (provider === 'mux') {
     return <MuxPlayer playbackId={url} />;
   }
-  
+
   if (provider === 'youtube') {
     return <iframe src={`https://youtube.com/embed/${url}`} />;
   }
-  
+
   // Supabase / direct URL
   return <video src={url} controls />;
 }
@@ -1257,6 +1291,7 @@ export function VideoPlayer({
 **Where to store:** Private Supabase Storage bucket `product-files`
 
 **File structure:**
+
 ```
 product-files/                          # PRIVATE BUCKET
 ├── products/
@@ -1269,9 +1304,10 @@ product-files/                          # PRIVATE BUCKET
 ```
 
 **Database storage:**
+
 ```sql
 -- The file_url in products table stores the path within the bucket
-UPDATE products 
+UPDATE products
 SET file_url = 'products/cinematic-landscapes-preset/Cinematic-Landscapes-Pack-v1.0.zip'
 WHERE slug = 'cinematic-landscapes-preset';
 ```
@@ -1286,6 +1322,7 @@ WHERE slug = 'cinematic-landscapes-preset';
 | Cost | $0.021/GB/month after 1GB free |
 
 **Alternative for very large files (>5GB):**
+
 - Use **Backblaze B2** + Cloudflare R2 (S3-compatible, cheaper)
 - But for typical preset/asset .zip files (10MB - 500MB), Supabase is perfect
 
@@ -1325,65 +1362,68 @@ Customer clicks "Download"
 
 ```typescript
 // app/api/downloads/[productId]/route.ts
-import { createClient } from '@supabase/supabase-js';
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { createClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: { productId: string } },
 ) {
   // 1. Get authenticated user
   const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_ANON_KEY!,
-    { cookies }
+    { cookies },
   );
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
   // 2. Verify user purchased this product
   const { data: purchase } = await supabase
-    .from('order_items')
-    .select(`
+    .from("order_items")
+    .select(
+      `
       id,
       order:orders!inner(user_id, status),
       product:products!inner(file_url, title)
-    `)
-    .eq('product_id', params.productId)
-    .eq('order.user_id', user.id)
-    .eq('order.status', 'completed')
+    `,
+    )
+    .eq("product_id", params.productId)
+    .eq("order.user_id", user.id)
+    .eq("order.status", "completed")
     .single();
-  
+
   if (!purchase) {
     return NextResponse.json(
-      { error: 'Product not purchased' }, 
-      { status: 403 }
+      { error: "Product not purchased" },
+      { status: 403 },
     );
   }
-  
+
   // 3. Generate signed URL (60 minute expiry)
   const supabaseAdmin = createClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY! // Service role for storage access
+    process.env.SUPABASE_SERVICE_ROLE_KEY!, // Service role for storage access
   );
-  
-  const { data: signedUrl, error } = await supabaseAdmin
-    .storage
-    .from('product-files')
+
+  const { data: signedUrl, error } = await supabaseAdmin.storage
+    .from("product-files")
     .createSignedUrl(purchase.product.file_url, 3600); // 3600 seconds = 1 hour
-  
+
   if (error || !signedUrl) {
     return NextResponse.json(
-      { error: 'Failed to generate download' }, 
-      { status: 500 }
+      { error: "Failed to generate download" },
+      { status: 500 },
     );
   }
-  
+
   // 4. Redirect to signed URL (browser will download)
   return NextResponse.redirect(signedUrl.signedUrl);
 }
@@ -1397,6 +1437,7 @@ export async function GET(
    - Set to **Private** (not public)
 
 2. **RLS Policy for bucket:**
+
    ```sql
    -- Only allow service role to access (via API)
    -- No direct user access to this bucket
@@ -1414,35 +1455,35 @@ export async function GET(
 
 ```typescript
 // actions/products.ts
-'use server'
+"use server";
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 export async function uploadProductFile(productId: string, formData: FormData) {
   // Use service role for admin operations
   const supabase = createClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
-  
-  const file = formData.get('file') as File;
+
+  const file = formData.get("file") as File;
   const fileName = `products/${productId}/${file.name}`;
-  
+
   // Upload to private bucket
   const { error } = await supabase.storage
-    .from('product-files')
+    .from("product-files")
     .upload(fileName, file, {
       upsert: true, // Replace if exists
     });
-  
+
   if (error) throw error;
-  
+
   // Update product with file path
   await supabase
-    .from('products')
+    .from("products")
     .update({ file_url: fileName })
-    .eq('id', productId);
-  
+    .eq("id", productId);
+
   return { success: true };
 }
 ```
@@ -1453,28 +1494,29 @@ export async function uploadProductFile(productId: string, formData: FormData) {
 
 ### Why Paddle Over Stripe?
 
-| Feature | Paddle | Stripe |
-|---------|--------|--------|
-| **Merchant of Record** | ✅ Yes (handles everything) | ❌ No (you handle taxes) |
-| **Tax Compliance** | ✅ Automatic global VAT/GST | ❌ Stripe Tax (extra setup) |
-| **Invoicing** | ✅ Paddle handles | ❌ You handle |
-| **Chargebacks** | ✅ Paddle handles | ❌ You handle |
-| **Digital Products** | ✅ Designed for this | ✅ Works but generic |
-| **Setup Complexity** | ✅ Simple | ⚠️ More configuration |
-| **Fees** | 5% + $0.50 | 2.9% + $0.30 |
+| Feature                | Paddle                      | Stripe                      |
+| ---------------------- | --------------------------- | --------------------------- |
+| **Merchant of Record** | ✅ Yes (handles everything) | ❌ No (you handle taxes)    |
+| **Tax Compliance**     | ✅ Automatic global VAT/GST | ❌ Stripe Tax (extra setup) |
+| **Invoicing**          | ✅ Paddle handles           | ❌ You handle               |
+| **Chargebacks**        | ✅ Paddle handles           | ❌ You handle               |
+| **Digital Products**   | ✅ Designed for this        | ✅ Works but generic        |
+| **Setup Complexity**   | ✅ Simple                   | ⚠️ More configuration       |
+| **Fees**               | 5% + $0.50                  | 2.9% + $0.30                |
 
 **Verdict:** For digital products sold globally, Paddle's higher fee is worth it because it eliminates tax compliance headaches.
 
 ### Paddle Billing (Latest API - 2024)
 
 Paddle has two APIs:
+
 - **Paddle Classic** (Legacy) - Being phased out
 - **Paddle Billing** (Current) - Use this one ✅
 
 ### Setup Requirements
 
 1. **Paddle Account**: https://paddle.com (sandbox available for testing)
-2. **API Keys**: 
+2. **API Keys**:
    - `PADDLE_API_KEY` (Server-side)
    - `PADDLE_CLIENT_TOKEN` (Client-side, for Paddle.js)
 3. **Webhook Secret**: For verifying webhook signatures
@@ -1493,31 +1535,33 @@ NEXT_PUBLIC_PADDLE_ENVIRONMENT=sandbox  # or 'production'
 
 ```typescript
 // lib/paddle/client.ts
-import { initializePaddle, Paddle } from '@paddle/paddle-js';
+import { initializePaddle, Paddle } from "@paddle/paddle-js";
 
 let paddleInstance: Paddle | null = null;
 
 export async function getPaddle(): Promise<Paddle> {
   if (paddleInstance) return paddleInstance;
-  
+
   paddleInstance = await initializePaddle({
-    environment: process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT as 'sandbox' | 'production',
+    environment: process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT as
+      | "sandbox"
+      | "production",
     token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
   });
-  
+
   return paddleInstance;
 }
 
 // Open checkout
 export async function openCheckout(priceId: string, customerEmail?: string) {
   const paddle = await getPaddle();
-  
+
   paddle.Checkout.open({
     items: [{ priceId, quantity: 1 }],
     customer: customerEmail ? { email: customerEmail } : undefined,
     settings: {
-      displayMode: 'overlay',
-      theme: 'dark',
+      displayMode: "overlay",
+      theme: "dark",
       successUrl: `${window.location.origin}/checkout/success?txn={transaction_id}`,
     },
   });
@@ -1537,29 +1581,29 @@ export async function openCheckout(priceId: string, customerEmail?: string) {
 import { openCheckout } from '@/lib/paddle/client';
 import { useUser } from '@/hooks/useUser'; // Your auth hook
 
-export function BuyButton({ 
-  priceId, 
+export function BuyButton({
+  priceId,
   productId,
-}: { 
-  priceId: string; 
+}: {
+  priceId: string;
   productId: string;
 }) {
   const { user } = useUser();
-  
+
   const handleBuy = async () => {
     if (!user) {
       // Redirect to login first
       window.location.href = '/login?redirect=/store/' + productId;
       return;
     }
-    
+
     await openCheckout(priceId, {
       userId: user.id,        // ✅ CRITICAL: Pass user ID
       userEmail: user.email,  // For reference
       productId: productId,   // For webhook processing
     });
   };
-  
+
   return (
     <button onClick={handleBuy}>
       Buy Now
@@ -1569,69 +1613,73 @@ export function BuyButton({
 ```
 
 **Updated openCheckout function:**
+
 ```typescript
 // lib/paddle/client.ts
 export async function openCheckout(
-  priceId: string, 
-  customData: { userId: string; userEmail: string; productId: string }
+  priceId: string,
+  customData: { userId: string; userEmail: string; productId: string },
 ) {
   const paddle = await getPaddle();
-  
+
   paddle.Checkout.open({
     items: [{ priceId, quantity: 1 }],
-    customData: customData,  // ✅ Pass user ID to webhook
+    customData: customData, // ✅ Pass user ID to webhook
     customer: { email: customData.userEmail },
     settings: {
-      displayMode: 'overlay',
-      theme: 'dark',
+      displayMode: "overlay",
+      theme: "dark",
       successUrl: `${window.location.origin}/checkout/success?txn={transaction_id}`,
     },
   });
 }
 ```
+
 ```
 
 ### Paddle Integration Flow
 
 ```
+
 ┌─────────────────────────────────────────────────────────────┐
-│                    CHECKOUT FLOW                             │
+│ CHECKOUT FLOW │
 ├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  1. Customer clicks "Buy" on product page                    │
-│         │                                                    │
-│         ▼                                                    │
-│  2. Initialize Paddle.js with client token                   │
-│         │                                                    │
-│         ▼                                                    │
-│  3. Open Paddle Checkout Overlay                             │
-│     paddle.Checkout.open({                                   │
-│       items: [{ priceId: 'pri_xxx', quantity: 1 }],         │
-│       customer: { email: 'user@example.com' },              │
-│     })                                                       │
-│         │                                                    │
-│         ▼                                                    │
-│  4. Customer completes payment in Paddle                     │
-│         │                                                    │
-│         ▼                                                    │
-│  5. Paddle sends webhook to /api/webhooks/paddle             │
-│     Event: "transaction.completed"                           │
-│         │                                                    │
-│         ▼                                                    │
-│  6. Webhook handler:                                         │
-│     - Verify signature with PADDLE_WEBHOOK_SECRET            │
-│     - Extract customer email, transaction ID                 │
-│     - Create/update user if needed                           │
-│     - Create order record                                    │
-│     - Create order_items                                     │
-│     - Grant download access                                  │
-│         │                                                    │
-│         ▼                                                    │
-│  7. Customer redirected to success page                      │
-│     successUrl: /checkout/success?txn={transaction_id}       │
-│                                                              │
+│ │
+│ 1. Customer clicks "Buy" on product page │
+│ │ │
+│ ▼ │
+│ 2. Initialize Paddle.js with client token │
+│ │ │
+│ ▼ │
+│ 3. Open Paddle Checkout Overlay │
+│ paddle.Checkout.open({ │
+│ items: [{ priceId: 'pri_xxx', quantity: 1 }], │
+│ customer: { email: 'user@example.com' }, │
+│ }) │
+│ │ │
+│ ▼ │
+│ 4. Customer completes payment in Paddle │
+│ │ │
+│ ▼ │
+│ 5. Paddle sends webhook to /api/webhooks/paddle │
+│ Event: "transaction.completed" │
+│ │ │
+│ ▼ │
+│ 6. Webhook handler: │
+│ - Verify signature with PADDLE_WEBHOOK_SECRET │
+│ - Extract customer email, transaction ID │
+│ - Create/update user if needed │
+│ - Create order record │
+│ - Create order_items │
+│ - Grant download access │
+│ │ │
+│ ▼ │
+│ 7. Customer redirected to success page │
+│ successUrl: /checkout/success?txn={transaction_id} │
+│ │
 └─────────────────────────────────────────────────────────────┘
-```
+
+````
 
 ### Webhook Handler
 
@@ -1649,14 +1697,14 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const signature = request.headers.get('paddle-signature');
-  
+
   // 1. Verify webhook signature
   if (!verifyPaddleSignature(body, signature)) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
-  
+
   const event = JSON.parse(body);
-  
+
   // 2. Handle event types
   switch (event.event_type) {
     case 'transaction.completed':
@@ -1666,16 +1714,16 @@ export async function POST(request: NextRequest) {
       await handleTransactionRefunded(event.data);
       break;
   }
-  
+
   return NextResponse.json({ received: true });
 }
 
 async function handleTransactionCompleted(data: any) {
   const { id, customer, items, details, custom_data } = data;
-  
+
   // ✅ CRITICAL: Use userId from customData first, fallback to email matching
   let userId: string | null = null;
-  
+
   // Priority 1: Use the logged-in user ID we passed to Paddle
   if (custom_data?.userId) {
     // Verify this user exists
@@ -1684,12 +1732,12 @@ async function handleTransactionCompleted(data: any) {
       .select('id')
       .eq('id', custom_data.userId)
       .single();
-    
+
     if (existingUser) {
       userId = existingUser.id;
     }
   }
-  
+
   // Priority 2: Fallback to email matching (for guest checkout or edge cases)
   if (!userId) {
     const { data: userByEmail } = await supabase
@@ -1697,7 +1745,7 @@ async function handleTransactionCompleted(data: any) {
       .select('id')
       .eq('email', customer.email)
       .single();
-    
+
     if (userByEmail) {
       userId = userByEmail.id;
     } else {
@@ -1706,21 +1754,21 @@ async function handleTransactionCompleted(data: any) {
       // Consider sending them an invite to claim their account
       const { data: newUser } = await supabase
         .from('users')
-        .insert({ 
+        .insert({
           id: crypto.randomUUID(), // Only for guest checkout!
-          email: customer.email 
+          email: customer.email
         })
         .select('id')
         .single();
       userId = newUser?.id || null;
     }
   }
-  
+
   if (!userId) {
     console.error('Failed to identify user for transaction:', id);
     return;
   }
-  
+
   // Create order
   const { data: order } = await supabase
     .from('orders')
@@ -1734,7 +1782,7 @@ async function handleTransactionCompleted(data: any) {
     })
     .select('id')
     .single();
-  
+
   // Create order items
   for (const item of items) {
     // Map Paddle price_id to our product
@@ -1743,7 +1791,7 @@ async function handleTransactionCompleted(data: any) {
       .select('id')
       .eq('paddle_price_id', item.price.id)
       .single();
-      
+
     if (product) {
       await supabase.from('order_items').insert({
         order_id: order.id,
@@ -1752,38 +1800,38 @@ async function handleTransactionCompleted(data: any) {
       });
     }
   }
-  
+
   // Optional: Send confirmation email
   // await sendOrderConfirmationEmail(customer.email, order.id);
 }
 
 function verifyPaddleSignature(payload: string, signature: string | null): boolean {
   if (!signature) return false;
-  
+
   const secret = process.env.PADDLE_WEBHOOK_SECRET!;
   const parts = signature.split(';');
   const timestamp = parts.find(p => p.startsWith('ts='))?.split('=')[1];
   const hash = parts.find(p => p.startsWith('h1='))?.split('=')[1];
-  
+
   const signedPayload = `${timestamp}:${payload}`;
   const expectedHash = crypto
     .createHmac('sha256', secret)
     .update(signedPayload)
     .digest('hex');
-  
+
   return hash === expectedHash;
 }
-```
+````
 
 ### Paddle Webhook Events to Handle
 
-| Event | Action |
-|-------|--------|
-| `transaction.completed` | Create order, grant download access |
-| `transaction.refunded` | Update order status to 'refunded', revoke access |
-| `transaction.payment_failed` | Log failure, notify user |
-| `customer.created` | Sync customer to users table |
-| `customer.updated` | Update user email if changed |
+| Event                        | Action                                           |
+| ---------------------------- | ------------------------------------------------ |
+| `transaction.completed`      | Create order, grant download access              |
+| `transaction.refunded`       | Update order status to 'refunded', revoke access |
+| `transaction.payment_failed` | Log failure, notify user                         |
+| `customer.created`           | Sync customer to users table                     |
+| `customer.updated`           | Update user email if changed                     |
 
 ### Product Setup in Paddle
 
@@ -1799,7 +1847,7 @@ function verifyPaddleSignature(payload: string, signature: string | null): boole
 
 3. **Store in Database**
    ```sql
-   UPDATE products 
+   UPDATE products
    SET paddle_price_id = 'pri_01abc123...'
    WHERE slug = 'cinematic-landscapes-preset';
    ```
@@ -1846,12 +1894,12 @@ export async function deleteProject(id: string) { ... }
 
 ### Data Fetching Strategy
 
-| Location | Method | Caching |
-|----------|--------|---------|
+| Location                   | Method                    | Caching                |
+| -------------------------- | ------------------------- | ---------------------- |
 | Public pages (Work, Store) | Server Components + fetch | ISR (revalidate: 3600) |
-| Admin pages | Server Components | No cache (dynamic) |
-| Customer account | Server Components | No cache (dynamic) |
-| Real-time updates | Supabase Realtime | N/A |
+| Admin pages                | Server Components         | No cache (dynamic)     |
+| Customer account           | Server Components         | No cache (dynamic)     |
+| Real-time updates          | Supabase Realtime         | N/A                    |
 
 ---
 
@@ -1865,12 +1913,12 @@ export async function deleteProject(id: string) { ... }
 // app/store/[slug]/page.tsx
 export async function generateMetadata({ params }): Promise<Metadata> {
   const product = await getProduct(params.slug);
-  
+
   return {
     title: `${product.title} | Raylodies Store`,
     description: product.description.slice(0, 160),
-    keywords: product.keywords.join(', '),
-    
+    keywords: product.keywords.join(", "),
+
     // Open Graph (Facebook, LinkedIn)
     openGraph: {
       title: product.title,
@@ -1881,20 +1929,20 @@ export async function generateMetadata({ params }): Promise<Metadata> {
           width: 1200,
           height: 630,
           alt: product.title,
-        }
+        },
       ],
-      type: 'product',
-      siteName: 'Raylodies',
+      type: "product",
+      siteName: "Raylodies",
     },
-    
+
     // Twitter Card
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title: product.title,
       description: product.description,
       images: [product.thumbnail],
     },
-    
+
     // Canonical URL (prevents duplicate content)
     alternates: {
       canonical: `https://raylodies.com/store/${params.slug}`,
@@ -1948,23 +1996,25 @@ export function ProductJsonLd({ product }: { product: Product }) {
 ```typescript
 // For creative work pages
 const creativeWorkData = {
-  '@context': 'https://schema.org',
-  '@type': 'CreativeWork',
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
   name: project.title,
   description: project.description,
-  image: project.media.filter(m => m.type === 'image').map(m => m.url),
-  video: project.media.filter(m => m.type === 'video').map(m => ({
-    '@type': 'VideoObject',
-    contentUrl: m.url,
-    name: project.title,
-  })),
+  image: project.media.filter((m) => m.type === "image").map((m) => m.url),
+  video: project.media
+    .filter((m) => m.type === "video")
+    .map((m) => ({
+      "@type": "VideoObject",
+      contentUrl: m.url,
+      name: project.title,
+    })),
   author: {
-    '@type': 'Person',
-    name: 'Ranya',
-    url: 'https://raylodies.com/about',
+    "@type": "Person",
+    name: "Ranya",
+    url: "https://raylodies.com/about",
   },
   dateCreated: project.year,
-  genre: 'AI Generated Art',
+  genre: "AI Generated Art",
 };
 ```
 
@@ -1978,7 +2028,7 @@ ALTER TABLE products ADD COLUMN meta_title TEXT;
 ALTER TABLE products ADD COLUMN meta_description TEXT;
 ALTER TABLE products ADD COLUMN og_image TEXT; -- Custom OG image if different from thumbnail
 
--- Add to projects table  
+-- Add to projects table
 ALTER TABLE projects ADD COLUMN meta_title TEXT;
 ALTER TABLE projects ADD COLUMN meta_description TEXT;
 ALTER TABLE projects ADD COLUMN og_image TEXT;
@@ -1987,6 +2037,7 @@ ALTER TABLE projects ADD COLUMN og_image TEXT;
 ### SEO Checklist for Product Pages
 
 #### Technical SEO
+
 - [x] Dynamic `<title>` tag with product name
 - [x] Meta description (150-160 chars)
 - [x] Canonical URL
@@ -1998,6 +2049,7 @@ ALTER TABLE projects ADD COLUMN og_image TEXT;
 - [x] Fast loading (Next.js Image optimization)
 
 #### Content SEO
+
 - [x] Unique, descriptive product titles
 - [x] Detailed product descriptions (300+ words ideal)
 - [x] Keywords in title, description, and content
@@ -2006,6 +2058,7 @@ ALTER TABLE projects ADD COLUMN og_image TEXT;
 - [x] Breadcrumb navigation
 
 #### URL Structure
+
 ```
 ✅ Good: /store/cinematic-landscapes-preset
 ❌ Bad:  /store/product?id=12345
@@ -2018,26 +2071,26 @@ ALTER TABLE projects ADD COLUMN og_image TEXT;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await getAllProducts();
   const projects = await getAllProjects();
-  
+
   const productUrls = products.map((product) => ({
     url: `https://raylodies.com/store/${product.slug}`,
     lastModified: product.updated_at,
-    changeFrequency: 'weekly' as const,
+    changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
-  
+
   const projectUrls = projects.map((project) => ({
     url: `https://raylodies.com/work/${project.slug}`,
     lastModified: project.updated_at,
-    changeFrequency: 'monthly' as const,
+    changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
-  
+
   return [
-    { url: 'https://raylodies.com', priority: 1.0 },
-    { url: 'https://raylodies.com/about', priority: 0.8 },
-    { url: 'https://raylodies.com/work', priority: 0.9 },
-    { url: 'https://raylodies.com/store', priority: 0.9 },
+    { url: "https://raylodies.com", priority: 1.0 },
+    { url: "https://raylodies.com/about", priority: 0.8 },
+    { url: "https://raylodies.com/work", priority: 0.9 },
+    { url: "https://raylodies.com/store", priority: 0.9 },
     ...productUrls,
     ...projectUrls,
   ];
@@ -2051,11 +2104,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/admin/', '/account/', '/api/'],
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/admin/", "/account/", "/api/"],
     },
-    sitemap: 'https://raylodies.com/sitemap.xml',
+    sitemap: "https://raylodies.com/sitemap.xml",
   };
 }
 ```
@@ -2075,16 +2128,17 @@ When making a user an admin, set their `app_metadata`:
 ```sql
 -- Function to set admin role (run once per admin user)
 -- Call this from Supabase Dashboard SQL Editor
-UPDATE auth.users 
+UPDATE auth.users
 SET raw_app_meta_data = raw_app_meta_data || '{"role": "super_admin"}'::jsonb
 WHERE email = 'ranya@raylodies.com';
 ```
 
 Or via Supabase Admin API:
+
 ```typescript
 // Use service role key
 const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-  app_metadata: { role: 'super_admin' }
+  app_metadata: { role: "super_admin" },
 });
 ```
 
@@ -2148,6 +2202,7 @@ CREATE POLICY "Admins can manage orders"
 ```
 
 **Why Custom Claims are faster:**
+
 - ❌ **Subquery**: `EXISTS (SELECT 1 FROM users WHERE ...)` = 1 DB query per row
 - ✅ **JWT Claim**: `auth.jwt() -> 'app_metadata'` = 0 DB queries (reads from token)
 
@@ -2301,9 +2356,10 @@ This architecture provides:
 ✅ **Secure** - RLS, signed URLs, webhook verification  
 ✅ **Simple** - Minimal moving parts, integrated stack  
 ✅ **Fast** - Edge functions, CDN, ISR caching  
-✅ **Maintainable** - Clear separation, type-safe  
+✅ **Maintainable** - Clear separation, type-safe
 
 The recommended approach prioritizes:
+
 1. **Speed to market** - Use managed services
 2. **Developer experience** - Type-safe, good tooling
 3. **Security by default** - RLS, proper auth
@@ -2311,6 +2367,5 @@ The recommended approach prioritizes:
 
 ---
 
-*Document created: December 2024*  
-*Last updated: December 2024*
-
+_Document created: December 2024_  
+_Last updated: December 2024_

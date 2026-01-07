@@ -16,7 +16,9 @@ export default async function ProjectsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-light text-white">Projects</h2>
-          <p className="text-white/40 text-sm mt-1">Manage your portfolio and creative work</p>
+          <p className="text-white/40 text-sm mt-1">
+            Manage your portfolio and creative work
+          </p>
         </div>
         <Link href="/admin/projects/new">
           <Button className="flex items-center gap-2">
@@ -30,9 +32,9 @@ export default async function ProjectsPage() {
       <div className="flex items-center gap-4 bg-[#050505] border border-white/5 p-2 rounded-lg">
         <div className="flex items-center gap-2 px-3 flex-1">
           <Search size={18} className="text-white/40" />
-          <input 
-            type="text" 
-            placeholder="Search projects..." 
+          <input
+            type="text"
+            placeholder="Search projects..."
             className="bg-transparent border-none outline-none text-sm text-white placeholder:text-white/30 w-full"
           />
         </div>
@@ -55,17 +57,30 @@ export default async function ProjectsPage() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-white/5 bg-white/[0.02]">
-              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider">Project</th>
-              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider">Category</th>
-              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider">Year</th>
-              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider">Status</th>
-              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider text-right">Actions</th>
+              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider">
+                Project
+              </th>
+              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider">
+                Category
+              </th>
+              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider">
+                Year
+              </th>
+              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="py-4 px-6 text-xs font-medium text-white/40 uppercase tracking-wider text-right">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
             {projects.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-white/40 font-light">
+                <td
+                  colSpan={5}
+                  className="py-12 text-center text-white/40 font-light"
+                >
                   No projects found. Create one to get started.
                 </td>
               </tr>
@@ -95,10 +110,10 @@ function ProjectRow({ project }: { project: Project }) {
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded bg-white/10 relative overflow-hidden border border-white/10">
             {project.thumbnail ? (
-              <Image 
-                src={project.thumbnail} 
-                alt={project.title} 
-                fill 
+              <Image
+                src={project.thumbnail}
+                alt={project.title}
+                fill
                 className="object-cover"
               />
             ) : (
@@ -115,7 +130,7 @@ function ProjectRow({ project }: { project: Project }) {
       </td>
       <td className="py-4 px-6">
         <span className="text-sm text-white/60">
-          {project.categories?.name || 'Uncategorized'}
+          {project.categories?.name || "Uncategorized"}
         </span>
       </td>
       <td className="py-4 px-6">
@@ -127,11 +142,17 @@ function ProjectRow({ project }: { project: Project }) {
       <td className="py-4 px-6 text-right">
         <div className="flex items-center justify-end gap-2">
           <Link href={`/admin/projects/${project.id}`}>
-            <button title="Edit" className="p-2 hover:bg-white/10 rounded-md transition-colors text-white/60 hover:text-blue-400">
+            <button
+              title="Edit"
+              className="p-2 hover:bg-white/10 rounded-md transition-colors text-white/60 hover:text-blue-400"
+            >
               <Edit size={16} />
             </button>
           </Link>
-          <ProjectRowActions projectId={project.id} isPublished={project.is_published} />
+          <ProjectRowActions
+            projectId={project.id}
+            isPublished={project.is_published}
+          />
         </div>
       </td>
     </tr>
@@ -140,19 +161,21 @@ function ProjectRow({ project }: { project: Project }) {
 
 function StatusBadge({ isPublished }: { isPublished: boolean }) {
   return (
-    <span className={cn(
-      "text-[10px] px-2 py-0.5 rounded-full inline-flex items-center gap-1.5",
-      isPublished 
-        ? "text-green-400 bg-green-400/10 border border-green-400/20" 
-        : "text-white/40 bg-white/5 border border-white/10"
-    )}>
-      <span className={cn("w-1 h-1 rounded-full", isPublished ? "bg-green-400" : "bg-white/40")} />
+    <span
+      className={cn(
+        "text-[10px] px-2 py-0.5 rounded-full inline-flex items-center gap-1.5",
+        isPublished
+          ? "text-green-400 bg-green-400/10 border border-green-400/20"
+          : "text-white/40 bg-white/5 border border-white/10",
+      )}
+    >
+      <span
+        className={cn(
+          "w-1 h-1 rounded-full",
+          isPublished ? "bg-green-400" : "bg-white/40",
+        )}
+      />
       {isPublished ? "Published" : "Draft"}
     </span>
   );
 }
-
-
-
-
-

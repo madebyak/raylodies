@@ -43,7 +43,7 @@ export default function Card({
         <div
           className={cn(
             "relative overflow-hidden bg-white/5",
-            aspectRatios[aspectRatio]
+            aspectRatios[aspectRatio],
           )}
         >
           <Image
@@ -85,4 +85,3 @@ export default function Card({
     </Link>
   );
 }
-

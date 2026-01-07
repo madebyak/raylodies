@@ -24,7 +24,7 @@ export default function CategoryFilter({
             "relative px-4 py-2 text-sm font-light transition-colors duration-300",
             activeCategory === category.value
               ? "text-white"
-              : "text-white/40 hover:text-white/70"
+              : "text-white/40 hover:text-white/70",
           )}
         >
           {category.label}
@@ -40,4 +40,3 @@ export default function CategoryFilter({
     </div>
   );
 }
-

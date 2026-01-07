@@ -14,7 +14,12 @@ interface ProductGalleryProps {
   productUrl?: string; // For Pinterest Save button - links to this URL when pinned
 }
 
-export default function ProductGallery({ images, thumbnail, title, productUrl }: ProductGalleryProps) {
+export default function ProductGallery({
+  images,
+  thumbnail,
+  title,
+  productUrl,
+}: ProductGalleryProps) {
   const allImages = useMemo(() => {
     const urls: string[] = [];
     if (thumbnail) urls.push(thumbnail);
@@ -72,7 +77,7 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
   return (
     <div className="space-y-4 lg:sticky lg:top-24">
       {/* Main Image */}
-      <div 
+      <div
         className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 group"
         onContextMenu={(e) => e.preventDefault()}
       >
@@ -144,7 +149,7 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
 
       {/* Thumbnails (only show if more than 1 image) */}
       {allImages.length > 1 && (
-        <div 
+        <div
           className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           onContextMenu={(e) => e.preventDefault()}
         >
@@ -156,7 +161,7 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
                 "relative flex-none w-24 aspect-[4/3] rounded-xl overflow-hidden bg-white/5 border-2 transition-all duration-200",
                 selectedIndex === index
                   ? "border-white/60 ring-2 ring-white/20"
-                  : "border-white/10 hover:border-white/30"
+                  : "border-white/10 hover:border-white/30",
               )}
             >
               <Image
@@ -195,7 +200,7 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
                 <X size={18} />
               </button>
 
-              <div 
+              <div
                 className="relative w-full aspect-[16/10] md:aspect-[16/9] rounded-2xl overflow-hidden bg-black border border-white/10"
                 onContextMenu={(e) => e.preventDefault()}
               >
@@ -237,7 +242,3 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
     </div>
   );
 }
-
-
-
-

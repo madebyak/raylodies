@@ -52,8 +52,7 @@ function MediaItem({
   fallbackPoster?: string | null;
   index: number;
 }) {
-  const isPortrait =
-    item.width && item.height && item.height > item.width;
+  const isPortrait = item.width && item.height && item.height > item.width;
 
   if (item.type === "video") {
     return (
@@ -118,4 +117,3 @@ export default function ProjectMediaMasonry({
     </div>
   );
 }
-

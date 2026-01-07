@@ -12,7 +12,11 @@ interface SortableProductImageProps {
   onRemove: (id: string) => void;
 }
 
-export default function SortableProductImage({ id, item, onRemove }: SortableProductImageProps) {
+export default function SortableProductImage({
+  id,
+  item,
+  onRemove,
+}: SortableProductImageProps) {
   const {
     attributes,
     listeners,
@@ -42,7 +46,7 @@ export default function SortableProductImage({ id, item, onRemove }: SortablePro
         className="object-cover"
         sizes="150px"
       />
-      
+
       {/* Drag Handle */}
       <button
         {...attributes}
@@ -69,7 +73,3 @@ export default function SortableProductImage({ id, item, onRemove }: SortablePro
     </div>
   );
 }
-
-
-
-

@@ -13,8 +13,6 @@ export function createPublicClient() {
         autoRefreshToken: false,
         persistSession: false,
       },
-    }
+    },
   );
 }
-
-

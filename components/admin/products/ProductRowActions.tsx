@@ -30,7 +30,7 @@ export default function ProductRowActions({
 
   function onDelete() {
     const ok = window.confirm(
-      "Delete this product?\n\nIf it has purchases, it will be archived (unpublished) instead to preserve download history."
+      "Delete this product?\n\nIf it has purchases, it will be archived (unpublished) instead to preserve download history.",
     );
     if (!ok) return;
 
@@ -40,7 +40,9 @@ export default function ProductRowActions({
         toast.error(`Delete failed: ${res.error}`);
         return;
       }
-      toast.success(res?.archived ? "Product archived (unpublished)" : "Product deleted");
+      toast.success(
+        res?.archived ? "Product archived (unpublished)" : "Product deleted",
+      );
       router.refresh();
     });
   }
@@ -68,5 +70,3 @@ export default function ProductRowActions({
     </div>
   );
 }
-
-

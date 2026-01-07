@@ -1,27 +1,33 @@
-'use server'
+"use server";
 
-import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
-import { cache } from 'react'
-import { createPublicClient } from '@/lib/supabase/public'
-import type { ProjectListItem } from '@/types/database'
+import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+import { cache } from "react";
+import { createPublicClient } from "@/lib/supabase/public";
+import type { ProjectListItem } from "@/types/database";
 
-type CategoryRow = { id: string; name: string; slug: string; type: 'project' | 'product' }
-type CategoryJoin = CategoryRow | CategoryRow[] | null
+type CategoryRow = {
+  id: string;
+  name: string;
+  slug: string;
+  type: "project" | "product";
+};
+type CategoryJoin = CategoryRow | CategoryRow[] | null;
 
-function firstCategory(value: CategoryJoin): ProjectListItem['categories'] {
-  if (!value) return null
-  return Array.isArray(value) ? value[0] ?? null : value
+function firstCategory(value: CategoryJoin): ProjectListItem["categories"] {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
 // Memoized version for the same request (React cache)
 // For admin pages - uses authenticated client
 export const getProjects = cache(async () => {
-  const supabase = await createClient()
-  
+  const supabase = await createClient();
+
   const { data: projects, error } = await supabase
-    .from('projects')
-    .select(`
+    .from("projects")
+    .select(
+      `
       *,
       categories (
         id,
@@ -29,25 +35,27 @@ export const getProjects = cache(async () => {
         slug,
         type
       )
-    `)
-    .order('created_at', { ascending: false })
+    `,
+    )
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Error fetching projects:', error)
-    return []
+    console.error("Error fetching projects:", error);
+    return [];
   }
 
-  return projects
-})
+  return projects;
+});
 
 // Get published projects only (for public pages)
 // Uses the same client but filters for published only
 export const getPublishedProjects = cache(async () => {
-  const supabase = createPublicClient()
-  
+  const supabase = createPublicClient();
+
   const { data: projects, error } = await supabase
-    .from('projects')
-    .select(`
+    .from("projects")
+    .select(
+      `
       id,
       title,
       slug,
@@ -62,16 +70,21 @@ export const getPublishedProjects = cache(async () => {
         slug,
         type
       )
-    `)
-    .eq('is_published', true)
-    .order('display_order', { ascending: true })
+    `,
+    )
+    .eq("is_published", true)
+    .order("display_order", { ascending: true });
 
   if (error) {
-    console.error('Error fetching published projects:', error)
-    return []
+    console.error("Error fetching published projects:", error);
+    return [];
   }
 
-  type ProjectRow = ProjectListItem & { categories: CategoryJoin; thumbnail_width?: number | null; thumbnail_height?: number | null }
+  type ProjectRow = ProjectListItem & {
+    categories: CategoryJoin;
+    thumbnail_width?: number | null;
+    thumbnail_height?: number | null;
+  };
 
   return (projects as unknown as ProjectRow[]).map((p) => ({
     id: p.id,
@@ -82,54 +95,57 @@ export const getPublishedProjects = cache(async () => {
     thumbnail_width: p.thumbnail_width ?? null,
     thumbnail_height: p.thumbnail_height ?? null,
     categories: firstCategory(p.categories),
-  })) satisfies ProjectListItem[]
-})
+  })) satisfies ProjectListItem[];
+});
 
-export async function deleteProject(id: string): Promise<{ success?: true; error?: string }> {
-  const supabase = await createClient()
-  
-  const { error } = await supabase
-    .from('projects')
-    .delete()
-    .eq('id', id)
+export async function deleteProject(
+  id: string,
+): Promise<{ success?: true; error?: string }> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("projects").delete().eq("id", id);
 
   if (error) {
-    console.error('Error deleting project:', error)
-    return { error: error.message }
+    console.error("Error deleting project:", error);
+    return { error: error.message };
   }
 
-  revalidatePath('/admin/projects')
-  revalidatePath('/work')
-  revalidatePath('/')
-  return { success: true }
+  revalidatePath("/admin/projects");
+  revalidatePath("/work");
+  revalidatePath("/");
+  return { success: true };
 }
 
-export async function toggleProjectStatus(id: string, currentStatus: boolean): Promise<{ success?: true; error?: string }> {
-  const supabase = await createClient()
-  
+export async function toggleProjectStatus(
+  id: string,
+  currentStatus: boolean,
+): Promise<{ success?: true; error?: string }> {
+  const supabase = await createClient();
+
   const { error } = await supabase
-    .from('projects')
+    .from("projects")
     .update({ is_published: !currentStatus })
-    .eq('id', id)
+    .eq("id", id);
 
   if (error) {
-    console.error('Error toggling project status:', error)
-    return { error: error.message }
+    console.error("Error toggling project status:", error);
+    return { error: error.message };
   }
 
-  revalidatePath('/admin/projects')
-  revalidatePath('/work')
-  revalidatePath('/')
-  return { success: true }
+  revalidatePath("/admin/projects");
+  revalidatePath("/work");
+  revalidatePath("/");
+  return { success: true };
 }
 
 // Get featured projects for homepage
 export const getFeaturedProjects = cache(async (limit: number = 4) => {
-  const supabase = createPublicClient()
-  
+  const supabase = createPublicClient();
+
   const { data: projects, error } = await supabase
-    .from('projects')
-    .select(`
+    .from("projects")
+    .select(
+      `
       id,
       title,
       slug,
@@ -144,18 +160,23 @@ export const getFeaturedProjects = cache(async (limit: number = 4) => {
         slug,
         type
       )
-    `)
-    .eq('is_published', true)
-    .eq('is_featured', true)
-    .order('display_order', { ascending: true })
-    .limit(limit)
+    `,
+    )
+    .eq("is_published", true)
+    .eq("is_featured", true)
+    .order("display_order", { ascending: true })
+    .limit(limit);
 
   if (error) {
-    console.error('Error fetching featured projects:', error)
-    return []
+    console.error("Error fetching featured projects:", error);
+    return [];
   }
 
-  type ProjectRow = ProjectListItem & { categories: CategoryJoin; thumbnail_width?: number | null; thumbnail_height?: number | null }
+  type ProjectRow = ProjectListItem & {
+    categories: CategoryJoin;
+    thumbnail_width?: number | null;
+    thumbnail_height?: number | null;
+  };
 
   return (projects as unknown as ProjectRow[]).map((p) => ({
     id: p.id,
@@ -166,7 +187,5 @@ export const getFeaturedProjects = cache(async (limit: number = 4) => {
     thumbnail_width: p.thumbnail_width ?? null,
     thumbnail_height: p.thumbnail_height ?? null,
     categories: firstCategory(p.categories),
-  })) satisfies ProjectListItem[]
-})
-
-
+  })) satisfies ProjectListItem[];
+});

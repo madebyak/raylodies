@@ -11,15 +11,24 @@ interface MediaUploaderProps {
   projectId: string;
   onUploadComplete: (
     url: string,
-    type: 'image' | 'video',
-    meta?: { width?: number | null; height?: number | null; poster_url?: string | null }
+    type: "image" | "video",
+    meta?: {
+      width?: number | null;
+      height?: number | null;
+      poster_url?: string | null;
+    },
   ) => void;
 }
 
-export default function MediaUploader({ projectId, onUploadComplete }: MediaUploaderProps) {
+export default function MediaUploader({
+  projectId,
+  onUploadComplete,
+}: MediaUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
 
-  async function getImageSize(file: File): Promise<{ width: number; height: number }> {
+  async function getImageSize(
+    file: File,
+  ): Promise<{ width: number; height: number }> {
     try {
       const bitmap = await createImageBitmap(file);
       return { width: bitmap.width, height: bitmap.height };
@@ -41,7 +50,7 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
   }
 
   async function getVideoMetadataAndPoster(
-    file: File
+    file: File,
   ): Promise<{ width: number; height: number; posterBlob: Blob | null }> {
     const url = URL.createObjectURL(file);
     const video = document.createElement("video");
@@ -53,7 +62,8 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
     try {
       await new Promise<void>((resolve, reject) => {
         video.onloadedmetadata = () => resolve();
-        video.onerror = () => reject(new Error("Failed to load video metadata"));
+        video.onerror = () =>
+          reject(new Error("Failed to load video metadata"));
       });
 
       const width = video.videoWidth || 0;
@@ -62,7 +72,10 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
       // Try to grab an early frame as poster (best-effort)
       let posterBlob: Blob | null = null;
       try {
-        const targetTime = Number.isFinite(video.duration) && video.duration > 0 ? Math.min(0.1, video.duration / 2) : 0.1;
+        const targetTime =
+          Number.isFinite(video.duration) && video.duration > 0
+            ? Math.min(0.1, video.duration / 2)
+            : 0.1;
         video.currentTime = targetTime;
         await new Promise<void>((resolve, reject) => {
           video.onseeked = () => resolve();
@@ -76,7 +89,7 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
         if (ctx) {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           posterBlob = await new Promise<Blob | null>((resolve) =>
-            canvas.toBlob((b) => resolve(b), "image/jpeg", 0.85)
+            canvas.toBlob((b) => resolve(b), "image/jpeg", 0.85),
           );
         }
       } catch {
@@ -89,69 +102,78 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
     }
   }
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    setIsUploading(true);
-    const supabase = createClient();
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      setIsUploading(true);
+      const supabase = createClient();
 
-    try {
-      for (const file of acceptedFiles) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `projects/${projectId}/media/${fileName}`;
+      try {
+        for (const file of acceptedFiles) {
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const filePath = `projects/${projectId}/media/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('public-assets')
-          .upload(filePath, file);
+          const { error: uploadError } = await supabase.storage
+            .from("public-assets")
+            .upload(filePath, file);
 
-        if (uploadError) throw uploadError;
+          if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('public-assets')
-          .getPublicUrl(filePath);
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from("public-assets").getPublicUrl(filePath);
 
-        // Simple type detection based on MIME type
-        const type = file.type.startsWith('video/') ? 'video' : 'image';
+          // Simple type detection based on MIME type
+          const type = file.type.startsWith("video/") ? "video" : "image";
 
-        if (type === "image") {
-          const { width, height } = await getImageSize(file);
-          onUploadComplete(publicUrl, type, { width, height });
-        } else {
-          const { width, height, posterBlob } = await getVideoMetadataAndPoster(file);
-          let poster_url: string | null = null;
+          if (type === "image") {
+            const { width, height } = await getImageSize(file);
+            onUploadComplete(publicUrl, type, { width, height });
+          } else {
+            const { width, height, posterBlob } =
+              await getVideoMetadataAndPoster(file);
+            let poster_url: string | null = null;
 
-          if (posterBlob) {
-            const posterName = `${Math.random().toString(36).substring(2)}.jpg`;
-            const posterPath = `projects/${projectId}/posters/${posterName}`;
-            const posterFile = new File([posterBlob], posterName, { type: "image/jpeg" });
+            if (posterBlob) {
+              const posterName = `${Math.random().toString(36).substring(2)}.jpg`;
+              const posterPath = `projects/${projectId}/posters/${posterName}`;
+              const posterFile = new File([posterBlob], posterName, {
+                type: "image/jpeg",
+              });
 
-            const { error: posterUploadError } = await supabase.storage
-              .from("public-assets")
-              .upload(posterPath, posterFile);
+              const { error: posterUploadError } = await supabase.storage
+                .from("public-assets")
+                .upload(posterPath, posterFile);
 
-            if (!posterUploadError) {
-              poster_url = supabase.storage.from("public-assets").getPublicUrl(posterPath).data.publicUrl;
+              if (!posterUploadError) {
+                poster_url = supabase.storage
+                  .from("public-assets")
+                  .getPublicUrl(posterPath).data.publicUrl;
+              }
             }
-          }
 
-          onUploadComplete(publicUrl, type, { width, height, poster_url });
+            onUploadComplete(publicUrl, type, { width, height, poster_url });
+          }
         }
+        toast.success("Media uploaded successfully");
+      } catch (error: unknown) {
+        console.error(error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        toast.error("Upload failed: " + errorMessage);
+      } finally {
+        setIsUploading(false);
       }
-      toast.success("Media uploaded successfully");
-    } catch (error: unknown) {
-      console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      toast.error("Upload failed: " + errorMessage);
-    } finally {
-      setIsUploading(false);
-    }
-  }, [projectId, onUploadComplete]);
+    },
+    [projectId, onUploadComplete],
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
-      'video/*': ['.mp4', '.webm']
-    }
+      "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+      "video/*": [".mp4", ".webm"],
+    },
   });
 
   return (
@@ -159,9 +181,9 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
       {...getRootProps()}
       className={cn(
         "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300",
-        isDragActive 
-          ? "border-blue-500 bg-blue-500/10" 
-          : "border-white/20 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.04]"
+        isDragActive
+          ? "border-blue-500 bg-blue-500/10"
+          : "border-white/20 hover:border-white/40 bg-white/[0.02] hover:bg-white/[0.04]",
       )}
     >
       <input {...getInputProps()} />
@@ -183,6 +205,3 @@ export default function MediaUploader({ projectId, onUploadComplete }: MediaUplo
     </div>
   );
 }
-
-
-

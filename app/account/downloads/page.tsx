@@ -16,7 +16,9 @@ interface OrderItemWithProduct {
 
 export default async function DownloadsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     return null;
@@ -24,8 +26,9 @@ export default async function DownloadsPage() {
 
   // Paid purchases (orders/order_items)
   const { data: paidItems } = await supabase
-    .from('order_items')
-    .select(`
+    .from("order_items")
+    .select(
+      `
       id,
       products!inner (
         id,
@@ -37,9 +40,10 @@ export default async function DownloadsPage() {
         user_id,
         status
       )
-    `)
-    .eq('orders.user_id', user.id)
-    .eq('orders.status', 'completed');
+    `,
+    )
+    .eq("orders.user_id", user.id)
+    .eq("orders.status", "completed");
 
   const paid: OrderItemWithProduct[] = (paidItems || []).map((item) => ({
     id: item.id as string,
@@ -49,7 +53,8 @@ export default async function DownloadsPage() {
   // Free entitlements (login-required)
   const { data: freeItems } = await supabase
     .from("product_entitlements")
-    .select(`
+    .select(
+      `
       id,
       products!inner (
         id,
@@ -57,7 +62,8 @@ export default async function DownloadsPage() {
         thumbnail,
         file_url
       )
-    `)
+    `,
+    )
     .eq("user_id", user.id);
 
   const free: OrderItemWithProduct[] = (freeItems || []).map((item) => ({
@@ -85,13 +91,16 @@ export default async function DownloadsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {orderItems.map((item) => (
-            <div key={item.id} className="bg-[#0a0a0a] border border-white/5 rounded-xl p-4 flex items-center gap-4 hover:border-white/10 transition-colors">
+            <div
+              key={item.id}
+              className="bg-[#0a0a0a] border border-white/5 rounded-xl p-4 flex items-center gap-4 hover:border-white/10 transition-colors"
+            >
               <div className="w-16 h-16 bg-white/5 rounded-lg overflow-hidden relative shrink-0">
                 {item.products.thumbnail ? (
-                  <Image 
-                    src={item.products.thumbnail} 
-                    alt={item.products.title} 
-                    fill 
+                  <Image
+                    src={item.products.thumbnail}
+                    alt={item.products.title}
+                    fill
                     className="object-cover"
                   />
                 ) : (
@@ -100,13 +109,15 @@ export default async function DownloadsPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex-1 min-w-0">
-                <h3 className="text-white font-light truncate">{item.products.title}</h3>
+                <h3 className="text-white font-light truncate">
+                  {item.products.title}
+                </h3>
                 <p className="text-white/40 text-sm">Ready to download</p>
               </div>
 
-              <a 
+              <a
                 href={`/api/downloads/${item.products.id}`}
                 className="flex items-center gap-2 px-4 py-2 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors"
               >
@@ -120,8 +131,3 @@ export default async function DownloadsPage() {
     </div>
   );
 }
-
-
-
-
-

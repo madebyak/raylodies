@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       meta_title,
       meta_description,
       categories (name, slug)
-    `
+    `,
     )
     .eq("slug", slug)
     .eq("is_published", true)
@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           meta_title,
           meta_description,
           categories (name, slug)
-        `
+        `,
         )
         .eq("slug", normalized)
         .eq("is_published", true)
@@ -77,7 +77,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     clampDescription(
       product.description
         ? `${product.description} — ${formatPrice(product.price)}`
-        : `Digital download — ${formatPrice(product.price)}`
+        : `Digital download — ${formatPrice(product.price)}`,
     );
 
   const canonicalPath = `/store/${product.slug}`;
@@ -125,7 +125,9 @@ export async function generateStaticParams() {
     .order("updated_at", { ascending: false })
     .limit(2000);
 
-  return (data || []).filter((r) => r.slug).map((r) => ({ slug: r.slug as string }));
+  return (data || [])
+    .filter((r) => r.slug)
+    .map((r) => ({ slug: r.slug as string }));
 }
 
 export default function ProductLayout({
@@ -135,4 +137,3 @@ export default function ProductLayout({
 }) {
   return <>{children}</>;
 }
-

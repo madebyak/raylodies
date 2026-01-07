@@ -3,7 +3,11 @@
 import ProductCard from "./ProductCard";
 import { ProductListItem } from "@/types/database";
 
-export default function ProductGrid({ initialProducts }: { initialProducts: ProductListItem[] }) {
+export default function ProductGrid({
+  initialProducts,
+}: {
+  initialProducts: ProductListItem[];
+}) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10">
       {initialProducts.length === 0 ? (

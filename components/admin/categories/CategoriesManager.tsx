@@ -2,9 +2,22 @@
 
 import { useState } from "react";
 import { Category } from "@/types/database";
-import { createCategory, updateCategory, deleteCategory } from "@/actions/categories";
+import {
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "@/actions/categories";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X, Check, Loader2, Palette, ShoppingBag } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  Check,
+  Loader2,
+  Palette,
+  ShoppingBag,
+} from "lucide-react";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +25,9 @@ interface CategoriesManagerProps {
   initialCategories: Category[];
 }
 
-export default function CategoriesManager({ initialCategories }: CategoriesManagerProps) {
+export default function CategoriesManager({
+  initialCategories,
+}: CategoriesManagerProps) {
   const [categories, setCategories] = useState(initialCategories);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
@@ -21,10 +36,10 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
   const [editName, setEditName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const projectCategories = categories.filter(c => c.type === 'project');
-  const productCategories = categories.filter(c => c.type === 'product');
+  const projectCategories = categories.filter((c) => c.type === "project");
+  const productCategories = categories.filter((c) => c.type === "product");
 
-  async function handleAdd(type: 'project' | 'product') {
+  async function handleAdd(type: "project" | "product") {
     if (!newName.trim()) {
       toast.error("Please enter a category name");
       return;
@@ -32,8 +47,8 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
 
     setIsLoading(true);
     const formData = new FormData();
-    formData.set('name', newName.trim());
-    formData.set('type', type);
+    formData.set("name", newName.trim());
+    formData.set("type", type);
 
     const result = await createCategory(formData);
     setIsLoading(false);
@@ -43,7 +58,7 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
     } else if (result.data) {
       setCategories([...categories, result.data]);
       setNewName("");
-      if (type === 'project') setIsAddingProject(false);
+      if (type === "project") setIsAddingProject(false);
       else setIsAddingProduct(false);
       toast.success("Category created");
     }
@@ -57,7 +72,7 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
 
     setIsLoading(true);
     const formData = new FormData();
-    formData.set('name', editName.trim());
+    formData.set("name", editName.trim());
 
     const result = await updateCategory(id, formData);
     setIsLoading(false);
@@ -65,7 +80,7 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
     if (result.error) {
       toast.error(result.error);
     } else if (result.data) {
-      setCategories(categories.map(c => c.id === id ? result.data! : c));
+      setCategories(categories.map((c) => (c.id === id ? result.data! : c)));
       setEditingId(null);
       setEditName("");
       toast.success("Category updated");
@@ -82,7 +97,7 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
     if (result.error) {
       toast.error(result.error);
     } else {
-      setCategories(categories.filter(c => c.id !== id));
+      setCategories(categories.filter((c) => c.id !== id));
       toast.success("Category deleted");
     }
   }
@@ -97,9 +112,9 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
     setEditName("");
   }
 
-  function cancelAdd(type: 'project' | 'product') {
+  function cancelAdd(type: "project" | "product") {
     setNewName("");
-    if (type === 'project') setIsAddingProject(false);
+    if (type === "project") setIsAddingProject(false);
     else setIsAddingProduct(false);
   }
 
@@ -113,13 +128,17 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
               <Palette className="w-5 h-5 text-purple-400" />
             </div>
             <div>
-              <h2 className="text-lg font-light text-white">Project Categories</h2>
-              <p className="text-xs text-white/40">{projectCategories.length} categories</p>
+              <h2 className="text-lg font-light text-white">
+                Project Categories
+              </h2>
+              <p className="text-xs text-white/40">
+                {projectCategories.length} categories
+              </p>
             </div>
           </div>
           {!isAddingProject && (
-            <Button 
-              onClick={() => setIsAddingProject(true)} 
+            <Button
+              onClick={() => setIsAddingProject(true)}
               className="!py-2 !px-3 text-sm"
             >
               <Plus size={16} />
@@ -140,19 +159,23 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
                 className="flex-1 bg-transparent border-none outline-none text-white text-sm placeholder:text-white/30"
                 autoFocus
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAdd('project');
-                  if (e.key === 'Escape') cancelAdd('project');
+                  if (e.key === "Enter") handleAdd("project");
+                  if (e.key === "Escape") cancelAdd("project");
                 }}
               />
               <button
-                onClick={() => handleAdd('project')}
+                onClick={() => handleAdd("project")}
                 disabled={isLoading}
                 className="p-1.5 text-green-400 hover:bg-green-500/10 rounded transition-colors"
               >
-                {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                {isLoading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Check size={16} />
+                )}
               </button>
               <button
-                onClick={() => cancelAdd('project')}
+                onClick={() => cancelAdd("project")}
                 className="p-1.5 text-white/40 hover:text-white hover:bg-white/10 rounded transition-colors"
               >
                 <X size={16} />
@@ -166,9 +189,9 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
               key={category.id}
               className={cn(
                 "flex items-center gap-2 p-3 rounded-lg border transition-all",
-                editingId === category.id 
-                  ? "bg-white/5 border-white/20" 
-                  : "bg-white/[0.02] border-white/5 hover:border-white/10"
+                editingId === category.id
+                  ? "bg-white/5 border-white/20"
+                  : "bg-white/[0.02] border-white/5 hover:border-white/10",
               )}
             >
               {editingId === category.id ? (
@@ -180,8 +203,8 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
                     className="flex-1 bg-transparent border-none outline-none text-white text-sm"
                     autoFocus
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleUpdate(category.id);
-                      if (e.key === 'Escape') cancelEdit();
+                      if (e.key === "Enter") handleUpdate(category.id);
+                      if (e.key === "Escape") cancelEdit();
                     }}
                   />
                   <button
@@ -189,7 +212,11 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
                     disabled={isLoading}
                     className="p-1.5 text-green-400 hover:bg-green-500/10 rounded transition-colors"
                   >
-                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                    {isLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Check size={16} />
+                    )}
                   </button>
                   <button
                     onClick={cancelEdit}
@@ -200,8 +227,12 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
                 </>
               ) : (
                 <>
-                  <span className="flex-1 text-sm text-white/80">{category.name}</span>
-                  <span className="text-xs text-white/30 font-mono">{category.slug}</span>
+                  <span className="flex-1 text-sm text-white/80">
+                    {category.name}
+                  </span>
+                  <span className="text-xs text-white/30 font-mono">
+                    {category.slug}
+                  </span>
                   <button
                     onClick={() => startEdit(category)}
                     className="p-1.5 text-white/40 hover:text-white hover:bg-white/10 rounded transition-colors"
@@ -220,7 +251,9 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
           ))}
 
           {projectCategories.length === 0 && !isAddingProject && (
-            <p className="text-sm text-white/40 text-center py-4">No project categories yet</p>
+            <p className="text-sm text-white/40 text-center py-4">
+              No project categories yet
+            </p>
           )}
         </div>
       </div>
@@ -233,13 +266,17 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
               <ShoppingBag className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-lg font-light text-white">Product Categories</h2>
-              <p className="text-xs text-white/40">{productCategories.length} categories</p>
+              <h2 className="text-lg font-light text-white">
+                Product Categories
+              </h2>
+              <p className="text-xs text-white/40">
+                {productCategories.length} categories
+              </p>
             </div>
           </div>
           {!isAddingProduct && (
-            <Button 
-              onClick={() => setIsAddingProduct(true)} 
+            <Button
+              onClick={() => setIsAddingProduct(true)}
               className="!py-2 !px-3 text-sm"
             >
               <Plus size={16} />
@@ -260,19 +297,23 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
                 className="flex-1 bg-transparent border-none outline-none text-white text-sm placeholder:text-white/30"
                 autoFocus
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAdd('product');
-                  if (e.key === 'Escape') cancelAdd('product');
+                  if (e.key === "Enter") handleAdd("product");
+                  if (e.key === "Escape") cancelAdd("product");
                 }}
               />
               <button
-                onClick={() => handleAdd('product')}
+                onClick={() => handleAdd("product")}
                 disabled={isLoading}
                 className="p-1.5 text-green-400 hover:bg-green-500/10 rounded transition-colors"
               >
-                {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                {isLoading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Check size={16} />
+                )}
               </button>
               <button
-                onClick={() => cancelAdd('product')}
+                onClick={() => cancelAdd("product")}
                 className="p-1.5 text-white/40 hover:text-white hover:bg-white/10 rounded transition-colors"
               >
                 <X size={16} />
@@ -286,9 +327,9 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
               key={category.id}
               className={cn(
                 "flex items-center gap-2 p-3 rounded-lg border transition-all",
-                editingId === category.id 
-                  ? "bg-white/5 border-white/20" 
-                  : "bg-white/[0.02] border-white/5 hover:border-white/10"
+                editingId === category.id
+                  ? "bg-white/5 border-white/20"
+                  : "bg-white/[0.02] border-white/5 hover:border-white/10",
               )}
             >
               {editingId === category.id ? (
@@ -300,8 +341,8 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
                     className="flex-1 bg-transparent border-none outline-none text-white text-sm"
                     autoFocus
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleUpdate(category.id);
-                      if (e.key === 'Escape') cancelEdit();
+                      if (e.key === "Enter") handleUpdate(category.id);
+                      if (e.key === "Escape") cancelEdit();
                     }}
                   />
                   <button
@@ -309,7 +350,11 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
                     disabled={isLoading}
                     className="p-1.5 text-green-400 hover:bg-green-500/10 rounded transition-colors"
                   >
-                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                    {isLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Check size={16} />
+                    )}
                   </button>
                   <button
                     onClick={cancelEdit}
@@ -320,8 +365,12 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
                 </>
               ) : (
                 <>
-                  <span className="flex-1 text-sm text-white/80">{category.name}</span>
-                  <span className="text-xs text-white/30 font-mono">{category.slug}</span>
+                  <span className="flex-1 text-sm text-white/80">
+                    {category.name}
+                  </span>
+                  <span className="text-xs text-white/30 font-mono">
+                    {category.slug}
+                  </span>
                   <button
                     onClick={() => startEdit(category)}
                     className="p-1.5 text-white/40 hover:text-white hover:bg-white/10 rounded transition-colors"
@@ -340,14 +389,12 @@ export default function CategoriesManager({ initialCategories }: CategoriesManag
           ))}
 
           {productCategories.length === 0 && !isAddingProduct && (
-            <p className="text-sm text-white/40 text-center py-4">No product categories yet</p>
+            <p className="text-sm text-white/40 text-center py-4">
+              No product categories yet
+            </p>
           )}
         </div>
       </div>
     </div>
   );
 }
-
-
-
-

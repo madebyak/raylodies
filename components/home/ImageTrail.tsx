@@ -83,7 +83,9 @@ export default function ImageTrail() {
     const container = containerRef.current;
     if (!container) return false;
     const rect = container.getBoundingClientRect();
-    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    return (
+      x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+    );
   }, []);
 
   // Check if mouse has moved enough to spawn new image
@@ -108,7 +110,7 @@ export default function ImageTrail() {
 
     const dist = Math.hypot(
       mouseRef.current.x - prevMouseRef.current.x,
-      mouseRef.current.y - prevMouseRef.current.y
+      mouseRef.current.y - prevMouseRef.current.y,
     );
     const raw = dist / dt;
 
@@ -188,13 +190,23 @@ export default function ImageTrail() {
     const inContainer = isInContainer(mouseRef.current.x, mouseRef.current.y);
     if (!inContainer) return;
 
-    if ((isMovingRef.current || isTouchingRef.current) && hasMovedEnough() && hasMovedAtAll()) {
+    if (
+      (isMovingRef.current || isTouchingRef.current) &&
+      hasMovedEnough() &&
+      hasMovedAtAll()
+    ) {
       lastMouseRef.current = { ...mouseRef.current };
       const speed = calculateSpeed();
       createImage(speed);
       prevMouseRef.current = { ...mouseRef.current };
     }
-  }, [isInContainer, hasMovedEnough, hasMovedAtAll, calculateSpeed, createImage]);
+  }, [
+    isInContainer,
+    hasMovedEnough,
+    hasMovedAtAll,
+    calculateSpeed,
+    createImage,
+  ]);
 
   // Touch-specific trail creation
   const createTouchTrailImage = useCallback(() => {
@@ -215,7 +227,11 @@ export default function ImageTrail() {
     const now = Date.now();
     const trail = trailRef.current;
 
-    if (now - lastRemovalTimeRef.current < CONFIG.removalDelay || trail.length === 0) return;
+    if (
+      now - lastRemovalTimeRef.current < CONFIG.removalDelay ||
+      trail.length === 0
+    )
+      return;
 
     if (now >= trail[0].removeTime) {
       const imgObj = trail.shift()!;
@@ -244,10 +260,13 @@ export default function ImageTrail() {
   useEffect(() => {
     // Check for mobile
     isMobileRef.current =
-      /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
+      /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+      window.innerWidth <= 768;
 
     // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (prefersReducedMotion) return;
 
     const container = containerRef.current;
@@ -258,7 +277,10 @@ export default function ImageTrail() {
       prevMouseRef.current = { ...mouseRef.current };
       mouseRef.current = { x: e.clientX, y: e.clientY };
 
-      if (isInContainer(mouseRef.current.x, mouseRef.current.y) && hasMovedAtAll()) {
+      if (
+        isInContainer(mouseRef.current.x, mouseRef.current.y) &&
+        hasMovedAtAll()
+      ) {
         isMovingRef.current = true;
         if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
         moveTimeoutRef.current = setTimeout(() => {
@@ -299,7 +321,9 @@ export default function ImageTrail() {
     // Add event listeners
     document.addEventListener("mouseover", handleInitialMouseOver);
     document.addEventListener("mousemove", handleMouseMove);
-    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    container.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
     container.addEventListener("touchmove", handleTouchMove, { passive: true });
     container.addEventListener("touchend", handleTouchEnd);
 
@@ -317,7 +341,8 @@ export default function ImageTrail() {
       container.removeEventListener("touchstart", handleTouchStart);
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameRef.current)
+        cancelAnimationFrame(animationFrameRef.current);
       if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
 
       // Clean up remaining images
@@ -335,4 +360,3 @@ export default function ImageTrail() {
     />
   );
 }
-

@@ -4,10 +4,7 @@ import { Package, DollarSign, CheckCircle } from "lucide-react";
 import Image from "next/image";
 
 export default async function OrdersPage() {
-  const [orders, stats] = await Promise.all([
-    getOrders(),
-    getOrderStats()
-  ]);
+  const [orders, stats] = await Promise.all([getOrders(), getOrderStats()]);
 
   return (
     <div className="space-y-8">
@@ -33,7 +30,7 @@ export default async function OrdersPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -41,11 +38,13 @@ export default async function OrdersPage() {
             </div>
             <div>
               <p className="text-sm text-white/40">Total Orders</p>
-              <p className="text-2xl font-light text-white">{stats.totalOrders}</p>
+              <p className="text-2xl font-light text-white">
+                {stats.totalOrders}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-500/10 rounded-lg">
@@ -53,7 +52,9 @@ export default async function OrdersPage() {
             </div>
             <div>
               <p className="text-sm text-white/40">Completed</p>
-              <p className="text-2xl font-light text-white">{stats.completedOrders}</p>
+              <p className="text-2xl font-light text-white">
+                {stats.completedOrders}
+              </p>
             </div>
           </div>
         </div>
@@ -88,25 +89,33 @@ export default async function OrdersPage() {
             <tbody className="divide-y divide-white/5">
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-white/40">
+                  <td
+                    colSpan={6}
+                    className="px-6 py-12 text-center text-white/40"
+                  >
                     <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
                     <p>No orders yet</p>
                   </td>
                 </tr>
               ) : (
                 orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr
+                    key={order.id}
+                    className="hover:bg-white/[0.02] transition-colors"
+                  >
                     <td className="px-6 py-4">
                       <div>
                         <p className="text-sm text-white font-mono">
-                          #{order.paddle_transaction_id?.slice(-8) || order.id.slice(0, 8)}
+                          #
+                          {order.paddle_transaction_id?.slice(-8) ||
+                            order.id.slice(0, 8)}
                         </p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div>
                         <p className="text-sm text-white">
-                          {order.user?.full_name || 'Guest'}
+                          {order.user?.full_name || "Guest"}
                         </p>
                         <p className="text-xs text-white/40">
                           {order.customer_email || order.user?.email}
@@ -116,11 +125,14 @@ export default async function OrdersPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         {order.order_items?.slice(0, 3).map((item) => (
-                          <div key={item.id} className="relative w-8 h-8 rounded overflow-hidden bg-white/5">
+                          <div
+                            key={item.id}
+                            className="relative w-8 h-8 rounded overflow-hidden bg-white/5"
+                          >
                             {item.product?.thumbnail ? (
                               <Image
                                 src={item.product.thumbnail}
-                                alt={item.product.title || ''}
+                                alt={item.product.title || ""}
                                 fill
                                 className="object-cover"
                               />
@@ -144,23 +156,28 @@ export default async function OrdersPage() {
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        order.status === 'completed' 
-                          ? 'bg-green-500/10 text-green-400'
-                          : order.status === 'pending'
-                          ? 'bg-yellow-500/10 text-yellow-400'
-                          : 'bg-red-500/10 text-red-400'
-                      }`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          order.status === "completed"
+                            ? "bg-green-500/10 text-green-400"
+                            : order.status === "pending"
+                              ? "bg-yellow-500/10 text-yellow-400"
+                              : "bg-red-500/10 text-red-400"
+                        }`}
+                      >
                         {order.status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-sm text-white/60">
-                        {new Date(order.created_at).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
+                        {new Date(order.created_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )}
                       </p>
                     </td>
                   </tr>
@@ -173,7 +190,3 @@ export default async function OrdersPage() {
     </div>
   );
 }
-
-
-
-

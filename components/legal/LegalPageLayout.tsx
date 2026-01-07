@@ -67,15 +67,24 @@ export default function LegalPageLayout({
 
                 <div className="hidden lg:block text-xs text-white/40">
                   See also{" "}
-                  <Link href="/terms" className="text-white/70 hover:text-white transition-colors">
+                  <Link
+                    href="/terms"
+                    className="text-white/70 hover:text-white transition-colors"
+                  >
                     Terms
                   </Link>
                   ,{" "}
-                  <Link href="/privacy" className="text-white/70 hover:text-white transition-colors">
+                  <Link
+                    href="/privacy"
+                    className="text-white/70 hover:text-white transition-colors"
+                  >
                     Privacy
                   </Link>{" "}
                   and{" "}
-                  <Link href="/refund" className="text-white/70 hover:text-white transition-colors">
+                  <Link
+                    href="/refund"
+                    className="text-white/70 hover:text-white transition-colors"
+                  >
                     Refunds
                   </Link>
                   .
@@ -84,7 +93,11 @@ export default function LegalPageLayout({
             </div>
           )}
 
-          <div className={hasToc ? "lg:col-span-9 order-1 lg:order-2" : "lg:col-span-12"}>
+          <div
+            className={
+              hasToc ? "lg:col-span-9 order-1 lg:order-2" : "lg:col-span-12"
+            }
+          >
             {children}
           </div>
         </div>
@@ -92,6 +105,3 @@ export default function LegalPageLayout({
     </section>
   );
 }
-
-
-

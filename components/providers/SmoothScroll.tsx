@@ -17,7 +17,9 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
   const pathname = usePathname();
 
   // Check if smooth scroll should be disabled for current route
-  const isDisabled = DISABLED_ROUTES.some(route => pathname.startsWith(route));
+  const isDisabled = DISABLED_ROUTES.some((route) =>
+    pathname.startsWith(route),
+  );
 
   useEffect(() => {
     // Don't initialize Lenis on disabled routes
@@ -58,5 +60,3 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
 
   return <>{children}</>;
 }
-
-

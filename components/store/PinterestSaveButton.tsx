@@ -38,7 +38,7 @@ export default function PinterestSaveButton({
     window.open(
       pinterestUrl,
       "pinterest-share",
-      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
+      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
     );
   }, [url, media, description]);
 
@@ -72,4 +72,3 @@ export default function PinterestSaveButton({
     </button>
   );
 }
-

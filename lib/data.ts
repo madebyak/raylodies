@@ -158,7 +158,13 @@ export const products: Product[] = [
       "A comprehensive collection of AI prompts and settings for creating stunning cinematic landscape imagery. Includes 50+ carefully crafted prompts, negative prompts, and recommended settings for various AI models.",
     price: 29,
     category: "AI Presets",
-    keywords: ["landscapes", "cinematic", "prompts", "midjourney", "stable diffusion"],
+    keywords: [
+      "landscapes",
+      "cinematic",
+      "prompts",
+      "midjourney",
+      "stable diffusion",
+    ],
     thumbnail:
       "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop",
     images: [
@@ -289,7 +295,7 @@ export function getProductBySlug(slug: string): Product | undefined {
 }
 
 export function getProjectsByCategory(
-  category: "ai-images" | "ai-videos" | "all"
+  category: "ai-images" | "ai-videos" | "all",
 ): Project[] {
   if (category === "all") return projects;
   return projects.filter((p) => p.category === category);
@@ -302,4 +308,3 @@ export function getFeaturedProjects(count: number = 4): Project[] {
 export function getFeaturedProducts(count: number = 4): Product[] {
   return products.slice(0, count);
 }
-

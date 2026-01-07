@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 // Note: This client has FULL ACCESS to your database.
 // Only use this in Server Actions or API Routes.
@@ -13,10 +13,6 @@ export function createAdminClient() {
         autoRefreshToken: false,
         persistSession: false,
       },
-    }
-  )
+    },
+  );
 }
-
-
-
-

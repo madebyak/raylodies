@@ -22,7 +22,8 @@ export default async function ProjectPage({
   // Fetch project with media
   const { data: project } = await supabase
     .from("projects")
-    .select(`
+    .select(
+      `
       *,
       categories (name),
       project_media (
@@ -34,7 +35,8 @@ export default async function ProjectPage({
         height,
         display_order
       )
-    `)
+    `,
+    )
     .eq("slug", slug)
     .eq("is_published", true)
     .single();
@@ -59,7 +61,7 @@ export default async function ProjectPage({
 
   // Sort media by display_order
   const media = (project.project_media as ProjectMedia[]).sort(
-    (a, b) => a.display_order - b.display_order
+    (a, b) => a.display_order - b.display_order,
   );
 
   const projectUrl = absoluteUrl(`/work/${project.slug}`);
@@ -72,9 +74,24 @@ export default async function ProjectPage({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-            { "@type": "ListItem", position: 2, name: "Work", item: absoluteUrl("/work") },
-            { "@type": "ListItem", position: 3, name: project.title, item: projectUrl },
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "Home",
+              item: absoluteUrl("/"),
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "Work",
+              item: absoluteUrl("/work"),
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: project.title,
+              item: projectUrl,
+            },
           ],
         }}
       />

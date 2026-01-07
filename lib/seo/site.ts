@@ -11,13 +11,17 @@ export function getSiteUrl(): string {
   // which breaks social crawlers trying to fetch og:image.
   // IMPORTANT: Use www.raylodies.com because raylodies.com redirects to www, and some
   // social crawlers (Telegram, Facebook) don't follow redirects for og:image URLs.
-  if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") {
+  if (
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL_ENV === "production"
+  ) {
     return "https://www.raylodies.com";
   }
 
   // 3) In preview deployments, VERCEL_URL is a good default.
   if (process.env.VERCEL_ENV === "preview") {
-    const preview = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.VERCEL_URL;
+    const preview =
+      process.env.NEXT_PUBLIC_VERCEL_URL || process.env.VERCEL_URL;
     if (preview) {
       const url = preview.startsWith("http") ? preview : `https://${preview}`;
       return url.replace(/\/+$/, "");
@@ -32,5 +36,3 @@ export function absoluteUrl(pathname: string): string {
   const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
   return `${base}${path}`;
 }
-
-

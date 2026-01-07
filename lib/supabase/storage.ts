@@ -6,7 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
  *   https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
  */
 export function parseSupabasePublicObjectUrl(
-  url: string
+  url: string,
 ): { bucket: string; path: string } | null {
   try {
     const u = new URL(url);
@@ -31,12 +31,10 @@ export function parseSupabasePublicObjectUrl(
  */
 export async function deleteStorageObject(
   bucket: string,
-  path: string
+  path: string,
 ): Promise<{ success?: true; error?: string }> {
   const admin = createAdminClient();
   const { error } = await admin.storage.from(bucket).remove([path]);
   if (error) return { error: error.message };
   return { success: true };
 }
-
-
