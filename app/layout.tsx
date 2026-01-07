@@ -4,7 +4,6 @@ import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import Providers from "@/components/providers";
 import { Toaster } from "sonner";
-import { getSiteUrl } from "@/lib/seo/site";
 import JsonLd from "@/components/seo/JsonLd";
 import { absoluteUrl } from "@/lib/seo/site";
 
@@ -15,11 +14,30 @@ const roboto = Roboto({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getSiteUrl()),
+// Site configuration - using hardcoded absolute URLs for OG images (best practice)
+const siteConfig = {
+  name: "Raylodies",
   title: "Raylodies | AI Creative Director",
   description:
     "Raylodies is an AI creative director specializing in AI-generated images and videos. Explore the portfolio and shop digital AI presets.",
+  url: "https://www.raylodies.com",
+  ogImage: "https://www.raylodies.com/opengraph-image.jpg",
+  twitterHandle: "@rno_jay",
+  locale: "en_US",
+};
+
+export const metadata: Metadata = {
+  // Base URL for resolving relative URLs
+  metadataBase: new URL(siteConfig.url),
+
+  // Primary Meta Tags
+  title: {
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+
+  // Keywords for SEO
   keywords: [
     "AI",
     "creative director",
@@ -27,20 +45,49 @@ export const metadata: Metadata = {
     "AI videos",
     "AI presets",
     "digital art",
+    "AI artist",
+    "Raylodies",
   ],
-  alternates: {
-    canonical: "/",
+
+  // Author information
+  authors: [
+    {
+      name: "Raylodies",
+      url: siteConfig.url,
+    },
+  ],
+  creator: "Raylodies",
+  publisher: "Raylodies",
+
+  // Robots directives
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
+
+  // Canonical URL
+  alternates: {
+    canonical: siteConfig.url,
+  },
+
+  // Open Graph metadata (Facebook, LinkedIn, Discord, Telegram, etc.)
   openGraph: {
     type: "website",
-    title: "Raylodies | AI Creative Director",
-    description:
-      "Raylodies is an AI creative director specializing in AI-generated images and videos. Explore the portfolio and shop digital AI presets.",
-    url: "/",
-    siteName: "Raylodies",
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    title: siteConfig.title,
+    description: siteConfig.description,
     images: [
       {
-        url: "/opengraph-image.jpg",
+        url: siteConfig.ogImage,
         width: 1200,
         height: 630,
         alt: "Raylodies - AI Creative Director & Artist",
@@ -48,23 +95,31 @@ export const metadata: Metadata = {
       },
     ],
   },
+
+  // Twitter Card metadata
   twitter: {
     card: "summary_large_image",
-    title: "Raylodies | AI Creative Director",
-    description:
-      "Raylodies is an AI creative director specializing in AI-generated images and videos. Explore the portfolio and shop digital AI presets.",
+    site: siteConfig.twitterHandle,
+    creator: siteConfig.twitterHandle,
+    title: siteConfig.title,
+    description: siteConfig.description,
     images: [
       {
-        url: "/twitter-image.jpg",
+        url: siteConfig.ogImage,
         width: 1200,
         height: 630,
         alt: "Raylodies - AI Creative Director & Artist",
       },
     ],
   },
+
+  // Verification for search consoles
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
+
+  // Category
+  category: "art",
 };
 
 export default async function RootLayout({
