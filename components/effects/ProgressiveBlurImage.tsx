@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Renderer, Program, Mesh, Triangle, Texture } from "ogl";
+import { Renderer, Program, Mesh, Plane, Texture, Transform } from "ogl";
 
-// Fullscreen triangle vertex shader
-const vertexShader = `
+// Vertex shader
+const vertexShader = /* glsl */ `
   attribute vec2 uv;
-  attribute vec2 position;
+  attribute vec3 position;
+  
   varying vec2 vUv;
   
   void main() {
     vUv = uv;
-    gl_Position = vec4(position, 0.0, 1.0);
+    gl_Position = vec4(position, 1.0);
   }
 `;
 
-// Fragment shader - progressive Gaussian blur
-const fragmentShader = `
+// Fragment shader with progressive Gaussian blur
+const fragmentShader = /* glsl */ `
   precision highp float;
   
   uniform sampler2D tMap;
@@ -27,11 +28,13 @@ const fragmentShader = `
   
   varying vec2 vUv;
   
+  // Optimized 13-tap Gaussian blur
   vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) {
     vec4 color = vec4(0.0);
     vec2 off1 = vec2(1.411764705882353) * direction;
     vec2 off2 = vec2(3.2941176470588234) * direction;
     vec2 off3 = vec2(5.176470588235294) * direction;
+    
     color += texture2D(image, uv) * 0.1964825501511404;
     color += texture2D(image, uv + (off1 / resolution)) * 0.2969069646728344;
     color += texture2D(image, uv - (off1 / resolution)) * 0.2969069646728344;
@@ -39,22 +42,25 @@ const fragmentShader = `
     color += texture2D(image, uv - (off2 / resolution)) * 0.09447039785044732;
     color += texture2D(image, uv + (off3 / resolution)) * 0.010381362401148057;
     color += texture2D(image, uv - (off3 / resolution)) * 0.010381362401148057;
+    
     return color;
   }
   
   void main() {
-    // Calculate blur amount based on vertical position
+    // Progressive blur: increases from uBlurStart to uBlurEnd (top to bottom)
     float blurFactor = smoothstep(uBlurStart, uBlurEnd, 1.0 - vUv.y);
     float blurAmount = blurFactor * uBlurStrength * 8.0;
     
     if (blurAmount < 0.1) {
+      // No blur needed
       gl_FragColor = texture2D(tMap, vUv);
     } else {
-      // Two-pass blur approximation in single pass
+      // Two-pass blur approximation
       vec4 blurH = blur13(tMap, vUv, uResolution, vec2(blurAmount, 0.0));
       vec4 blurV = blur13(tMap, vUv, uResolution, vec2(0.0, blurAmount));
       vec4 blurred = (blurH + blurV) * 0.5;
       
+      // Mix original with blurred
       vec4 original = texture2D(tMap, vUv);
       gl_FragColor = mix(original, blurred, blurFactor);
     }
@@ -83,7 +89,6 @@ export default function ProgressiveBlurImage({
 }: ProgressiveBlurImageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const meshRef = useRef<Mesh | null>(null);
   const programRef = useRef<Program | null>(null);
   const rendererRef = useRef<Renderer | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -94,6 +99,8 @@ export default function ProgressiveBlurImage({
 
     const canvas = canvasRef.current;
     const container = containerRef.current;
+    let animationId: number;
+    let isActive = true;
 
     // Initialize renderer
     const renderer = new Renderer({
@@ -107,25 +114,37 @@ export default function ProgressiveBlurImage({
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 0);
 
+    // Create scene using Transform (required for renderer.render)
+    const scene = new Transform();
+
     // Create texture from image
     const texture = new Texture(gl, {
       generateMipmaps: false,
+      minFilter: gl.LINEAR,
+      magFilter: gl.LINEAR,
     });
 
+    // Load image
     const image = new Image();
     image.crossOrigin = "anonymous";
+    
     image.onload = () => {
       texture.image = image;
       setImageDimensions({ width: image.width, height: image.height });
       setIsLoaded(true);
     };
+    
     image.onerror = () => {
       console.error("Failed to load image:", src);
     };
+    
     image.src = src;
 
-    // Create fullscreen triangle geometry (more efficient than quad)
-    const geometry = new Triangle(gl);
+    // Create fullscreen plane geometry (covers -1 to 1 in clip space)
+    const geometry = new Plane(gl, {
+      width: 2,
+      height: 2,
+    });
 
     // Create program with shaders
     const program = new Program(gl, {
@@ -133,7 +152,7 @@ export default function ProgressiveBlurImage({
       fragment: fragmentShader,
       uniforms: {
         tMap: { value: texture },
-        uResolution: { value: [canvas.width || 1, canvas.height || 1] },
+        uResolution: { value: [1, 1] },
         uBlurStrength: { value: blurStrength },
         uBlurStart: { value: blurStart },
         uBlurEnd: { value: blurEnd },
@@ -141,9 +160,9 @@ export default function ProgressiveBlurImage({
     });
     programRef.current = program;
 
-    // Create mesh
+    // Create mesh and add to scene
     const mesh = new Mesh(gl, { geometry, program });
-    meshRef.current = mesh;
+    mesh.setParent(scene);
 
     // Resize handler
     const resize = () => {
@@ -151,7 +170,10 @@ export default function ProgressiveBlurImage({
       if (rect.width > 0 && rect.height > 0) {
         renderer.setSize(rect.width, rect.height);
         if (program.uniforms.uResolution) {
-          program.uniforms.uResolution.value = [rect.width * renderer.dpr, rect.height * renderer.dpr];
+          program.uniforms.uResolution.value = [
+            rect.width * renderer.dpr,
+            rect.height * renderer.dpr,
+          ];
         }
       }
     };
@@ -164,15 +186,11 @@ export default function ProgressiveBlurImage({
     resizeObserver.observe(container);
 
     // Render loop
-    let animationId: number;
-    let isActive = true;
-    
     const render = () => {
       if (!isActive) return;
       
-      // Direct mesh render without scene graph
-      mesh.program.use();
-      mesh.geometry.draw({ mode: gl.TRIANGLES, program: mesh.program });
+      // Render scene (scene must have children for this to work)
+      renderer.render({ scene });
       
       animationId = requestAnimationFrame(render);
     };
@@ -181,12 +199,14 @@ export default function ProgressiveBlurImage({
     // Cleanup
     return () => {
       isActive = false;
-      cancelAnimationFrame(animationId);
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
       resizeObserver.disconnect();
       
       // Clean up WebGL resources
       try {
-        const loseContext = renderer.gl.getExtension("WEBGL_lose_context");
+        const loseContext = gl.getExtension("WEBGL_lose_context");
         if (loseContext) {
           loseContext.loseContext();
         }
@@ -210,9 +230,10 @@ export default function ProgressiveBlurImage({
       ref={containerRef}
       className={`relative overflow-hidden ${className}`}
       style={{
-        aspectRatio: imageDimensions.width && imageDimensions.height 
-          ? `${imageDimensions.width} / ${imageDimensions.height}` 
-          : "3 / 4",
+        aspectRatio:
+          imageDimensions.width && imageDimensions.height
+            ? `${imageDimensions.width} / ${imageDimensions.height}`
+            : "3 / 4",
       }}
     >
       {/* Fallback image for SSR and while loading */}
@@ -223,7 +244,7 @@ export default function ProgressiveBlurImage({
           isLoaded ? "opacity-0" : "opacity-100"
         }`}
       />
-      
+
       {/* WebGL Canvas */}
       <canvas
         ref={canvasRef}
