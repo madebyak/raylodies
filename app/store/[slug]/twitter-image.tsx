@@ -9,9 +9,6 @@ export const size = {
 };
 export const contentType = 'image/png';
 
-// Allow dynamic generation
-export const runtime = 'edge';
-
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = createPublicClient();
