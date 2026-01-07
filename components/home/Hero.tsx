@@ -53,14 +53,14 @@ function HeroHeadline() {
 
   // Define the headline structure with styling
   const headlineContent = [
-    { text: "I craft bold visual stories at the crossroads of", className: "text-white/60" },
-    { text: "AI", className: "text-white" },
-    { text: "and", className: "text-white/60" },
-    { text: "art", className: "text-white" },
+    { text: "I craft bold visual stories at the crossroads of", className: "text-white" },
+    { text: "AI", className: "text-purple-500 font-regular" },
+    { text: "and", className: "text-white" },
+    { text: "art", className: "text-purple-500 font-regular" },
   ];
 
   return (
-    <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-light leading-[1.1] tracking-tight mb-6">
+    <h1 className=" uppercase text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-light leading-[1.1] tracking-tight mb-6 max-w-2xl">
       <motion.span
         className="inline"
         initial="hidden"
@@ -123,7 +123,7 @@ function HeroSubheading() {
   const subheadingText = "Transforming ideas into digital experiences for both personal and creative use.";
 
   return (
-    <p className="text-xl md:text-2xl lg:text-3xl font-light text-white/50 leading-[1.3] tracking-tight mb-10 max-w-3xl">
+    <p className="text-xl md:text-2xl lg:text-3xl font-light text-white leading-[1.3] tracking-tight mb-10 max-w-2xl">
       <motion.span
         className="inline"
         initial="hidden"
@@ -177,7 +177,7 @@ export default function Hero() {
           <ParagraphReveal
             delay={0.9}
             triggerOnLoad
-            className="text-white/40 text-base md:text-lg font-light leading-relaxed max-w-2xl mb-10"
+            className="text-white/40 text-base md:text-lg font-light leading-relaxed max-w-lg mb-10"
           >
             If you&apos;re here for self-expression, visual identity, or storytelling, my work is designed to spark emotion, curiosity, and connection. Through AI-generated art, I create immersive visuals that move people and expand what&apos;s possible in visual communication.
           </ParagraphReveal>

@@ -1,8 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import { motion, useInView, useAnimation } from "framer-motion";
+
+// Dynamically import ProgressiveBlurImage to avoid SSR issues with WebGL
+const ProgressiveBlurImage = dynamic(
+  () => import("@/components/effects/ProgressiveBlurImage"),
+  { ssr: false }
+);
 import { ArrowRight } from "lucide-react";
 import { SOCIAL_LINKS } from "@/lib/social";
 import { Liu_Jian_Mao_Cao } from "next/font/google";
@@ -281,18 +287,16 @@ export default function AboutPage() {
             </ParagraphReveal>
           </div>
 
-          {/* Right - Personal Image */}
+          {/* Right - Personal Image with Progressive Blur Effect */}
           <SectionReveal delay={0.2}>
-            <div className="relative aspect-[3/4] w-full max-w-md mx-auto lg:max-w-none overflow-hidden">
-              <Image
-                src="/personal-img.jpg"
-                alt="Ranya - AI Creative Director"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
-            </div>
+            <ProgressiveBlurImage
+              src="/personal-img.jpg"
+              alt="Ranya - AI Creative Director"
+              className="w-full max-w-md mx-auto lg:max-w-none"
+              blurStrength={0.6}
+              blurStart={0.4}
+              blurEnd={0.95}
+            />
           </SectionReveal>
         </div>
 
