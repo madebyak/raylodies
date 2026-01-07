@@ -3,14 +3,22 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowDown } from "lucide-react";
+import dynamic from "next/dynamic";
+
+// Dynamically import ImageTrail to avoid SSR issues
+const ImageTrail = dynamic(() => import("./ImageTrail"), { ssr: false });
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex flex-col justify-center px-6 md:px-10 pt-20">
+    <section className="relative min-h-screen flex flex-col justify-center px-6 md:px-10 pt-20 overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none z-0" />
 
-      <div className="max-w-[1800px] mx-auto w-full">
+      {/* Image Trail Effect - Below content */}
+      <ImageTrail />
+
+      {/* Main Content - Above trail images */}
+      <div className="relative z-20 max-w-[1800px] mx-auto w-full pointer-events-none">
         {/* Main Hero Content */}
         <div className="max-w-4xl">
           {/* Subtitle */}
@@ -49,12 +57,12 @@ export default function Hero() {
             move people and expand what&apos;s possible in visual communication.
           </motion.p>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons - Restore pointer events for interactivity */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap gap-4"
+            className="flex flex-wrap gap-4 pointer-events-auto"
           >
             <Link
               href="/work"
@@ -77,7 +85,7 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20"
       >
         <motion.div
           animate={{ y: [0, 10, 0] }}
