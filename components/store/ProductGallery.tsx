@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ProductImage } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
+import PinterestSaveButton from "./PinterestSaveButton";
 
 interface ProductGalleryProps {
   images: ProductImage[];
@@ -72,13 +73,7 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
     <div className="space-y-4 lg:sticky lg:top-24">
       {/* Main Image */}
       <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 group">
-        <div 
-          className="aspect-[4/3] relative"
-          // Pinterest Save Button data attributes
-          data-pin-url={productUrl}
-          data-pin-media={selectedImage}
-          data-pin-description={title}
-        >
+        <div className="aspect-[4/3] relative">
           <Image
             src={selectedImage!}
             alt={title}
@@ -88,6 +83,17 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
             sizes="(max-width: 1024px) 100vw, 60vw"
           />
         </div>
+
+        {/* Pinterest Save Button - sticky on top left */}
+        {productUrl && selectedImage && (
+          <div className="absolute top-3 left-3 z-10">
+            <PinterestSaveButton
+              url={productUrl}
+              media={selectedImage}
+              description={title}
+            />
+          </div>
+        )}
 
         {/* Subtle gradient for controls */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

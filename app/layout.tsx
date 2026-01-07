@@ -161,19 +161,13 @@ export default async function RootLayout({
         </Providers>
         <Toaster theme="dark" position="bottom-right" richColors />
         
-        {/* Pinterest Save Button SDK - enables hover "Save" button on images */}
-        {/* data-pin-color="red" shows the red branded Pinterest button */}
-        {/* data-pin-lang="en" ensures English text */}
-        {/* data-pin-save="true" shows "Save" text on the button */}
+        {/* Pinterest SDK - loaded for Rich Pins support */}
+        {/* We use a custom PinterestSaveButton component instead of the hover button */}
+        {/* Setting data-pin-hover="false" disables the automatic hover buttons */}
         <Script
           src="//assets.pinterest.com/js/pinit.js"
           strategy="lazyOnload"
-          data-pin-hover="true"
-          data-pin-tall="true"
-          data-pin-round="true"
-          data-pin-color="red"
-          data-pin-lang="en"
-          data-pin-save="true"
+          data-pin-hover="false"
         />
       </body>
     </html>
