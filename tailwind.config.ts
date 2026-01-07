@@ -15,6 +15,7 @@ const config: Config = {
         background: "#000000",
         foreground: "#ffffff",
         muted: "#888888",
+        accent: "#6d15f9",
       },
     },
   },

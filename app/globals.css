@@ -10,6 +10,7 @@
   --color-muted-darker: #666666;
   --color-border: rgba(255, 255, 255, 0.1);
   --color-border-hover: rgba(255, 255, 255, 0.2);
+  --color-accent: #6d15f9;
   
   --font-light: 300;
   --font-regular: 400;
@@ -52,9 +53,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Selection */
+/* Selection - Purple highlight with white text */
 ::selection {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--color-accent);
+  color: var(--color-foreground);
+}
+
+::-moz-selection {
+  background-color: var(--color-accent);
   color: var(--color-foreground);
 }
 
