@@ -116,7 +116,8 @@ export default async function ProductPage({
             <ProductGallery 
               images={images} 
               thumbnail={product.thumbnail} 
-              title={product.title} 
+              title={product.title}
+              productUrl={productUrl}
             />
           </div>
 

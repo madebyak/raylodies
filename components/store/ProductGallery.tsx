@@ -10,9 +10,10 @@ interface ProductGalleryProps {
   images: ProductImage[];
   thumbnail: string | null;
   title: string;
+  productUrl?: string; // For Pinterest Save button - links to this URL when pinned
 }
 
-export default function ProductGallery({ images, thumbnail, title }: ProductGalleryProps) {
+export default function ProductGallery({ images, thumbnail, title, productUrl }: ProductGalleryProps) {
   const allImages = useMemo(() => {
     const urls: string[] = [];
     if (thumbnail) urls.push(thumbnail);
@@ -71,7 +72,13 @@ export default function ProductGallery({ images, thumbnail, title }: ProductGall
     <div className="space-y-4 lg:sticky lg:top-24">
       {/* Main Image */}
       <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 group">
-        <div className="aspect-[4/3] relative">
+        <div 
+          className="aspect-[4/3] relative"
+          // Pinterest Save Button data attributes
+          data-pin-url={productUrl}
+          data-pin-media={selectedImage}
+          data-pin-description={title}
+        >
           <Image
             src={selectedImage!}
             alt={title}
