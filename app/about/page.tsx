@@ -6,9 +6,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { SOCIAL_LINKS } from "@/lib/social";
-import { Ms_Madi } from "next/font/google";
+import { Liu_Jian_Mao_Cao } from "next/font/google";
 
-const msMadi = Ms_Madi({
+const liuJianMaoCao = Liu_Jian_Mao_Cao({
   subsets: ["latin"],
   weight: "400",
   display: "swap",
@@ -221,8 +221,8 @@ export default function AboutPage() {
                   Let&apos;s create something{" "}
                   <span
                     className={[
-                      msMadi.className,
-                      "wow-gradient inline-block align-baseline",
+                      liuJianMaoCao.className,
+                      "wow-gradient inline-block align-baseline px-1 py-2 text-4xl md:text-5xl",
                     ].join(" ")}
                   >
                     WOW

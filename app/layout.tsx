@@ -118,6 +118,11 @@ export const metadata: Metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
 
+  // Pinterest domain verification
+  other: {
+    "p:domain_verify": "e8ed1eecd088a9013ecf1f74bc090005",
+  },
+
   // Category
   category: "art",
 };
