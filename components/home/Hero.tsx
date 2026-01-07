@@ -53,7 +53,10 @@ function HeroHeadline() {
 
   // Define the headline structure with styling
   const headlineContent = [
-    { text: "I craft bold visual stories at the crossroads of", className: "text-white" },
+    {
+      text: "I craft bold visual stories at the crossroads of",
+      className: "text-white",
+    },
     { text: "AI", className: "text-purple-500 font-regular" },
     { text: "and", className: "text-white" },
     { text: "art", className: "text-purple-500 font-regular" },
@@ -70,13 +73,19 @@ function HeroHeadline() {
         {headlineContent.map((segment, segmentIndex) => (
           <span key={segmentIndex} className="inline">
             {segment.text.split(" ").map((word, wordIndex, arr) => (
-              <span key={`${segmentIndex}-${wordIndex}`} className="inline-block overflow-hidden">
+              <span
+                key={`${segmentIndex}-${wordIndex}`}
+                className="inline-block overflow-hidden"
+              >
                 <motion.span
                   className={`inline-block ${segment.className}`}
                   variants={wordVariants}
                 >
                   {word}
-                  {wordIndex < arr.length - 1 || segmentIndex < headlineContent.length - 1 ? "\u00A0" : ""}
+                  {wordIndex < arr.length - 1 ||
+                  segmentIndex < headlineContent.length - 1
+                    ? "\u00A0"
+                    : ""}
                 </motion.span>
               </span>
             ))}
@@ -120,7 +129,8 @@ function HeroSubheading() {
     },
   };
 
-  const subheadingText = "Transforming ideas into digital experiences for both personal and creative use.";
+  const subheadingText =
+    "Transforming ideas into digital experiences for both personal and creative use.";
 
   return (
     <p className="text-xl md:text-2xl lg:text-3xl font-light text-white leading-[1.3] tracking-tight mb-10 max-w-2xl">
@@ -179,11 +189,19 @@ export default function Hero() {
             triggerOnLoad
             className="text-white/40 text-base md:text-lg font-light leading-relaxed max-w-lg mb-10"
           >
-            If you&apos;re here for self-expression, visual identity, or storytelling, my work is designed to spark emotion, curiosity, and connection. Through AI-generated art, I create immersive visuals that move people and expand what&apos;s possible in visual communication.
+            If you&apos;re here for self-expression, visual identity, or
+            storytelling, my work is designed to spark emotion, curiosity, and
+            connection. Through AI-generated art, I create immersive visuals
+            that move people and expand what&apos;s possible in visual
+            communication.
           </ParagraphReveal>
 
           {/* CTA Buttons - Button reveal */}
-          <ButtonReveal delay={1.1} triggerOnLoad className="flex flex-wrap gap-4 pointer-events-auto">
+          <ButtonReveal
+            delay={1.1}
+            triggerOnLoad
+            className="flex flex-wrap gap-4 pointer-events-auto"
+          >
             <Link
               href="/work"
               className="inline-flex items-center px-6 py-3 bg-white text-black text-sm font-light tracking-wide hover:bg-white/90 transition-colors duration-300"
