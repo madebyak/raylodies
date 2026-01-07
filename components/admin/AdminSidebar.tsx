@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
@@ -78,7 +79,14 @@ export default function AdminSidebar() {
           <div className="h-20 flex items-center justify-between px-6 border-b border-white/5">
             <Link href="/" className="flex items-center gap-3 text-white" aria-label="Raylodies">
               <span className="sr-only">Raylodies</span>
-              <img src="/white-logo.svg" alt="" className="h-6 w-auto" />
+              <Image
+                src="/white-logo.svg"
+                alt=""
+                width={120}
+                height={24}
+                className="h-6 w-auto"
+                priority
+              />
               <span className="text-xs text-white/40 font-normal">Admin</span>
             </Link>
             <button 
