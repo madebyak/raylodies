@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import Providers from "@/components/providers";
@@ -159,6 +160,15 @@ export default async function RootLayout({
           </ConditionalLayout>
         </Providers>
         <Toaster theme="dark" position="bottom-right" richColors />
+        
+        {/* Pinterest Save Button SDK - enables hover "Save" button on images */}
+        <Script
+          src="//assets.pinterest.com/js/pinit.js"
+          strategy="lazyOnload"
+          data-pin-hover="true"
+          data-pin-tall="true"
+          data-pin-round="true"
+        />
       </body>
     </html>
   );
