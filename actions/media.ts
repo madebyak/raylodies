@@ -11,49 +11,13 @@ type AddProjectMediaMeta = {
   poster_url?: string | null
 }
 
+// Note: Thumbnail is now managed independently via ThumbnailUploader in admin.
+// It no longer auto-syncs from the first media item.
+
 function getErrorCode(err: unknown): string | null {
   if (!err || typeof err !== 'object') return null
   const code = (err as Record<string, unknown>).code
   return typeof code === 'string' ? code : null
-}
-
-async function syncProjectThumbnailFromFirstMedia(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  projectId: string
-) {
-  const { data: first, error } = await supabase
-    .from('project_media')
-    .select('type,url,poster_url,width,height')
-    .eq('project_id', projectId)
-    .order('display_order', { ascending: true })
-    .limit(1)
-    .maybeSingle()
-
-  if (error && getErrorCode(error) !== 'PGRST116') {
-    console.error('Error selecting first media:', error)
-  }
-
-  if (!first) {
-    await supabase
-      .from('projects')
-      .update({ thumbnail: null, thumbnail_width: null, thumbnail_height: null })
-      .eq('id', projectId)
-    return
-  }
-
-  const thumb =
-    first.type === 'image'
-      ? first.url
-      : first.poster_url
-
-  await supabase
-    .from('projects')
-    .update({
-      thumbnail: thumb ?? null,
-      thumbnail_width: first.width ?? null,
-      thumbnail_height: first.height ?? null,
-    })
-    .eq('id', projectId)
 }
 
 export async function addProjectMedia(
@@ -103,9 +67,6 @@ export async function addProjectMedia(
   }
 
   console.log('Successfully inserted project media:', data)
-  
-  // Keep thumbnail always in sync with the *first* media item (image or video poster)
-  await syncProjectThumbnailFromFirstMedia(supabase, projectId)
 
   revalidatePath(`/admin/projects/${projectId}`)
   revalidatePath('/work')
@@ -116,7 +77,6 @@ export async function addProjectMedia(
 export async function reorderProjectMedia(items: { id: string; display_order: number }[]) {
   const supabase = await createClient()
   if (!items || items.length === 0) return
-  const projectId = (await supabase.from('project_media').select('project_id').eq('id', items[0].id).single()).data?.project_id
 
   // Batch update using Promise.all for better performance
   await Promise.all(
@@ -127,10 +87,6 @@ export async function reorderProjectMedia(items: { id: string; display_order: nu
         .eq('id', item.id)
     )
   )
-
-  if (projectId) {
-    await syncProjectThumbnailFromFirstMedia(supabase, projectId)
-  }
 
   revalidatePath('/admin/projects')
   revalidatePath('/work')
@@ -151,12 +107,10 @@ export async function removeProjectMedia(id: string) {
     console.warn('Failed to fetch media before delete:', fetchErr)
   }
 
-  const { data: deleted, error } = await supabase
+  const { error } = await supabase
     .from('project_media')
     .delete()
     .eq('id', id)
-    .select('project_id')
-    .maybeSingle()
 
   if (error) throw new Error(error.message)
 
@@ -168,10 +122,6 @@ export async function removeProjectMedia(id: string) {
     if (parsed.bucket !== 'public-assets') continue
     const res = await deleteStorageObject(parsed.bucket, parsed.path)
     if (res.error) console.warn('Storage cleanup failed (project media):', res.error)
-  }
-  
-  if (deleted?.project_id) {
-    await syncProjectThumbnailFromFirstMedia(supabase, deleted.project_id)
   }
 
   revalidatePath('/admin/projects')

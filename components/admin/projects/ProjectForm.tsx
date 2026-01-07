@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { upsertProject } from "@/actions/project-editor";
 import { addProjectMedia, getProjectMedia, removeProjectMedia, reorderProjectMedia } from "@/actions/media";
 import { deleteProject } from "@/actions/projects";
+import { updateProjectThumbnail, removeProjectThumbnail } from "@/actions/project-thumbnail";
 import Button from "@/components/ui/Button";
 import Input, { Textarea, Select } from "@/components/ui/Input";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
@@ -12,6 +13,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import MediaUploader from "./MediaUploader";
 import SortableMediaItem from "./SortableMediaItem";
+import ThumbnailUploader from "./ThumbnailUploader";
 import { Project, Category, ProjectMedia } from "@/types/database";
 
 import {
@@ -142,6 +144,35 @@ export default function ProjectForm({
     }
   }
 
+  async function handleThumbnailUpload(url: string, width: number, height: number) {
+    if (!initialData?.id) return;
+    try {
+      const result = await updateProjectThumbnail(initialData.id, url, width, height);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        router.refresh();
+      }
+    } catch {
+      toast.error("Failed to update thumbnail");
+    }
+  }
+
+  async function handleThumbnailRemove() {
+    if (!initialData?.id) return;
+    try {
+      const result = await removeProjectThumbnail(initialData.id);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Thumbnail removed");
+        router.refresh();
+      }
+    } catch {
+      toast.error("Failed to remove thumbnail");
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-20">
       <div className="flex items-center justify-between">
@@ -216,10 +247,33 @@ export default function ProjectForm({
               />
             </div>
 
+            {/* Thumbnail Section */}
+            <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
+              <div className="space-y-1">
+                <h3 className="text-lg font-light text-white">Thumbnail</h3>
+                <p className="text-sm text-white/40">
+                  This image appears in the work grid and social previews. It won&apos;t show in the project gallery.
+                </p>
+              </div>
+              
+              {isNew ? (
+                <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center opacity-50 cursor-not-allowed">
+                  <p className="text-sm text-white/40">Save project first to upload thumbnail</p>
+                </div>
+              ) : initialData?.id ? (
+                <ThumbnailUploader
+                  projectId={initialData.id}
+                  currentThumbnail={initialData.thumbnail || null}
+                  onUploadComplete={handleThumbnailUpload}
+                  onRemove={handleThumbnailRemove}
+                />
+              ) : null}
+            </div>
+
             <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-light text-white">Media Gallery</h3>
-                {!isNew && <span className="text-xs text-white/40">Drag to reorder • First item = thumbnail</span>}
+                {!isNew && <span className="text-xs text-white/40">Drag to reorder</span>}
               </div>
               
               {isNew ? (

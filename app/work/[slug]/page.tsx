@@ -1,29 +1,15 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { notFound, redirect } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import Button from "@/components/ui/Button";
+import ProjectMediaMasonry from "@/components/work/ProjectMediaMasonry";
 import { ProjectMedia } from "@/types/database";
 import JsonLd from "@/components/seo/JsonLd";
 import { absoluteUrl } from "@/lib/seo/site";
 import { normalizeSlug } from "@/lib/slug";
 
 export const revalidate = 300;
-
-// Video Player Component
-function VideoPlayer({ url, poster }: { url: string; poster?: string | null }) {
-  return (
-    <video
-      src={url}
-      poster={poster || undefined}
-      className="w-full h-full object-contain bg-black"
-      controls
-      loop
-      playsInline
-    />
-  );
-}
 
 export default async function ProjectPage({
   params,
@@ -142,51 +128,14 @@ export default async function ProjectPage({
         </div>
       </div>
 
-      {/* Media Gallery */}
+      {/* Media Gallery - Masonry Grid */}
       <div className="px-6 md:px-10 pb-32">
-        <div className="max-w-[1800px] mx-auto space-y-4 md:space-y-8">
-          {media.map((item) => (
-            <div
-              key={item.id}
-              className="relative w-full overflow-hidden rounded-lg bg-white/5"
-            >
-              {item.type === "video" ? (
-                <div
-                  className={`w-full max-h-[80vh] ${
-                    item.width && item.height && item.width < item.height
-                      ? "mx-auto max-w-[560px]"
-                      : ""
-                  }`}
-                  style={
-                    item.width && item.height
-                      ? { aspectRatio: `${item.width} / ${item.height}` }
-                      : undefined
-                  }
-                >
-                  <VideoPlayer
-                    url={item.url}
-                    poster={item.poster_url || project.og_image || project.thumbnail}
-                  />
-                </div>
-              ) : (
-                <div className="relative w-full h-auto">
-                  <Image
-                    src={item.url}
-                    alt={project.title}
-                    width={(item.width as number | null) || 1920}
-                    height={(item.height as number | null) || 1080}
-                    className={`w-full h-auto object-cover ${
-                      item.width && item.height && item.width < item.height
-                        ? "mx-auto max-w-[560px]"
-                        : ""
-                    }`}
-                    sizes="100vw"
-                    priority={item.display_order === 0}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="max-w-[1800px] mx-auto">
+          <ProjectMediaMasonry
+            media={media}
+            projectTitle={project.title}
+            fallbackPoster={project.og_image || project.thumbnail}
+          />
         </div>
       </div>
 

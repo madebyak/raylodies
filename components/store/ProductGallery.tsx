@@ -72,13 +72,17 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
   return (
     <div className="space-y-4 lg:sticky lg:top-24">
       {/* Main Image */}
-      <div className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 group">
+      <div 
+        className="relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 group"
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <div className="aspect-[4/3] relative">
           <Image
             src={selectedImage!}
             alt={title}
             fill
-            className="object-cover"
+            className="object-cover select-none"
+            draggable={false}
             priority
             sizes="(max-width: 1024px) 100vw, 60vw"
           />
@@ -140,7 +144,10 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
 
       {/* Thumbnails (only show if more than 1 image) */}
       {allImages.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div 
+          className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          onContextMenu={(e) => e.preventDefault()}
+        >
           {allImages.map((url, index) => (
             <button
               key={index}
@@ -156,7 +163,8 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
                 src={url}
                 alt={`${title} - Image ${index + 1}`}
                 fill
-                className="object-cover"
+                className="object-cover select-none"
+                draggable={false}
                 sizes="96px"
               />
             </button>
@@ -187,12 +195,16 @@ export default function ProductGallery({ images, thumbnail, title, productUrl }:
                 <X size={18} />
               </button>
 
-              <div className="relative w-full aspect-[16/10] md:aspect-[16/9] rounded-2xl overflow-hidden bg-black border border-white/10">
+              <div 
+                className="relative w-full aspect-[16/10] md:aspect-[16/9] rounded-2xl overflow-hidden bg-black border border-white/10"
+                onContextMenu={(e) => e.preventDefault()}
+              >
                 <Image
                   src={selectedImage!}
                   alt={title}
                   fill
-                  className="object-contain"
+                  className="object-contain select-none"
+                  draggable={false}
                   sizes="100vw"
                   priority
                 />
