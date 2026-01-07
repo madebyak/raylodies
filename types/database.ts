@@ -61,6 +61,7 @@ export interface Product {
   slug: string
   description: string | null
   price: number
+  is_free: boolean
   category_id: string | null
   thumbnail: string | null
   file_url: string | null
@@ -84,9 +85,18 @@ export interface ProductListItem {
   title: string
   slug: string
   price: number
+  is_free: boolean
   thumbnail: string | null
   categories?: Pick<Category, 'id' | 'name' | 'slug' | 'type'> | null
   keywords?: string[]
+}
+
+export interface ProductEntitlement {
+  id: string
+  user_id: string
+  product_id: string
+  source: 'free' | 'admin_grant' | 'migration'
+  created_at: string
 }
 
 export interface ProductImage {

@@ -10,7 +10,7 @@ function clampDescription(text: string, max = 160) {
 }
 
 interface Props {
-  params: { slug: string } | Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

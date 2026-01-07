@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { ProductImage } from '@/types/database'
 import { revalidatePath } from 'next/cache'
+import { deleteStorageObject, parseSupabasePublicObjectUrl } from '@/lib/supabase/storage'
 
 async function syncProductThumbnailFromFirstImage(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -93,7 +94,18 @@ export async function reorderProductImages(items: { id: string; display_order: n
 
 export async function removeProductImage(id: string) {
   const supabase = await createClient()
-  
+
+  // Fetch before delete so we can attempt storage cleanup.
+  const { data: existing, error: fetchErr } = await supabase
+    .from('product_images')
+    .select('product_id, url')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (fetchErr && fetchErr.code !== 'PGRST116') {
+    console.warn('Failed to fetch image before delete:', fetchErr)
+  }
+
   const { data: deleted, error } = await supabase
     .from('product_images')
     .delete()
@@ -102,6 +114,19 @@ export async function removeProductImage(id: string) {
     .maybeSingle()
 
   if (error) throw new Error(error.message)
+
+  // Best-effort: delete storage object if the URL is a Supabase public-assets object.
+  const url = existing?.url
+  if (url && typeof url === 'string') {
+    const parsed = parseSupabasePublicObjectUrl(url)
+    if (parsed) {
+      // Only delete from our known public bucket (avoid accidental deletion if URL points elsewhere).
+      if (parsed.bucket === 'public-assets') {
+        const res = await deleteStorageObject(parsed.bucket, parsed.path)
+        if (res.error) console.warn('Storage cleanup failed (product image):', res.error)
+      }
+    }
+  }
 
   if (deleted?.product_id) {
     await syncProductThumbnailFromFirstImage(supabase, deleted.product_id)

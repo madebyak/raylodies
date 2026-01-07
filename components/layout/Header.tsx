@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -55,9 +56,18 @@ export default function Header() {
         {/* Logo */}
         <Link
           href="/"
-          className="text-white text-lg md:text-xl font-light tracking-wide hover:opacity-70 transition-opacity duration-300"
+          className="text-white hover:opacity-70 transition-opacity duration-300 flex items-center"
+          aria-label="Raylodies"
         >
-          Raylodies
+          <span className="sr-only">Raylodies</span>
+          <Image
+            src="/white-logo.svg"
+            alt=""
+            width={320}
+            height={80}
+            className="h-10 md:h-12 w-auto"
+            priority
+          />
         </Link>
 
         {/* Desktop Navigation */}

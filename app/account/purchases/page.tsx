@@ -26,8 +26,11 @@ interface OrderRaw {
 export default async function PurchasesPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  // Next.js 16 typed PageProps expects searchParams to be a Promise in this repo's generated types.
+  // At runtime, `searchParams` may already be a plain object; `await` is safe on non-Promise values.
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -68,7 +71,7 @@ export default async function PurchasesPage({
     <div className="space-y-6">
       <h2 className="text-xl font-light text-white">Purchase History</h2>
       <PurchasesAutoRefresh
-        enabled={searchParams?.checkout === "success"}
+        enabled={resolvedSearchParams?.checkout === "success"}
         orderCount={orders.length}
       />
 

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { ProjectMedia } from '@/types/database'
 import { revalidatePath } from 'next/cache'
+import { deleteStorageObject, parseSupabasePublicObjectUrl } from '@/lib/supabase/storage'
 
 type AddProjectMediaMeta = {
   width?: number | null
@@ -138,7 +139,18 @@ export async function reorderProjectMedia(items: { id: string; display_order: nu
 
 export async function removeProjectMedia(id: string) {
   const supabase = await createClient()
-  
+
+  // Fetch before delete so we can attempt storage cleanup (media + poster).
+  const { data: existing, error: fetchErr } = await supabase
+    .from('project_media')
+    .select('project_id, url, poster_url')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (fetchErr && getErrorCode(fetchErr) !== 'PGRST116') {
+    console.warn('Failed to fetch media before delete:', fetchErr)
+  }
+
   const { data: deleted, error } = await supabase
     .from('project_media')
     .delete()
@@ -147,6 +159,16 @@ export async function removeProjectMedia(id: string) {
     .maybeSingle()
 
   if (error) throw new Error(error.message)
+
+  // Best-effort: delete storage objects if URLs are Supabase public-assets objects.
+  for (const candidate of [existing?.url, existing?.poster_url]) {
+    if (!candidate || typeof candidate !== 'string') continue
+    const parsed = parseSupabasePublicObjectUrl(candidate)
+    if (!parsed) continue
+    if (parsed.bucket !== 'public-assets') continue
+    const res = await deleteStorageObject(parsed.bucket, parsed.path)
+    if (res.error) console.warn('Storage cleanup failed (project media):', res.error)
+  }
   
   if (deleted?.project_id) {
     await syncProjectThumbnailFromFirstMedia(supabase, deleted.project_id)

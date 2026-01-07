@@ -15,7 +15,7 @@ export const revalidate = 300;
 export default async function ProductPage({
   params,
 }: {
-  params: { slug: string } | Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   const supabase = createPublicClient();
@@ -135,7 +135,7 @@ export default async function ProductPage({
                 {product.title}
               </h1>
               <p className="text-2xl text-white font-light">
-                {formatPrice(product.price)}
+                {product.is_free || product.price === 0 ? "Free" : formatPrice(product.price)}
               </p>
             </div>
 
@@ -148,6 +148,8 @@ export default async function ProductPage({
                 productId={product.id}
                 productSlug={product.slug}
                 paddlePriceId={product.paddle_price_id}
+                isFree={Boolean(product.is_free) || product.price === 0}
+                hasFile={!!product.file_url}
               />
             </div>
           </div>

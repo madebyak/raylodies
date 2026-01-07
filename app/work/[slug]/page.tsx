@@ -28,7 +28,7 @@ function VideoPlayer({ url, poster }: { url: string; poster?: string | null }) {
 export default async function ProjectPage({
   params,
 }: {
-  params: { slug: string } | Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   const supabase = createPublicClient();

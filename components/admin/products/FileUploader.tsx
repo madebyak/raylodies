@@ -2,9 +2,9 @@
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, FileIcon, Loader2, CheckCircle } from "lucide-react";
+import { Upload, FileIcon, Loader2, CheckCircle, Trash2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { setProductFilePath } from "@/actions/product-editor";
+import { deleteProductFile, replaceProductFilePath } from "@/actions/product-editor";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
@@ -15,6 +15,7 @@ interface FileUploaderProps {
 
 export default function FileUploader({ productId, currentFile }: FileUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [localFile, setLocalFile] = useState<string | null>(currentFile);
 
   function sanitizeFileName(name: string): string {
@@ -49,7 +50,7 @@ export default function FileUploader({ productId, currentFile }: FileUploaderPro
         throw new Error(uploadError.message);
       }
 
-      const res = await setProductFilePath(productId, filePath);
+      const res = await replaceProductFilePath(productId, filePath);
       if (res.error) throw new Error(res.error);
 
       setLocalFile(filePath);
@@ -62,6 +63,28 @@ export default function FileUploader({ productId, currentFile }: FileUploaderPro
       setIsUploading(false);
     }
   }, [productId]);
+
+  const onRemove = useCallback(async () => {
+    if (!localFile) return;
+    const ok = window.confirm("Remove the current digital file?\n\nThis will delete it from storage and clear it from the product.");
+    if (!ok) return;
+    setIsDeleting(true);
+    try {
+      const res = await deleteProductFile(productId);
+      if (res.error) throw new Error(res.error);
+      if ((res as { warning?: string }).warning) {
+        toast.warning(`File cleared, but storage delete failed: ${(res as { warning?: string }).warning}`);
+      } else {
+        toast.success("File removed");
+      }
+      setLocalFile(null);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      toast.error(`Failed to remove file: ${msg}`);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [localFile, productId]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -99,10 +122,14 @@ export default function FileUploader({ productId, currentFile }: FileUploaderPro
           )}
           <div className="space-y-1">
             <p className="text-sm text-white font-medium">
-              {isUploading ? "Uploading..." : "Upload Digital File"}
+              {isUploading
+                ? "Uploading..."
+                : localFile
+                ? "Upload / Replace Digital File"
+                : "Upload Digital File"}
             </p>
             <p className="text-xs text-white/40">
-              Drag & drop or click to browse (.zip, .rar, .pdf, images, videos)
+              Drag & drop or click to browse. Uploading a new file will replace the current one.
             </p>
           </div>
         </div>
@@ -121,7 +148,36 @@ export default function FileUploader({ productId, currentFile }: FileUploaderPro
               <CheckCircle size={10} />
               Ready for download
             </p>
+            <div className="mt-1 flex items-center gap-2">
+              <p className="text-[11px] text-white/40 font-mono truncate">
+                {localFile}
+              </p>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(localFile);
+                    toast.success("Path copied");
+                  } catch {
+                    toast.error("Failed to copy");
+                  }
+                }}
+                className="p-1 rounded hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+                title="Copy storage path"
+              >
+                <Copy size={14} />
+              </button>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={onRemove}
+            disabled={isDeleting || isUploading}
+            className="p-2 rounded-md hover:bg-white/10 text-white/60 hover:text-red-300 transition-colors disabled:opacity-40"
+            title="Remove file"
+          >
+            {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 size={16} />}
+          </button>
         </div>
       )}
     </div>

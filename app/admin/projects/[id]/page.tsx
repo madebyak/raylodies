@@ -2,7 +2,7 @@ import ProjectForm from "@/components/admin/projects/ProjectForm";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 
-export default async function ProjectEditorPage({ params }: { params: { id: string } }) {
+export default async function ProjectEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
   const { id } = await params;
   
@@ -35,6 +35,8 @@ export default async function ProjectEditorPage({ params }: { params: { id: stri
     />
   );
 }
+
+
 
 
 

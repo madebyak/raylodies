@@ -23,6 +23,7 @@ export async function GET(
   }
 
   const admin = createAdminClient();
+  // 1) Paid purchase (Paddle -> orders/order_items)
   const { data: purchase, error } = await admin
     .from("order_items")
     .select(
@@ -48,10 +49,27 @@ export async function GET(
     );
   }
 
+  // 2) Free entitlement (login-required)
+  const { data: entitlement, error: entErr } = await admin
+    .from("product_entitlements")
+    .select("id")
+    .eq("product_id", productId)
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (entErr) {
+    console.error("Entitlement lookup failed:", entErr);
+    return NextResponse.json(
+      { authenticated: true, hasPurchased: !!purchase },
+      { headers: noStoreHeaders }
+    );
+  }
+
   return NextResponse.json(
     {
       authenticated: true,
-      hasPurchased: !!purchase,
+      hasPurchased: !!purchase || !!entitlement,
     },
     { headers: noStoreHeaders }
   );

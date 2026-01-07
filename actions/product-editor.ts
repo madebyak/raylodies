@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { syncProductWithPaddle } from '@/lib/paddle/server'
 import { normalizeSlug } from '@/lib/slug'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { deleteStorageObject } from '@/lib/supabase/storage'
 
 function getErrorCode(err: unknown): string | null {
   if (!err || typeof err !== 'object') return null
@@ -40,7 +41,9 @@ export async function upsertProduct(formData: FormData) {
   const title = formData.get('title') as string
   const description = formData.get('description') as string
   const category_id = formData.get('category_id') as string
-  const price = parseFloat(formData.get('price') as string)
+  const is_free = formData.get('is_free') === 'on'
+  const rawPrice = parseFloat(formData.get('price') as string)
+  const price = is_free ? 0 : rawPrice
   const is_published = formData.get('is_published') === 'on'
   const meta_title = (formData.get('meta_title') as string) || null
   const meta_description = (formData.get('meta_description') as string) || null
@@ -73,21 +76,21 @@ export async function upsertProduct(formData: FormData) {
     slug = await generateUniqueProductSlug(supabase, title)
   }
 
-  // Sync with Paddle - create/update product and price
-  const paddleResult = await syncProductWithPaddle({
-    existingPaddleProductId,
-    existingPaddlePriceId,
-    name: title,
-    description,
-    price,
-    updatePrice: existingDbPrice === null ? true : existingDbPrice !== price,
-  })
+  // Sync with Paddle only for paid products.
+  const paddleResult = is_free
+    ? { paddleProductId: undefined, paddlePriceId: undefined, error: undefined as string | undefined }
+    : await syncProductWithPaddle({
+        existingPaddleProductId,
+        existingPaddlePriceId,
+        name: title,
+        description,
+        price,
+        updatePrice: existingDbPrice === null ? true : existingDbPrice !== price,
+      })
 
-  if (paddleResult.error) {
+  if (!is_free && paddleResult.error) {
     console.error('Paddle sync failed:', paddleResult.error)
     // Continue without Paddle IDs - admin can manually add later if needed
-    // Or return error if Paddle is required:
-    // return { error: paddleResult.error }
   }
 
   const productData = {
@@ -95,9 +98,10 @@ export async function upsertProduct(formData: FormData) {
     slug,
     description,
     price,
+    is_free,
     category_id: category_id || null,
-    paddle_product_id: paddleResult.paddleProductId || existingPaddleProductId || null,
-    paddle_price_id: paddleResult.paddlePriceId || existingPaddlePriceId || null,
+    paddle_product_id: is_free ? null : (paddleResult.paddleProductId || existingPaddleProductId || null),
+    paddle_price_id: is_free ? null : (paddleResult.paddlePriceId || existingPaddlePriceId || null),
     is_published,
     meta_title,
     meta_description,
@@ -189,6 +193,94 @@ export async function setProductFilePath(productId: string, filePath: string) {
     .eq('id', productId)
 
   if (error) return { error: error.message }
+
+  revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${productId}`)
+  revalidatePath('/store')
+  return { success: true }
+}
+
+/**
+ * Deletes the current product file (if any) from storage and clears products.file_url.
+ * Uses service role for storage deletion, but still checks the caller is an admin.
+ */
+export async function deleteProductFile(productId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = user?.app_metadata?.role === 'super_admin'
+  if (!user || !isAdmin) return { error: 'Unauthorized' }
+
+  const { data: product, error: fetchErr } = await supabase
+    .from('products')
+    .select('file_url')
+    .eq('id', productId)
+    .maybeSingle()
+
+  if (fetchErr) return { error: fetchErr.message }
+
+  const filePath = product?.file_url ?? null
+  if (!filePath) {
+    // Nothing to delete, but keep DB consistent.
+    await supabase.from('products').update({ file_url: null }).eq('id', productId)
+    revalidatePath('/admin/products')
+    revalidatePath(`/admin/products/${productId}`)
+    revalidatePath('/store')
+    return { success: true }
+  }
+
+  // Clear DB pointer first (so UI doesn't keep referencing a deleted file).
+  const { error: clearErr } = await supabase
+    .from('products')
+    .update({ file_url: null })
+    .eq('id', productId)
+
+  if (clearErr) return { error: clearErr.message }
+
+  // Best-effort remove from private bucket.
+  const res = await deleteStorageObject('product-files', filePath)
+  if (res.error) {
+    // DB is already cleared; surface warning to UI.
+    return { success: true, warning: res.error }
+  }
+
+  revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${productId}`)
+  revalidatePath('/store')
+  return { success: true }
+}
+
+/**
+ * Replaces a product file path and cleans up the previous storage object (best-effort).
+ * This prevents orphan files when admins upload a new version.
+ */
+export async function replaceProductFilePath(productId: string, nextFilePath: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = user?.app_metadata?.role === 'super_admin'
+  if (!user || !isAdmin) return { error: 'Unauthorized' }
+
+  const { data: product, error: fetchErr } = await supabase
+    .from('products')
+    .select('file_url')
+    .eq('id', productId)
+    .maybeSingle()
+
+  if (fetchErr) return { error: fetchErr.message }
+
+  const prev = product?.file_url ?? null
+
+  const { error: updateErr } = await supabase
+    .from('products')
+    .update({ file_url: nextFilePath })
+    .eq('id', productId)
+
+  if (updateErr) return { error: updateErr.message }
+
+  // Best-effort delete previous object (ignore failures).
+  if (prev && prev !== nextFilePath) {
+    const res = await deleteStorageObject('product-files', prev)
+    if (res.error) console.warn('Storage cleanup failed (product file):', res.error)
+  }
 
   revalidatePath('/admin/products')
   revalidatePath(`/admin/products/${productId}`)

@@ -26,7 +26,9 @@ export async function GET(
     );
   }
   
-  // 2. Verify user purchased this product (single join query, no N+1)
+  // 2) Verify access:
+  // - paid purchase: orders/order_items
+  // - free entitlement: product_entitlements
   const { data: purchase, error: purchaseError } = await supabaseAdmin
     .from('order_items')
     .select(`
@@ -53,17 +55,51 @@ export async function GET(
       { status: 500, headers: { "Cache-Control": noStore } }
     );
   }
-  
-  if (!purchase) {
-    return NextResponse.json(
-      { error: 'Product not purchased or order not completed' }, 
-      { status: 403, headers: { "Cache-Control": noStore } }
-    );
+
+  // If no purchase, fallback to entitlement.
+  let fileUrl: string | null = null;
+  if (purchase) {
+    const productsValue = (purchase as unknown as {
+      products?: { file_url?: string | null; title?: string | null } | { file_url?: string | null; title?: string | null }[]
+    }).products;
+    const product = Array.isArray(productsValue) ? productsValue[0] : productsValue;
+    fileUrl = product?.file_url ?? null;
+  } else {
+    const { data: ent, error: entErr } = await supabaseAdmin
+      .from("product_entitlements")
+      .select(`
+        id,
+        products!inner (
+          file_url,
+          title
+        )
+      `)
+      .eq("product_id", productId)
+      .eq("user_id", user.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (entErr) {
+      console.error("Download entitlement lookup failed:", entErr);
+      return NextResponse.json(
+        { error: "Database error" },
+        { status: 500, headers: { "Cache-Control": noStore } }
+      );
+    }
+
+    if (!ent) {
+      return NextResponse.json(
+        { error: "No access to this product" },
+        { status: 403, headers: { "Cache-Control": noStore } }
+      );
+    }
+
+    const productsValue = (ent as unknown as {
+      products?: { file_url?: string | null; title?: string | null } | { file_url?: string | null; title?: string | null }[]
+    }).products;
+    const product = Array.isArray(productsValue) ? productsValue[0] : productsValue;
+    fileUrl = product?.file_url ?? null;
   }
-  
-  const productsValue = (purchase as unknown as { products?: { file_url?: string | null; title?: string | null } | { file_url?: string | null; title?: string | null }[] }).products;
-  const product = Array.isArray(productsValue) ? productsValue[0] : productsValue;
-  const fileUrl = product?.file_url ?? null;
   
   if (!fileUrl) {
     return NextResponse.json(

@@ -113,7 +113,9 @@ function ProductRow({ product }: { product: Product }) {
         </span>
       </td>
       <td className="py-4 px-6">
-        <span className="text-sm text-white font-medium">{formatPrice(product.price)}</span>
+        <span className="text-sm text-white font-medium">
+          {product.is_free || product.price === 0 ? "Free" : formatPrice(product.price)}
+        </span>
       </td>
       <td className="py-4 px-6">
         {product.file_url ? (

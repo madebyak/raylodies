@@ -52,6 +52,7 @@ export const getPublishedProducts = cache(async () => {
       title,
       slug,
       price,
+      is_free,
       thumbnail,
       categories (
         id,
@@ -76,6 +77,7 @@ export const getPublishedProducts = cache(async () => {
     title: p.title,
     slug: p.slug,
     price: p.price,
+    is_free: Boolean((p as unknown as { is_free?: boolean | null }).is_free) || p.price === 0,
     thumbnail: p.thumbnail ?? null,
     categories: firstCategory(p.categories),
     keywords: (p.product_keywords || []).map((k) => k.keyword).filter(Boolean),

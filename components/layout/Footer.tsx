@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { SOCIAL_LINKS } from "@/lib/social";
 
 const footerLinks = [
@@ -28,9 +29,17 @@ export default function Footer() {
           <div className="space-y-4">
             <Link
               href="/"
-              className="text-white text-xl font-light tracking-wide hover:opacity-70 transition-opacity duration-300"
+              className="text-white hover:opacity-70 transition-opacity duration-300 inline-flex items-center"
+              aria-label="Raylodies"
             >
-              Raylodies
+              <span className="sr-only">Raylodies</span>
+              <Image
+                src="/white-logo.svg"
+                alt=""
+                width={320}
+                height={80}
+                className="h-10 md:h-12 w-auto"
+              />
             </Link>
             <p className="text-white/40 text-sm font-light leading-relaxed max-w-xs">
               Not just art. A mindset of believing that something beautiful can

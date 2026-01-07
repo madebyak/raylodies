@@ -5,21 +5,29 @@ import Link from "next/link";
 import { Check, Download, RefreshCw } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { BuyButton } from "@/components/store/BuyButton";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 type Props = {
   productId: string;
   productSlug: string;
   paddlePriceId: string | null;
+  isFree: boolean;
+  hasFile: boolean;
 };
 
 export default function ProductPurchasePanel({
   productId,
   productSlug,
   paddlePriceId,
+  isFree,
+  hasFile,
 }: Props) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [hasPurchased, setHasPurchased] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -57,6 +65,37 @@ export default function ProductPurchasePanel({
     }
   }
 
+  async function claimFree() {
+    if (!hasFile) {
+      toast.error("This product doesn't have a downloadable file yet.");
+      return;
+    }
+    setIsClaiming(true);
+    try {
+      const res = await fetch(`/api/free-claim/${productId}`, {
+        method: "POST",
+        cache: "no-store",
+      });
+
+      if (res.status === 401) {
+        router.push(`/login?redirect=${encodeURIComponent(`/store/${productSlug}`)}`);
+        return;
+      }
+
+      if (!res.ok) {
+        const msg = (await res.json().catch(() => null)) as { error?: string } | null;
+        toast.error(msg?.error || "Failed to claim free product.");
+        return;
+      }
+
+      setHasPurchased(true);
+      toast.success("Added to your downloads.");
+      router.push("/account/downloads");
+    } finally {
+      setIsClaiming(false);
+    }
+  }
+
   // When the tab is refocused after checkout, re-check purchase status.
   useEffect(() => {
     if (hasPurchased) return;
@@ -90,7 +129,22 @@ export default function ProductPurchasePanel({
     </div>
   ) : (
     <div className="space-y-4">
-      {paddlePriceId ? (
+      {isFree ? (
+        <>
+          <Button
+            type="button"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={claimFree}
+            disabled={isClaiming || !hasFile}
+          >
+            <Download size={18} />
+            {hasFile ? (isClaiming ? "Claiming…" : "Get Free Download") : "No file attached"}
+          </Button>
+          <p className="text-center text-xs text-white/30">
+            Free download • Login required
+          </p>
+        </>
+      ) : paddlePriceId ? (
         <>
           <BuyButton priceId={paddlePriceId} productId={productId} productSlug={productSlug} />
           <p className="text-center text-[11px] text-white/40 leading-relaxed">
@@ -125,7 +179,7 @@ export default function ProductPurchasePanel({
         {isRefreshing ? "Refreshing…" : "Refresh purchase status"}
       </Button>
       <p className="text-center text-xs text-white/30">
-        Secure payment via Paddle • Instant download
+        {isFree ? "Instant access after login" : "Secure payment via Paddle • Instant download"}
       </p>
     </div>
   );

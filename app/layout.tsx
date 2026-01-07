@@ -45,9 +45,6 @@ export const metadata: Metadata = {
     description:
       "Raylodies is an AI creative director specializing in AI-generated images and videos. Explore the portfolio and shop digital AI presets.",
   },
-  icons: {
-    icon: "/favicon.ico",
-  },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
@@ -67,7 +64,8 @@ export default async function RootLayout({
             "@type": "Organization",
             name: "Raylodies",
             url: absoluteUrl("/"),
-            logo: absoluteUrl("/favicon.ico"),
+            // Prefer a brand logo (not the favicon). SVG is OK; we also ship raster icons via app/icon.png.
+            logo: absoluteUrl("/white-logo.svg"),
           }}
         />
         <JsonLd

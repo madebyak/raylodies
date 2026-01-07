@@ -22,8 +22,8 @@ export default async function DownloadsPage() {
     return null;
   }
 
-  // Get all purchased products with orders join
-  const { data: items } = await supabase
+  // Paid purchases (orders/order_items)
+  const { data: paidItems } = await supabase
     .from('order_items')
     .select(`
       id,
@@ -41,11 +41,37 @@ export default async function DownloadsPage() {
     .eq('orders.user_id', user.id)
     .eq('orders.status', 'completed');
 
-  // Transform items to expected format
-  const orderItems: OrderItemWithProduct[] = (items || []).map((item) => ({
+  const paid: OrderItemWithProduct[] = (paidItems || []).map((item) => ({
     id: item.id as string,
-    products: item.products as unknown as ProductInfo
+    products: item.products as unknown as ProductInfo,
   }));
+
+  // Free entitlements (login-required)
+  const { data: freeItems } = await supabase
+    .from("product_entitlements")
+    .select(`
+      id,
+      products!inner (
+        id,
+        title,
+        thumbnail,
+        file_url
+      )
+    `)
+    .eq("user_id", user.id);
+
+  const free: OrderItemWithProduct[] = (freeItems || []).map((item) => ({
+    id: item.id as string,
+    products: item.products as unknown as ProductInfo,
+  }));
+
+  // Merge + de-dupe by product id (in case a product is both free and purchased)
+  const byProductId = new Map<string, OrderItemWithProduct>();
+  for (const item of [...paid, ...free]) {
+    if (!item.products?.id) continue;
+    byProductId.set(item.products.id, item);
+  }
+  const orderItems = Array.from(byProductId.values());
 
   return (
     <div className="space-y-6">
@@ -94,6 +120,8 @@ export default async function DownloadsPage() {
     </div>
   );
 }
+
+
 
 
 

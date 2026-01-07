@@ -76,9 +76,10 @@ export default function AdminSidebar() {
         <div className="h-full flex flex-col">
           {/* Logo Area */}
           <div className="h-20 flex items-center justify-between px-6 border-b border-white/5">
-            <Link href="/" className="text-xl font-light tracking-wide text-white">
-              Raylodies
-              <span className="text-xs text-white/40 ml-2 font-normal">Admin</span>
+            <Link href="/" className="flex items-center gap-3 text-white" aria-label="Raylodies">
+              <span className="sr-only">Raylodies</span>
+              <img src="/white-logo.svg" alt="" className="h-6 w-auto" />
+              <span className="text-xs text-white/40 font-normal">Admin</span>
             </Link>
             <button 
               onClick={() => setIsMobileOpen(false)}
@@ -134,6 +135,8 @@ export default function AdminSidebar() {
     </>
   );
 }
+
+
 
 
 

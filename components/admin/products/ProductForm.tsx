@@ -45,6 +45,12 @@ export default function ProductForm({
   const [imageItems, setImageItems] = useState<ProductImage[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [keywordInput, setKeywordInput] = useState("");
+  const [isFree, setIsFree] = useState<boolean>(Boolean(initialData?.is_free) || initialData?.price === 0);
+  const [priceValue, setPriceValue] = useState<string>(() => {
+    if (Boolean(initialData?.is_free)) return "0";
+    if (typeof initialData?.price === "number") return String(initialData.price);
+    return "";
+  });
   const isNew = !initialData?.id;
 
   const sensors = useSensors(
@@ -330,7 +336,7 @@ export default function ProductForm({
             <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
               <h3 className="text-lg font-light text-white mb-4">Digital File</h3>
               <p className="text-sm text-white/40 mb-4">
-                Upload the .zip file that customers will receive after purchase.
+                Upload the digital file that customers will receive after purchase/claim.
                 This file is stored securely and only accessible via signed URLs.
               </p>
               
@@ -414,14 +420,41 @@ export default function ProductForm({
           <div className="space-y-6">
             <div className="bg-[#050505] border border-white/10 rounded-xl p-6 space-y-6">
               <h3 className="text-lg font-light text-white mb-4">Pricing & Category</h3>
-              
+
+              <div className="pt-1">
+                <label className="flex items-center justify-between cursor-pointer group p-3 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/[0.02] transition-all">
+                  <div className="flex flex-col">
+                    <span className="text-sm text-white/80 group-hover:text-white transition-colors">
+                      Free product
+                    </span>
+                    <span className="text-xs text-white/40">
+                      Users must sign in to download. No Paddle checkout.
+                    </span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    name="is_free"
+                    checked={isFree}
+                    onChange={(e) => {
+                      const next = e.target.checked;
+                      setIsFree(next);
+                      if (next) setPriceValue("0");
+                    }}
+                    className="accent-white w-5 h-5 rounded"
+                  />
+                </label>
+              </div>
+
               <Input
                 name="price"
                 type="number"
                 step="0.01"
                 label="Price (USD)"
-                defaultValue={initialData?.price}
+                value={priceValue}
+                onChange={(e) => setPriceValue(e.target.value)}
+                readOnly={isFree}
                 required
+                className={isFree ? "opacity-60 cursor-not-allowed" : undefined}
               />
               
               <Select
@@ -436,27 +469,37 @@ export default function ProductForm({
 
               <div className="pt-4 border-t border-white/10 space-y-4">
                 <h4 className="text-sm font-medium text-white">Paddle Integration</h4>
-                <p className="text-xs text-white/40">
-                  Paddle product and price IDs are automatically created when you save the product.
-                </p>
-                {initialData?.paddle_product_id && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/10">
-                      <span className="text-xs text-white/50">Product ID</span>
-                      <code className="text-xs text-green-400 font-mono">{initialData.paddle_product_id}</code>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/10">
-                      <span className="text-xs text-white/50">Price ID</span>
-                      <code className="text-xs text-green-400 font-mono">{initialData.paddle_price_id || 'Not set'}</code>
-                    </div>
-                  </div>
-                )}
-                {!initialData?.paddle_product_id && !isNew && (
-                  <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                    <p className="text-xs text-yellow-400">
-                      No Paddle IDs found. Save the product to auto-create them.
+                {isFree ? (
+                  <div className="p-3 rounded-lg bg-white/[0.03] border border-white/10">
+                    <p className="text-xs text-white/50">
+                      This product is <span className="text-white">Free</span>. Paddle checkout is disabled.
                     </p>
                   </div>
+                ) : (
+                  <>
+                    <p className="text-xs text-white/40">
+                      Paddle product and price IDs are automatically created when you save the product.
+                    </p>
+                    {initialData?.paddle_product_id && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/10">
+                          <span className="text-xs text-white/50">Product ID</span>
+                          <code className="text-xs text-green-400 font-mono">{initialData.paddle_product_id}</code>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/10">
+                          <span className="text-xs text-white/50">Price ID</span>
+                          <code className="text-xs text-green-400 font-mono">{initialData.paddle_price_id || 'Not set'}</code>
+                        </div>
+                      </div>
+                    )}
+                    {!initialData?.paddle_product_id && !isNew && (
+                      <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                        <p className="text-xs text-yellow-400">
+                          No Paddle IDs found. Save the product to auto-create them.
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
