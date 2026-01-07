@@ -52,7 +52,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     : `$${product?.price?.toFixed(0) ?? '0'}`;
 
   const title = product?.title ?? 'Product';
-  const category = (product?.categories as { name: string } | null)?.name ?? 'Digital Product';
+  // categories comes as a single object from the join, not an array
+  const categoryData = product?.categories as { name: string } | null | undefined;
+  const category = categoryData?.name ?? 'Digital Product';
   const productImage = product?.thumbnail;
 
   return new ImageResponse(
