@@ -57,11 +57,10 @@ function HeroHeadline() {
     { text: "AI", className: "text-white" },
     { text: "and", className: "text-white/60" },
     { text: "art", className: "text-white" },
-    { text: "— transforming ideas into digital experiences for both personal and creative use.", className: "text-white/60" },
   ];
 
   return (
-    <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-light leading-[1.1] tracking-tight mb-8">
+    <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-light leading-[1.1] tracking-tight mb-6">
       <motion.span
         className="inline"
         initial="hidden"
@@ -85,6 +84,62 @@ function HeroHeadline() {
         ))}
       </motion.span>
     </h1>
+  );
+}
+
+// Hero subheading with word-by-word reveal
+function HeroSubheading() {
+  const controls = useAnimation();
+
+  useEffect(() => {
+    controls.start("visible");
+  }, [controls]);
+
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.03,
+        delayChildren: 0.6,
+      },
+    },
+  };
+
+  const wordVariants = {
+    hidden: {
+      y: 60,
+      opacity: 0,
+    },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.7,
+        ease: EASING,
+      },
+    },
+  };
+
+  const subheadingText = "Transforming ideas into digital experiences for both personal and creative use.";
+
+  return (
+    <p className="text-xl md:text-2xl lg:text-3xl font-light text-white/50 leading-[1.3] tracking-tight mb-10 max-w-3xl">
+      <motion.span
+        className="inline"
+        initial="hidden"
+        animate={controls}
+        variants={containerVariants}
+      >
+        {subheadingText.split(" ").map((word, index, arr) => (
+          <span key={index} className="inline-block overflow-hidden">
+            <motion.span className="inline-block" variants={wordVariants}>
+              {word}
+              {index < arr.length - 1 ? "\u00A0" : ""}
+            </motion.span>
+          </span>
+        ))}
+      </motion.span>
+    </p>
   );
 }
 
@@ -115,17 +170,20 @@ export default function Hero() {
           {/* Main Headline - Word reveal */}
           <HeroHeadline />
 
+          {/* Subheading - Word reveal (smaller than headline) */}
+          <HeroSubheading />
+
           {/* Description - Paragraph reveal */}
           <ParagraphReveal
-            delay={0.7}
+            delay={0.9}
             triggerOnLoad
-            className="text-white/50 text-lg md:text-xl font-light leading-relaxed max-w-2xl mb-10"
+            className="text-white/40 text-base md:text-lg font-light leading-relaxed max-w-2xl mb-10"
           >
             If you&apos;re here for self-expression, visual identity, or storytelling, my work is designed to spark emotion, curiosity, and connection. Through AI-generated art, I create immersive visuals that move people and expand what&apos;s possible in visual communication.
           </ParagraphReveal>
 
           {/* CTA Buttons - Button reveal */}
-          <ButtonReveal delay={0.9} triggerOnLoad className="flex flex-wrap gap-4 pointer-events-auto">
+          <ButtonReveal delay={1.1} triggerOnLoad className="flex flex-wrap gap-4 pointer-events-auto">
             <Link
               href="/work"
               className="inline-flex items-center px-6 py-3 bg-white text-black text-sm font-light tracking-wide hover:bg-white/90 transition-colors duration-300"
@@ -147,7 +205,7 @@ export default function Hero() {
         ref={scrollIndicatorRef}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 1.2, ease: EASING }}
+        transition={{ duration: 0.6, delay: 1.4, ease: EASING }}
         className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20"
       >
         <motion.div
