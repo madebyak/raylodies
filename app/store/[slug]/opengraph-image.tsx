@@ -12,8 +12,8 @@ export const contentType = 'image/png';
 // Allow dynamic generation
 export const runtime = 'edge';
 
-export default async function Image({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const supabase = createPublicClient();
 
   // Fetch product data
