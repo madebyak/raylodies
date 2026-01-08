@@ -52,8 +52,10 @@ export default function PrivacyPage() {
         prose-hr:my-12 prose-hr:border-white/10"
       >
         <p>
-          This Privacy Policy describes how we collect, use, and share personal
-          information when you visit or purchase from our website.
+          This Privacy Policy describes how personal information is collected,
+          used, and shared when you visit or purchase from our website. Raylodies
+          is operated by Moonwhale LLC, which is the legal entity responsible for
+          this website.
         </p>
 
         <h2 id="info">1. Information We Collect</h2>
@@ -85,8 +87,8 @@ export default function PrivacyPage() {
         <h2 id="payments">3. Payments</h2>
         <p>
           Purchases are processed by Paddle as Merchant of Record. Paddle
-          processes payment and billing data under its own privacy policy. We do
-          not store full payment card details.
+          processes payment and billing data under its own privacy practices. We
+          do not store full payment card details.
         </p>
 
         <h2 id="cookies">4. Cookies &amp; Analytics</h2>

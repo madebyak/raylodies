@@ -19,6 +19,7 @@ export default function TermsPage() {
     { href: "#ip", label: "Intellectual Property" },
     { href: "#conduct", label: "User Conduct" },
     { href: "#liability", label: "Limitation of Liability" },
+    { href: "#disclaimer", label: "Disclaimer" },
     { href: "#indemnification", label: "Indemnification" },
     { href: "#law", label: "Governing Law" },
     { href: "#updates", label: "Changes to Terms" },
@@ -32,6 +33,14 @@ export default function TermsPage() {
         <>
           Effective Date:{" "}
           <span className="text-white/70">22 December 2025</span>
+          <span className="mx-2 text-white/20">•</span>
+          Website:{" "}
+          <a
+            href="https://www.raylodies.com"
+            className="text-white/70 hover:text-white transition-colors"
+          >
+            www.raylodies.com
+          </a>
           <span className="mx-2 text-white/20">•</span>
           Support:{" "}
           <a
@@ -56,10 +65,14 @@ export default function TermsPage() {
         prose-hr:my-12 prose-hr:border-white/10"
       >
         <p>
-          These Terms of Service (“Terms”) govern your access to and use of the
-          Raylodies website and any purchase or use of our digital products,
-          downloads, and related services (collectively, the “Service”). The
-          Service is operated by Raylodies (“Raylodies”, “we”, “us”, “our”).
+          These Terms of Service (“Terms”) govern your access to and use of this
+          website and any purchase or use of our digital products, downloads,
+          and related services (collectively, the “Service”).
+        </p>
+        <p>
+          Raylodies is a website and brand operated by Moonwhale LLC
+          (“Moonwhale”, “we”, “us”, “our”). These Terms are issued by Moonwhale
+          LLC.
         </p>
         <p>
           By accessing the site and/or purchasing any product, you agree to
@@ -197,6 +210,11 @@ export default function TermsPage() {
             outputs) and not the original files or packs, unless the client
             purchases their own licence.
           </li>
+          <li>
+            Use mockups/blueprints for presentations, demonstrations, design
+            exploration, and commercial visuals, subject to the restrictions
+            below.
+          </li>
         </ul>
 
         <h3>6.4 Prompts &amp; Prompt Packs — Special Rules</h3>
@@ -211,8 +229,9 @@ export default function TermsPage() {
         <ul>
           <li>
             Share, publish, resell, redistribute, or leak the prompts (or any
-            substantial portion), including in public posts, groups, courses, or
-            marketplaces, unless you have written permission from Raylodies.
+            substantial portion of them), including in prompt libraries, public
+            posts, communities, courses, or marketplaces, unless you have
+            written permission from us.
           </li>
           <li>
             Sell prompts as standalone prompt products or bundles that compete
@@ -233,8 +252,9 @@ export default function TermsPage() {
             printing.
           </li>
           <li>
-            Use them inside End Products (as part of a composition) where the
-            print is not being redistributed as a standalone file.
+            Use them inside End Products (e.g., as part of a design composition,
+            campaign mock, editorial layout, or brand concept) where the print
+            is not redistributed as a standalone file.
           </li>
         </ul>
         <p>You may not under the Standard Licence:</p>
@@ -281,7 +301,8 @@ export default function TermsPage() {
           <li>
             Resell, redistribute, share, gift, upload, or make available the
             Licensed Content (original or modified) as standalone files,
-            including via file-sharing or “free downloads”.
+            including via cloud folders, file-sharing sites, communities,
+            torrents, marketplaces, or “free downloads”.
           </li>
           <li>
             Create or sell competing packs/libraries where the primary value is
@@ -330,9 +351,10 @@ export default function TermsPage() {
 
         <h2 id="ip">7. Intellectual Property</h2>
         <p>
-          All site content and Licensed Content are owned by Raylodies or its
-          licensors and protected by applicable intellectual property laws.
-          Except for the licence granted above, no rights are granted.
+          All site content and Licensed Content are owned by Moonwhale LLC
+          and/or its licensors and are protected by applicable intellectual
+          property laws. Except for the licence granted above, no rights are
+          granted.
         </p>
 
         <h2 id="conduct">8. User Conduct</h2>
@@ -347,7 +369,7 @@ export default function TermsPage() {
 
         <h2 id="liability">9. Limitation of Liability</h2>
         <p>
-          To the maximum extent permitted by law, Raylodies (including its
+          To the maximum extent permitted by law, Moonwhale LLC (including its
           employees, contractors, affiliates, licensors, and service providers)
           will not be liable for any indirect, incidental, special,
           consequential, or punitive damages, or loss of profits, revenue, data,
@@ -359,30 +381,38 @@ export default function TermsPage() {
           required by law, if higher).
         </p>
 
-        <h2 id="indemnification">10. Indemnification</h2>
+        <h2 id="disclaimer">10. Disclaimer</h2>
         <p>
-          You agree to indemnify and hold harmless Raylodies and its affiliates,
-          officers, directors, employees, and agents from claims, liabilities,
-          damages, and expenses (including reasonable legal fees) arising from
-          your breach of these Terms or misuse of the Service.
+          The Service and Digital Products are provided “as is” and “as
+          available”. We make no warranties that the Service will be
+          uninterrupted, error-free, or that files will work with every device,
+          software version, or third-party platform. Where applicable, AI
+          outputs are inherently variable and results are not guaranteed.
         </p>
 
-        <h2 id="law">11. Governing Law</h2>
+        <h2 id="indemnification">11. Indemnification</h2>
+        <p>
+          You agree to indemnify and hold harmless Moonwhale LLC and its
+          affiliates, officers, directors, employees, and agents from claims,
+          liabilities, damages, and expenses (including reasonable legal fees)
+          arising from your breach of these Terms or misuse of the Service.
+        </p>
+
+        <h2 id="law">12. Governing Law</h2>
         <p>
           These Terms are governed by the laws of the United States of America,
-          without regard to conflict of law principles, except that payment
-          disputes may be handled through Paddle’s processes as Merchant of
-          Record.
+          without regard to conflict of law principles. Payment disputes may
+          also be handled through Paddle’s processes as Merchant of Record.
         </p>
 
-        <h2 id="updates">12. Changes to These Terms</h2>
+        <h2 id="updates">13. Changes to These Terms</h2>
         <p>
           We may update these Terms from time to time. Updates will be posted
           with a new Effective Date. Continued use after changes means you
           accept the updated Terms.
         </p>
 
-        <h2 id="agreement">13. Severability &amp; Entire Agreement</h2>
+        <h2 id="agreement">14. Severability &amp; Entire Agreement</h2>
         <p>
           If any part of these Terms is found unenforceable, the remainder
           remains in effect. These Terms and the policies referenced form the
