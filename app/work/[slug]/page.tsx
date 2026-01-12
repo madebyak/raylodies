@@ -2,12 +2,12 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import Button from "@/components/ui/Button";
 import ProjectMediaMasonry from "@/components/work/ProjectMediaMasonry";
 import { ProjectMedia } from "@/types/database";
 import JsonLd from "@/components/seo/JsonLd";
 import { absoluteUrl } from "@/lib/seo/site";
 import { normalizeSlug } from "@/lib/slug";
+import StartProjectCTA from "@/components/cta/StartProjectCTA";
 
 export const revalidate = 300;
 
@@ -156,15 +156,8 @@ export default async function ProjectPage({
         </div>
       </div>
 
-      {/* Next Project (Optional: You could query next project here) */}
-      <div className="border-t border-white/5 py-20 text-center">
-        <p className="text-white/40 text-sm mb-4">Ready to start?</p>
-        <Link href="/start-a-project">
-          <Button size="lg" variant="secondary">
-            Start a Project
-          </Button>
-        </Link>
-      </div>
+      {/* CTA Section */}
+      <StartProjectCTA variant="project" />
     </article>
   );
 }

@@ -5,11 +5,7 @@ import { motion, useAnimation } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef } from "react";
-import {
-  LabelReveal,
-  ParagraphReveal,
-  ButtonReveal,
-} from "@/components/animations/TextReveal";
+import { LabelReveal, ButtonReveal } from "@/components/animations/TextReveal";
 
 // Dynamically import ImageTrail to avoid SSR issues
 const ImageTrail = dynamic(() => import("./ImageTrail"), { ssr: false });
@@ -182,19 +178,6 @@ export default function Hero() {
 
           {/* Subheading - Word reveal (smaller than headline) */}
           <HeroSubheading />
-
-          {/* Description - Paragraph reveal */}
-          <ParagraphReveal
-            delay={0.9}
-            triggerOnLoad
-            className="text-white/40 text-base md:text-lg font-light leading-relaxed max-w-lg mb-10"
-          >
-            If you&apos;re here for self-expression, visual identity, or
-            storytelling, my work is designed to spark emotion, curiosity, and
-            connection. Through AI-generated art, I create immersive visuals
-            that move people and expand what&apos;s possible in visual
-            communication.
-          </ParagraphReveal>
 
           {/* CTA Buttons - Button reveal */}
           <ButtonReveal

@@ -1,6 +1,7 @@
 import Hero from "@/components/home/Hero";
 import HeroVideo from "@/components/home/HeroVideo";
 import FeaturedWork from "@/components/home/FeaturedWork";
+import StartProjectCTA from "@/components/cta/StartProjectCTA";
 import { getFeaturedProjects } from "@/actions/projects";
 
 export default async function HomePage() {
@@ -11,6 +12,7 @@ export default async function HomePage() {
       <Hero />
       <HeroVideo />
       <FeaturedWork projects={featuredProjects} />
+      <StartProjectCTA variant="about" />
     </>
   );
 }

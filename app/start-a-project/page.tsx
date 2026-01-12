@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input, Textarea, Select } from "@/components/ui/Input";
 import { Send, CheckCircle } from "lucide-react";
 import { SOCIAL_LINKS } from "@/lib/social";
+import { createInquiry } from "@/actions/inquiries";
+import { toast } from "sonner";
 
 const projectTypes = [
   { value: "", label: "Select project type" },
@@ -49,11 +51,27 @@ export default function StartAProjectPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const result = await createInquiry({
+        name: formData.name,
+        email: formData.email,
+        project_type: formData.projectType || undefined,
+        budget: formData.budget || undefined,
+        message: formData.message,
+      });
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      if (result.error) {
+        toast.error(result.error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      setIsSubmitted(true);
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -86,10 +104,10 @@ export default function StartAProjectPage() {
                   Email
                 </h3>
                 <a
-                  href="mailto:hello@raylodies.com"
+                  href="mailto:ranya@moonswhale.com"
                   className="text-white text-lg font-light hover:text-white/70 transition-colors duration-300"
                 >
-                  hello@raylodies.com
+                  ranya@moonswhale.com
                 </a>
               </div>
 

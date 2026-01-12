@@ -1,24 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { motion, useInView, useAnimation } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { SOCIAL_LINKS } from "@/lib/social";
-import { Liu_Jian_Mao_Cao } from "next/font/google";
 import { useEffect, useRef } from "react";
 import {
   LabelReveal,
   ParagraphReveal,
   SectionReveal,
-  ButtonReveal,
 } from "@/components/animations/TextReveal";
-
-const liuJianMaoCao = Liu_Jian_Mao_Cao({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
+import StartProjectCTA from "@/components/cta/StartProjectCTA";
 
 // Codrops-style easing
 const EASING = [0.77, 0, 0.175, 1] as const;
@@ -208,79 +198,6 @@ function TagList({ items, delay = 0 }: { items: string[]; delay?: number }) {
   );
 }
 
-// CTA Heading with WOW animation
-function CTAHeading() {
-  const ref = useRef<HTMLHeadingElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-10%" });
-  const controls = useAnimation();
-
-  useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
-    }
-  }, [controls, isInView]);
-
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.06,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const wordVariants = {
-    hidden: {
-      y: 60,
-      opacity: 0,
-    },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.7,
-        ease: EASING,
-      },
-    },
-  };
-
-  return (
-    <h2 ref={ref} className="text-3xl md:text-4xl font-light text-white">
-      <motion.span
-        className="inline"
-        initial="hidden"
-        animate={controls}
-        variants={containerVariants}
-      >
-        {["Let's", "create", "something"].map((word, i) => (
-          <span key={i} className="inline-block overflow-hidden">
-            <motion.span className="inline-block" variants={wordVariants}>
-              {word}
-              {"\u00A0"}
-            </motion.span>
-          </span>
-        ))}
-        <span className="inline-block overflow-hidden">
-          <motion.span
-            className={[
-              liuJianMaoCao.className,
-              "wow-gradient inline-block align-baseline px-1 py-2 text-4xl md:text-5xl",
-            ].join(" ")}
-            variants={wordVariants}
-          >
-            WOW
-          </motion.span>
-        </span>
-        <span className="inline-block overflow-hidden">
-          <motion.span className="inline-block" variants={wordVariants}>
-            .
-          </motion.span>
-        </span>
-      </motion.span>
-    </h2>
-  );
-}
 
 export default function AboutPage() {
   return (
@@ -421,62 +338,10 @@ export default function AboutPage() {
           </SectionReveal>
         </div>
 
-        {/* Connect Section */}
-        <SectionReveal delay={0.1}>
-          <div className="pt-12 border-t border-white/10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-end">
-              {/* CTA */}
-              <div className="space-y-6">
-                <CTAHeading />
-                <ParagraphReveal
-                  delay={0.3}
-                  className="text-white/50 text-base font-light"
-                >
-                  Available for select projects and collaborations.
-                </ParagraphReveal>
-                <ButtonReveal delay={0.4}>
-                  <Link
-                    href="/start-a-project"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black text-sm font-light tracking-wide hover:bg-white/90 transition-colors duration-300 group"
-                  >
-                    Start a Project
-                    <ArrowRight
-                      size={16}
-                      className="group-hover:translate-x-1 transition-transform duration-300"
-                    />
-                  </Link>
-                </ButtonReveal>
-              </div>
-
-              {/* Social Links */}
-              <SectionReveal delay={0.2}>
-                <div className="space-y-6 md:text-right">
-                  <LabelReveal
-                    delay={0.3}
-                    className="text-white/40 text-sm font-light uppercase tracking-wider"
-                  >
-                    Connect
-                  </LabelReveal>
-                  <div className="flex md:justify-end items-center gap-6">
-                    {SOCIAL_LINKS.map((social) => (
-                      <a
-                        key={social.label}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white/40 hover:text-white transition-colors duration-300"
-                        aria-label={social.label}
-                      >
-                        <social.icon size={24} />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </SectionReveal>
-            </div>
-          </div>
-        </SectionReveal>
       </div>
+
+      {/* CTA Section */}
+      <StartProjectCTA variant="about" />
     </section>
   );
 }

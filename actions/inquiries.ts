@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { revalidatePath } from "next/cache";
 import { cache } from "react";
 
@@ -14,6 +15,41 @@ export interface Inquiry {
   message: string;
   status: string;
   created_at: string;
+}
+
+export interface CreateInquiryData {
+  name: string;
+  email: string;
+  project_type?: string;
+  budget?: string;
+  message: string;
+}
+
+/**
+ * Create a new inquiry from the Start a Project form.
+ * Uses public client since form submitters are not authenticated.
+ */
+export async function createInquiry(
+  data: CreateInquiryData,
+): Promise<{ success?: true; error?: string }> {
+  const supabase = createPublicClient();
+
+  const { error } = await supabase.from("inquiries").insert({
+    name: data.name,
+    email: data.email,
+    project_type: data.project_type || null,
+    budget: data.budget || null,
+    message: data.message,
+    status: "new",
+  });
+
+  if (error) {
+    console.error("Error creating inquiry:", error);
+    return { error: error.message };
+  }
+
+  revalidatePath("/admin/inquiries");
+  return { success: true };
 }
 
 export const getInquiries = cache(async () => {
